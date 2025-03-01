@@ -3,6 +3,7 @@
 #include <ctime>
 #include <chrono>
 #include <thread>
+#include <vector>
 
 double* generateRandomMatrix(int N)
 {
