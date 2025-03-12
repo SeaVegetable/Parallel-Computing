@@ -1,4 +1,4 @@
-#ifdef BSPLINEBASIS_HPP
+#ifndef BSPLINEBASIS_HPP
 #define BSPLINEBASIS_HPP
 
 // Ref : Les Piegl and Wayne Tiller, The NURBS Book, 2nd Edition, Springer, 1997
