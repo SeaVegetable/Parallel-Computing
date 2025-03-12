@@ -3,6 +3,7 @@
 
 // Ref : Les Piegl and Wayne Tiller, The NURBS Book, 2nd Edition, Springer, 1997
 // FindSpan and BasisFuns are based on Algorithm A2.1 and A2.2
+// DerBasisFuns is based on Algorithm A2.3
 
 #include <vector>
 
