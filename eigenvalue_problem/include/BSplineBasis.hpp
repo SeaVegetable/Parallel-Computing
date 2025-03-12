@@ -11,9 +11,13 @@ class BSplineBasis
 {
     public:
         BSplineBasis(const int &in_p, const std::vector<double> &in_S)
-            : p(in_p), S(in_S), nFunc(static_cast<int>(S.size()) - p - 1) {}
+            : p(in_p), S(in_S) {}
         
         ~BSplineBasis();
+
+        int GetDegree() const { return p; }
+
+        std::vector<double> GetKnotVector() const { return S; }
 
         int FindSpan(double &u);
 
@@ -24,7 +28,6 @@ class BSplineBasis
     private:
         const int p;
         const std::vector<double> S;
-        const int nFunc;
 };
 
 #endif

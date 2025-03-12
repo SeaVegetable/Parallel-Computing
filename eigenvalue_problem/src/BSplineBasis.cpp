@@ -2,6 +2,7 @@
 
 int BSplineBasis::FindSpan(double &u)
 {
+    const int nFunc = static_cast<int>(S.size()) - p - 1;
     if (u == S[nFunc + 1]) return nFunc;
     int low = p;
     int high = nFunc + 1;
@@ -107,4 +108,5 @@ std::vector<double> BSplineBasis::DerBasisFuns(double &u, int &i, int &n)
         }
         r *= (p - k);
     }
+    std::vector<double> dersOut(ders.begin()+(n*(p+1)), ders.end());
 }
