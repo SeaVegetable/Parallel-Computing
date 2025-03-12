@@ -25,7 +25,7 @@ std::vector<double> ControlPointGenerator::GenerateControlPoints1D(
         std::vector<double> dNl(dN.begin()+1, dN.end());
         Eigen::Map<Eigen::RowVectorXd> rowMap(dNl.data(), dNl.size());
         A.row(i) = rowMap;
-        b(i) -= Pmin dN[0];
+        b(i) -= Pmin * dN[0];
     }
     VectorXd x = A.partialPivLu().solve(b);
     std::vector<double> solution(x.data(), x.data() + x.size());
