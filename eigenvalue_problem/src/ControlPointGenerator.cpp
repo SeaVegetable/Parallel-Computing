@@ -8,6 +8,12 @@ std::vector<double> ControlPointGenerator::GenerateControlPoints1D(
     const std::vector<double> S = basis->GetKnotVector();
     const int nFunc = static_cast<int>(S.size()) - p - 1;
 
+    if (nFunc < 2*p + 2)
+    {
+        std::cerr << "Error: Number of basis functions is less than 2*p+2" << std::endl;
+        exit(1);
+    }
+
     const double ds = (S[p+1] - S[p]) / (p + 1);
     std::vector<double> s{};
     for (int i = 0; i < p; ++i) s.push_back(S[p]+(i+1)*ds);
@@ -33,12 +39,9 @@ std::vector<double> ControlPointGenerator::GenerateControlPoints1D(
     std::vector<double> CP{};
     CP.push_back(Pmin);
     for (int i = 0; i < p; ++i) CP.push_back(solution[i]);
-    int L = nFunc - 2 * p;
-    if (L > 0)
-    {
-        double d = (Pmax - Pmin - 2 * (CP.back())) / (L + 1);
-        for (int i = 0; i < L; ++i) CP.push_back(CP.back() + d);
-    }
+    int L = nFunc - 2*p - 2;
+    double d = (Pmax + Pmin - 2 * (CP.back())) / (L + 1);
+    for (int i = 0; i < L; ++i) CP.push_back(CP.back() + d);
     for (int i = p; i > 0; --i) CP.push_back(Pmax - (Pmin - CP[i]));
     CP.push_back(Pmax);
 
