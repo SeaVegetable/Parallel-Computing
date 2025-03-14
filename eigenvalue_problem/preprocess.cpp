@@ -1,5 +1,8 @@
 #include <iostream>
 #include "ControlPointGenerator.hpp"
+#include "IENGenerator.hpp"
+#include "IDGenerator.hpp"
+#include "NURBSExtractionGenerator.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -49,4 +52,8 @@ int main(int argc, char *argv[])
 
     IDGenerator * idgen = new IDGenerator();
     std::vector<int> ID = idgen->GenerateID2D(basis1, basis2);
+
+    NURBSExtractionGenerator * neg = new NURBSExtractionGenerator();
+    std::vector<int> NURBSExtraction1 = neg->GenerateNURBSExtraction(basis1);
+    std::vector<int> NURBSExtraction2 = neg->GenerateNURBSExtraction(basis2);
 }
