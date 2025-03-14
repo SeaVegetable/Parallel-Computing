@@ -46,4 +46,7 @@ int main(int argc, char *argv[])
 
     IENGenerator * igen = new IENGenerator();
     std::vector<int> IEN = igen->GenerateIEN2D(basis1, basis2);
+
+    IDGenerator * idgen = new IDGenerator();
+    std::vector<int> ID = idgen->GenerateID2D(basis1, basis2);
 }
