@@ -1,7 +1,7 @@
 #include <iostream>
 #include "ControlPointGenerator.hpp"
 #include "IENGenerator.hpp"
-// #include "IDGenerator.hpp"
+#include "IDGenerator.hpp"
 // #include "NURBSExtractionGenerator.hpp"
 
 int main(int argc, char *argv[])
@@ -50,17 +50,17 @@ int main(int argc, char *argv[])
     IENGenerator * igen = new IENGenerator();
     std::vector<int> IEN = igen->GenerateIEN2D(basis1, basis2);
 
-    for (int e = 0; e < nElem; ++e)
+    IDGenerator * idgen = new IDGenerator();
+    std::vector<int> ID = idgen->GenerateID2D(basis1, basis2);
+
+    for (int i = 0; i < nFuncY; ++i)
     {
-        for (int i = 0; i < nLocBas; ++i)
+        for (int j = 0; j < nFuncX; ++j)
         {
-            std::cout << IEN[e*nLocBas + i] << " ";
+            std::cout << ID[i*nFuncX+j] << " ";
         }
         std::cout << std::endl;
     }
-
-    // IDGenerator * idgen = new IDGenerator();
-    // std::vector<int> ID = idgen->GenerateID2D(basis1, basis2);
 
     // NURBSExtractionGenerator * neg = new NURBSExtractionGenerator();
     // std::vector<int> NURBSExtraction1 = neg->GenerateNURBSExtraction(basis1);

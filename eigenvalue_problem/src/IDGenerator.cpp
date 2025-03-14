@@ -25,12 +25,12 @@ std::vector<int> IDGenerator::GenerateID2D(
 
     std::vector<int> ID(m*n, -1);
 
-    int A = 0
+    int A = 0;
     for (int j = 1; j < n-1; ++j)
     {
         for (int i = 1; i < m-1; ++i)
         {
-            ID[(j-1)*m+i] = A;
+            ID[j*m+i] = A;
             A++;
         }
     }
