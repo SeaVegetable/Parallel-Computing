@@ -1,6 +1,6 @@
 #include "BSplineBasis.hpp"
 
-int BSplineBasis::FindSpan(double &u)
+int BSplineBasis::FindSpan(const double &u) const
 {
     const int nFunc = static_cast<int>(S.size()) - p - 1;
     if (u == S[nFunc + 1]) return nFunc;
@@ -18,7 +18,7 @@ int BSplineBasis::FindSpan(double &u)
     return mid;
 }
 
-std::vector<double> BSplineBasis::BasisFuns(double &u, int &i)
+std::vector<double> BSplineBasis::BasisFuns(const double &u, const int &i) const
 {
     std::vector<double> N(p + 1, 0.0);
     std::vector<double> left(p + 1, 0.0);
@@ -40,7 +40,7 @@ std::vector<double> BSplineBasis::BasisFuns(double &u, int &i)
     return N;
 }
 
-std::vector<double> BSplineBasis::DerBasisFuns(double &u, int &i, int &n)
+std::vector<double> BSplineBasis::DerBasisFuns(const double &u, const int &i, const int &n) const
 {
     std::vector<double> ndu((p+1)*(p+1), 0.0);
     std::vector<double> ders((n+1)*(p+1), 0.0);
@@ -109,4 +109,5 @@ std::vector<double> BSplineBasis::DerBasisFuns(double &u, int &i, int &n)
         r *= (p - k);
     }
     std::vector<double> dersOut(ders.begin()+(n*(p+1)), ders.end());
+    return dersOut;
 }

@@ -19,11 +19,11 @@ class BSplineBasis
 
         std::vector<double> GetKnotVector() const { return S; }
 
-        int FindSpan(double &u);
+        int FindSpan(const double &u) const;
 
-        std::vector<double> BasisFuns(double &u, int &i);
+        std::vector<double> BasisFuns(const double &u, const int &i) const;
 
-        std::vector<double> DerBasisFuns(double &u, int &i, int &n);
+        std::vector<double> DerBasisFuns(const double &u, const int &i, const int &n) const;
 
     private:
         const int p;
