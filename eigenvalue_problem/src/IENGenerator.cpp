@@ -8,7 +8,7 @@ std::vector<int> IENGenerator::GenerateIEN1D(const BSplineBasis * const &basis)
     const int nElem = nFunc - p;
     const int nLocBas = p + 1;
 
-    std::vector<int> IEN(nElem * nLocBas);
+    std::vector<int> IEN{};
 
     int A = 0;
     for (int i = 0; i < nFunc; ++i)
@@ -18,7 +18,7 @@ std::vector<int> IENGenerator::GenerateIEN1D(const BSplineBasis * const &basis)
         {
             for (int iloc = p; iloc >= 0; --iloc)
             {
-                int B = A - iloc;
+                int B = A - iloc - 1;
                 IEN.push_back(B);
             }
         }
@@ -27,7 +27,7 @@ std::vector<int> IENGenerator::GenerateIEN1D(const BSplineBasis * const &basis)
     return IEN;
 }
 
-std::vector<double> IENGenerator::GenerateIEN2D(
+std::vector<int> IENGenerator::GenerateIEN2D(
     const BSplineBasis * const &basis1, const BSplineBasis * const &basis2)
 {
     const int p = basis1->GetDegree();
@@ -39,7 +39,7 @@ std::vector<double> IENGenerator::GenerateIEN2D(
     const int nElem = (m - p) * (n - q);
     const int nLocBas = (p + 1) * (q + 1);
 
-    std::vector<double> IEN(nElem * nLocBas);
+    std::vector<int> IEN{};
 
     int A = 0;
     for (int j = 0; j < n; ++j)
@@ -53,11 +53,13 @@ std::vector<double> IENGenerator::GenerateIEN2D(
                 {
                     for (int iloc = p; iloc >= 0; --iloc)
                     {
-                        int B = A - iloc - jloc * m;
+                        int B = A - iloc - jloc * m - 1;
                         IEN.push_back(B);
                     }
                 }
             }
         }
     }
+
+    return IEN;
 }

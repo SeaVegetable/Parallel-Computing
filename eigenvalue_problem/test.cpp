@@ -1,6 +1,6 @@
 #include <iostream>
 #include "ControlPointGenerator.hpp"
-// #include "IENGenerator.hpp"
+#include "IENGenerator.hpp"
 // #include "IDGenerator.hpp"
 // #include "NURBSExtractionGenerator.hpp"
 
@@ -45,22 +45,19 @@ int main(int argc, char *argv[])
     double P2min = 0.0;
     double P2max = Ly;
 
-    // std::vector<double> CP_1D = cpg->GenerateControlPoints1D(basis1, P1max, P1min);
-
-    // for (int i = 0; i < CP_1D.size(); ++i)
-    // {
-    //     std::cout << CP_1D[i] << std::endl;
-    // }
-
     std::vector<double> CP = cpg->GenerateControlPoints2D(basis1, basis2, P1min, P1max, P2min, P2max);
 
-    for (int i = 0; i < CP.size(); i += 2)
-    {
-        std::cout << CP[i] << ' ' << CP[i+1] << std::endl;
-    }
+    IENGenerator * igen = new IENGenerator();
+    std::vector<int> IEN = igen->GenerateIEN2D(basis1, basis2);
 
-    // IENGenerator * igen = new IENGenerator();
-    // std::vector<int> IEN = igen->GenerateIEN2D(basis1, basis2);
+    for (int e = 0; e < nElem; ++e)
+    {
+        for (int i = 0; i < nLocBas; ++i)
+        {
+            std::cout << IEN[e*nLocBas + i] << " ";
+        }
+        std::cout << std::endl;
+    }
 
     // IDGenerator * idgen = new IDGenerator();
     // std::vector<int> ID = idgen->GenerateID2D(basis1, basis2);

@@ -20,6 +20,7 @@ include_directories(${INCLUDE_DIR})
 
 # Add source files
 set(SOURCES ${SOURCE_DIR}/BSplineBasis.cpp
-            ${SOURCE_DIR}/ControlPointGenerator.cpp)
+            ${SOURCE_DIR}/ControlPointGenerator.cpp
+            ${SOURCE_DIR}/IENGenerator.cpp)
 
 add_executable(test ${SOURCES} test.cpp)
