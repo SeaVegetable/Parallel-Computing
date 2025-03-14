@@ -9,12 +9,11 @@
 class NURBSExtractionGenerator
 {
     public:
-        std::vector<int> GenerateExtraction1D(const BSplineBasis * const &basis);
+        std::vector<double> GenerateExtraction1D(const BSplineBasis * const &basis);
 
-    private:
-        inline int idxC(int &i, int &j, int &k, int &a)
+        inline int idxC(const int &i, const int &j, const int &k, const int &a) const
         {
-            return i + j * a + k * a * a;
+            return (j-1) + (i-1) * a + (k-1) * a * a;
         }
 };
 

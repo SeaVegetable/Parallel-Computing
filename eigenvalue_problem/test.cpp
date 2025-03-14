@@ -2,7 +2,7 @@
 #include "ControlPointGenerator.hpp"
 #include "IENGenerator.hpp"
 #include "IDGenerator.hpp"
-// #include "NURBSExtractionGenerator.hpp"
+#include "NURBSExtractionGenerator.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -53,16 +53,24 @@ int main(int argc, char *argv[])
     IDGenerator * idgen = new IDGenerator();
     std::vector<int> ID = idgen->GenerateID2D(basis1, basis2);
 
-    for (int i = 0; i < nFuncY; ++i)
+
+    NURBSExtractionGenerator * neg = new NURBSExtractionGenerator();
+    std::vector<double> NURBSExtraction1 = neg->GenerateExtraction1D(basis1);
+
+    std::cout << NURBSExtraction1.size() << std::endl;
+    for (int e = 0; e < nElemX; ++e)
     {
-        for (int j = 0; j < nFuncX; ++j)
+        std::cout << "Element " << e << std::endl;
+        for (int i = 0; i < q + 1; ++i)
         {
-            std::cout << ID[i*nFuncX+j] << " ";
+            for (int j = 0; j < p + 1; ++j)
+            {
+                int idx = e * nLocBas + i * (q + 1) + j;
+                std::cout << NURBSExtraction1[idx] << " ";
+            }
+            std::cout << std::endl;
         }
         std::cout << std::endl;
     }
-
-    // NURBSExtractionGenerator * neg = new NURBSExtractionGenerator();
-    // std::vector<int> NURBSExtraction1 = neg->GenerateNURBSExtraction(basis1);
-    // std::vector<int> NURBSExtraction2 = neg->GenerateNURBSExtraction(basis2);
+    // std::vector<double> NURBSExtraction2 = neg->GenerateExtraction1D(basis2);
 }
