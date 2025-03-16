@@ -16,6 +16,23 @@ int main(int argc, char *argv[])
     int nElemX = 15;
     int nElemY = 15;
 
+    std::string file_info = "info.txt";
+    std::ofstream file(file_info.c_str());
+    if (!file.is_open())
+    {
+        std::cerr << "Error: Could not open file " << file_info << std::endl;
+        exit(1);
+    }
+
+    file << "p: " << p << std::endl;
+    file << "q: " << q << std::endl;
+    file << "Lx: " << Lx << std::endl;
+    file << "Ly: " << Ly << std::endl;
+    file << "nElemX: " << nElemX << std::endl;
+    file << "nElemY: " << nElemY << std::endl;
+
+    file.close();
+
     double hx = Lx / nElemX;
     double hy = Ly / nElemY;
 

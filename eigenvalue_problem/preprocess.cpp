@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     int nElemY = 3;
 
     std::string file_info = "info.txt";
-    std::ofstream file(file_info);
+    std::ofstream file(file_info.c_str());
     if (!file.is_open())
     {
         std::cerr << "Error: Could not open file " << file_info << std::endl;

@@ -1,8 +1,8 @@
 #include "Partition.hpp"
 
-void GeneratePartition(const BSplineBasis * const &basis1, const BSplineBasis * const &basis2,
-    const vector<double> &CP, const vector<int> &IEN, const vector<int> &ID,
-    const vector<double> &NURBSExtraction1, const vector<double> &NURBSExtraction2)
+void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSplineBasis * const &basis2,
+    const std::vector<double> &CP, const std::vector<int> &IEN, const std::vector<int> &ID,
+    const std::vector<double> &NURBSExtraction1, const std::vector<double> &NURBSExtraction2)
 {
     const int p = basis1->GetDegree();
     const int q = basis2->GetDegree();
@@ -29,6 +29,7 @@ void GeneratePartition(const BSplineBasis * const &basis1, const BSplineBasis * 
     {
         for (int i = 0; i < nElemX; i += localnElemX)
         {
+            std::cout << "Generating partition " << count << "..." << std::endl;
             const int localnElem = localnElemX * localnElemY;
             const int extSizeX = (p + 1) * (p + 1);
             const int extSizeY = (q + 1) * (q + 1);
@@ -36,6 +37,7 @@ void GeneratePartition(const BSplineBasis * const &basis1, const BSplineBasis * 
             std::vector<double> localCP{};
             std::vector<int> local_to_global{};
             std::vector<int> localIEN{};
+            std::vector<int> localID{};
             std::vector<double> localNURBSExtraction1{};
             std::vector<double> localNURBSExtraction2{};
 
@@ -43,7 +45,7 @@ void GeneratePartition(const BSplineBasis * const &basis1, const BSplineBasis * 
             {
                 for (int locali = 0; locali < localnElemX; ++locali)
                 {
-                    for (int ii = 0; i < nLocBas; ++ii)
+                    for (int ii = 0; ii < nLocBas; ++ii)
                     {
                         int index = i + locali + (j + localj) * nElemX;
                         local_to_global.push_back(IEN[index * nLocBas + ii]);
@@ -58,7 +60,7 @@ void GeneratePartition(const BSplineBasis * const &basis1, const BSplineBasis * 
             {
                 for (int locali = 0; locali < localnElemX; ++locali)
                 {
-                    for (int ii = 0; i < nLocBas; ++ii)
+                    for (int ii = 0; ii < nLocBas; ++ii)
                     {
                         int index = i + locali + (j + localj) * nElemX;
                         localIEN.push_back(std::distance(local_to_global.begin(),
@@ -85,21 +87,24 @@ void GeneratePartition(const BSplineBasis * const &basis1, const BSplineBasis * 
                 {
                     localCP.push_back(CP[local_to_global[ii] * dim + jj]);
                 }
+                localID.push_back(ID[local_to_global[ii]]);
             }
 
             std::string filename = GetPartitionFilename("Partition", count);
-            WritePartition(filename, local_to_global, localCP,
+            WritePartition(filename, local_to_global, localCP, localID,
                 localIEN, localNURBSExtraction1, localNURBSExtraction2);
+
+            std::cout << "Partition " << count << " generated." << std::endl;
             ++count;
         }
     }
 }
 
-void WritePartition(const std::string &filename, const std::vector<std::int> &local_to_global,
-    const std::vector<double> &CP, const std::vector<int> &IEN,
+void Partition::WritePartition(const std::string &filename, const std::vector<int> &local_to_global,
+    const std::vector<double> &CP, const std::vector<int> &ID, const std::vector<int> &IEN,
     const std::vector<double> &NURBSExtraction1, const std::vector<double> &NURBSExtraction2) const
 {
-    std::ofstream file(filename);
+    std::ofstream file(filename.c_str());
 
     if (!file.is_open())
     {
@@ -125,6 +130,12 @@ void WritePartition(const std::string &filename, const std::vector<std::int> &lo
         file << IEN[i] << std::endl;
     }
 
+    file << "ID" << std::endl;
+    for (int i = 0; i < ID.size(); ++i)
+    {
+        file << ID[i] << std::endl;
+    }
+
     file << "NURBSExtraction1" << std::endl;
     for (int i = 0; i < NURBSExtraction1.size(); ++i)
     {
@@ -140,7 +151,7 @@ void WritePartition(const std::string &filename, const std::vector<std::int> &lo
     file.close();
 }
 
-std::string GetPartitionFilename(const std::string &base_name, const int &rank) const
+std::string Partition::GetPartitionFilename(const std::string &base_name, const int &rank) const
 {
     std::string filename = base_name + "_" + std::to_string(rank) + ".txt";
     return filename;
