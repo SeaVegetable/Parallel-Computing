@@ -23,6 +23,7 @@ set(SOURCES ${SOURCE_DIR}/BSplineBasis.cpp
             ${SOURCE_DIR}/ControlPointGenerator.cpp
             ${SOURCE_DIR}/IENGenerator.cpp
             ${SOURCE_DIR}/IDGenerator.cpp
-            ${SOURCE_DIR}/NURBSExtractionGenerator.cpp)
+            ${SOURCE_DIR}/NURBSExtractionGenerator.cpp
+            ${SOURCE_DIR}/Partition.cpp)
 
 add_executable(test ${SOURCES} test.cpp)

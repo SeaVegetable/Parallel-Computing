@@ -3,6 +3,7 @@
 #include "IENGenerator.hpp"
 #include "IDGenerator.hpp"
 #include "NURBSExtractionGenerator.hpp"
+#include "Partition.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -56,4 +57,10 @@ int main(int argc, char *argv[])
     NURBSExtractionGenerator * neg = new NURBSExtractionGenerator();
     std::vector<int> NURBSExtraction1 = neg->GenerateNURBSExtraction(basis1);
     std::vector<int> NURBSExtraction2 = neg->GenerateNURBSExtraction(basis2);
+
+    std::string base_name = "part";
+    Partition * part = new Partition(4, 2, base_name);
+    part->GeneratePartition(basis1, basis2, CP, IEN, ID, NURBSExtraction1, NURBSExtraction2);
+
+    return 0;
 }

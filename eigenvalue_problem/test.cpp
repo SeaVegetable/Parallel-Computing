@@ -3,6 +3,7 @@
 #include "IENGenerator.hpp"
 #include "IDGenerator.hpp"
 #include "NURBSExtractionGenerator.hpp"
+#include "Partition.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -12,8 +13,8 @@ int main(int argc, char *argv[])
     double Lx = 1.0;
     double Ly = 1.0;
 
-    int nElemX = 10;
-    int nElemY = 10;
+    int nElemX = 15;
+    int nElemY = 15;
 
     double hx = Lx / nElemX;
     double hy = Ly / nElemY;
@@ -56,21 +57,9 @@ int main(int argc, char *argv[])
 
     NURBSExtractionGenerator * neg = new NURBSExtractionGenerator();
     std::vector<double> NURBSExtraction1 = neg->GenerateExtraction1D(basis1);
+    std::vector<double> NURBSExtraction2 = neg->GenerateExtraction1D(basis2);
 
-    std::cout << NURBSExtraction1.size() << std::endl;
-    for (int e = 0; e < nElemX; ++e)
-    {
-        std::cout << "Element " << e << std::endl;
-        for (int i = 0; i < q + 1; ++i)
-        {
-            for (int j = 0; j < p + 1; ++j)
-            {
-                int idx = e * nLocBas + i * (q + 1) + j;
-                std::cout << NURBSExtraction1[idx] << " ";
-            }
-            std::cout << std::endl;
-        }
-        std::cout << std::endl;
-    }
-    // std::vector<double> NURBSExtraction2 = neg->GenerateExtraction1D(basis2);
+    std::string base_name = "part";
+    Partition * part = new Partition(3, 2, base_name);
+    part->GeneratePartition(basis1, basis2, CP, IEN, ID, NURBSExtraction1, NURBSExtraction2);
 }
