@@ -1,4 +1,4 @@
-#include <iostream>
+#include "FileManager.hpp"
 #include "ControlPointGenerator.hpp"
 #include "IENGenerator.hpp"
 #include "IDGenerator.hpp"
@@ -21,24 +21,9 @@ int main(int argc, char *argv[])
     std::string base_name = "part";
 
     std::string file_info = "info.txt";
-    std::ofstream file(file_info.c_str());
-    if (!file.is_open())
-    {
-        std::cerr << "Error: Could not open file " << file_info << std::endl;
-        exit(1);
-    }
-
-    file << "p: " << p << std::endl;
-    file << "q: " << q << std::endl;
-    file << "Lx: " << Lx << std::endl;
-    file << "Ly: " << Ly << std::endl;
-    file << "nElemX: " << nElemX << std::endl;
-    file << "nElemY: " << nElemY << std::endl;
-    file << "part_num_1d: " << part_num_1d << std::endl;
-    file << "dim: " << dim << std::endl;
-    file << "base_name: " << base_name << std::endl;
-
-    file.close();
+    
+    FileManager * fm = new FileManager();
+    fm->WritePreprocessInfo(file_info, p, q, Lx, Ly, nElemX, nElemY, part_num_1d, dim, base_name);
 
     double hx = Lx / nElemX;
     double hy = Ly / nElemY;
@@ -85,5 +70,13 @@ int main(int argc, char *argv[])
     Partition * part = new Partition(part_num_1d, dim, base_name);
     part->GeneratePartition(basis1, basis2, CP, IEN, ID, NURBSExtraction1, NURBSExtraction2);
 
+    delete fm; fm = nullptr;
+    delete cpg; cpg = nullptr;
+    delete basis1; basis1 = nullptr;
+    delete basis2; basis2 = nullptr;
+    delete igen; igen = nullptr;
+    delete idgen; idgen = nullptr;
+    delete neg; neg = nullptr;
+    delete part; part = nullptr;
     return 0;
 }

@@ -1,10 +1,7 @@
 #ifndef PARTITION_HPP
 #define PARTITION_HPP
 
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <string>
+#include "FileManager.hpp"
 #include <algorithm>
 #include <iterator>
 #include "BSplineBasis.hpp"

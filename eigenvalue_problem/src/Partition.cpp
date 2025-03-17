@@ -17,6 +17,8 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
     const int localnElemX = nElemX / part_num_1d;
     const int localnElemY = nElemY / part_num_1d;
 
+    FileManager * fm = new FileManager();
+
     if (nElemX % part_num_1d != 0 || nElemY % part_num_1d != 0)
     {
         std::cerr << "Error: Number of partitions must divide number of elements in each direction." << std::endl;
@@ -96,76 +98,14 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
                 localID.push_back(ID[local_to_global[ii]]);
             }
 
-            std::string filename = GetPartitionFilename(base_name, count);
-            WritePartition(filename, local_to_global, localCP, localID,
+            std::string filename = fm->GetPartitionFilename(base_name, count);
+            fm->WritePartition(filename, local_to_global, localCP, localID,
                 localIEN, localNURBSExtraction1, localNURBSExtraction2);
 
             std::cout << "Partition " << count << " generated." << std::endl;
             ++count;
         }
     }
-}
 
-void Partition::WritePartition(const std::string &filename, const std::vector<int> &local_to_global,
-    const std::vector<double> &CP, const std::vector<int> &ID, const std::vector<int> &IEN,
-    const std::vector<double> &NURBSExtraction1, const std::vector<double> &NURBSExtraction2) const
-{
-    std::ofstream file(filename.c_str());
-
-    if (!file.is_open())
-    {
-        std::cerr << "Error: Could not open file " << filename << std::endl;
-        exit(1);
-    }
-
-    file << "LocalToGlobal" << std::endl;
-    for (int i = 0; i < local_to_global.size(); ++i)
-    {
-        file << local_to_global[i] << " ";
-    }
-    file << std::endl;
-
-    file << "CP" << std::endl;
-    for (int i = 0; i < CP.size(); ++i)
-    {
-        file << CP[i] << " ";
-    }
-    file << std::endl;
-
-    file << "IEN" << std::endl;
-    for (int i = 0; i < IEN.size(); ++i)
-    {
-        file << IEN[i] << " ";
-    }
-    file << std::endl;
-
-    file << "ID" << std::endl;
-    for (int i = 0; i < ID.size(); ++i)
-    {
-        file << ID[i] << " ";
-    }
-    file << std::endl;
-
-    file << std::setprecision(16);
-    file << "NURBSExtraction1" << std::endl;
-    for (int i = 0; i < NURBSExtraction1.size(); ++i)
-    {
-        file << NURBSExtraction1[i] << " ";
-    }
-    file << std::endl;
-
-    file << "NURBSExtraction2" << std::endl;
-    for (int i = 0; i < NURBSExtraction2.size(); ++i)
-    {
-        file << NURBSExtraction2[i] << " ";
-    }
-    file << std::endl;
-
-    file.close();
-}
-
-std::string Partition::GetPartitionFilename(const std::string &base_name, const int &rank) const
-{
-    std::string filename = base_name + "_" + std::to_string(rank) + ".txt";
-    return filename;
+    delete fm; fm = nullptr;
 }
