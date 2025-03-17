@@ -16,6 +16,10 @@ int main(int argc, char *argv[])
     int nElemX = 3;
     int nElemY = 3;
 
+    int part_num_1d = 2;
+    int dim = 2;
+    std::string base_name = "part";
+
     std::string file_info = "info.txt";
     std::ofstream file(file_info.c_str());
     if (!file.is_open())
@@ -30,6 +34,9 @@ int main(int argc, char *argv[])
     file << "Ly: " << Ly << std::endl;
     file << "nElemX: " << nElemX << std::endl;
     file << "nElemY: " << nElemY << std::endl;
+    file << "part_num_1d: " << part_num_1d << std::endl;
+    file << "dim: " << dim << std::endl;
+    file << "base_name: " << base_name << std::endl;
 
     file.close();
 
@@ -75,8 +82,7 @@ int main(int argc, char *argv[])
     std::vector<int> NURBSExtraction1 = neg->GenerateNURBSExtraction(basis1);
     std::vector<int> NURBSExtraction2 = neg->GenerateNURBSExtraction(basis2);
 
-    std::string base_name = "part";
-    Partition * part = new Partition(4, 2, base_name);
+    Partition * part = new Partition(part_num_1d, dim, base_name);
     part->GeneratePartition(basis1, basis2, CP, IEN, ID, NURBSExtraction1, NURBSExtraction2);
 
     return 0;
