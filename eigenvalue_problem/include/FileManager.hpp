@@ -10,9 +10,6 @@
 class FileManager
 {
 public:
-    FileManager(){}
-    ~FileManager(){}
-
     void WritePartition(const std::string &filename,
         const std::vector<double> &CP, const std::vector<int> &ID, const std::vector<int> &IEN,
         const std::vector<double> &NURBSExtraction1, const std::vector<double> &NURBSExtraction2) const;

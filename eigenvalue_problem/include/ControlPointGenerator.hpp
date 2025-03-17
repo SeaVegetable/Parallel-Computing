@@ -8,9 +8,6 @@
 class ControlPointGenerator
 {
     public:
-        ControlPointGenerator() {}
-        ~ControlPointGenerator() {}
-
         std::vector<double> GenerateControlPoints1D(
             const BSplineBasis * const &basis,
             const double &Pmax, const double &Pmin);

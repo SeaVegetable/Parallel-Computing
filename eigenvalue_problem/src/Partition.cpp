@@ -95,7 +95,7 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
                     localID.push_back(ID[local_to_global_total[ii]]);
                 else
                     localID.push_back(-1);
-            }
+            }            
 
             std::vector<int> localIEN{};
             for (int localj = elem_start_idx_y[j]; localj <= elem_end_idx_y[j]; ++localj)
@@ -105,14 +105,14 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
                     int index = localj * nElemX + locali;
                     for (int ii = 0; ii < nLocBas; ++ii)
                     {
-                        localIEN.push_back(std::distance(local_to_global.begin(),
-                            std::find(local_to_global.begin(), local_to_global.end(), IEN[index * nLocBas + ii])));
+                        localIEN.push_back(std::distance(local_to_global_total.begin(),
+                            std::find(local_to_global_total.begin(), local_to_global_total.end(), IEN[index * nLocBas + ii])));
                     }
                 }
             }
 
             std::vector<double> localNURBSExtraction1{};
-            for (int ii = elem_end_idx_x[i]; ii <= elem_end_idx_x[i]; ++ii)
+            for (int ii = elem_start_idx_x[i]; ii <= elem_end_idx_x[i]; ++ii)
             {
                 size_t start = ii * extSizeX;
                 size_t end = (ii + 1) * extSizeX;
@@ -122,7 +122,7 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
             }
 
             std::vector<double> localNURBSExtraction2{};
-            for (int jj = elem_end_idx_y[j]; jj <= elem_end_idx_y[j]; ++jj)
+            for (int jj = elem_start_idx_y[j]; jj <= elem_end_idx_y[j]; ++jj)
             {
                 size_t start = jj * extSizeY;
                 size_t end = (jj + 1) * extSizeY;

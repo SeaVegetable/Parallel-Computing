@@ -13,7 +13,7 @@ class BSplineBasis
         BSplineBasis(const int &in_p, const std::vector<double> &in_S)
             : p(in_p), S(in_S) {}
         
-        ~BSplineBasis();
+        ~BSplineBasis() {}
 
         int GetDegree() const { return p; }
 

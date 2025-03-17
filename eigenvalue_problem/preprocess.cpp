@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
     int nElemX = 15;
     int nElemY = 15;
 
-    int part_num_1d = 2;
+    int part_num_1d = 3;
     int dim = 2;
     std::string base_name = "part";
 
@@ -68,6 +68,14 @@ int main(int argc, char *argv[])
 
     Partition * part = new Partition(part_num_1d, part_num_1d, dim, base_name);
     part->GeneratePartition(basis1, basis2, CP, IEN, ID, NURBSExtraction1, NURBSExtraction2);
+
+    delete cpg; cpg = nullptr;
+    delete basis1; basis1 = nullptr;
+    delete basis2; basis2 = nullptr;
+    delete igen; igen = nullptr;
+    delete idgen; idgen = nullptr;
+    delete neg; neg = nullptr;
+    delete part; part = nullptr;
 
     return 0;
 }

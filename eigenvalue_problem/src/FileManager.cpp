@@ -11,24 +11,26 @@ void FileManager::WritePartition(const std::string &filename,
         exit(1);
     }
 
-    file << "CP" << std::endl;
-    std::copy(CP.begin(), CP.end(), std::ostream_iterator<int>(file, " "));
-    file << std::endl;
-
     file << "ID" << std::endl;
-    std::copy(ID.begin(), ID.end(), std::ostream_iterator<int>(file, " "));
+    for (int ii = 0; ii < ID.size(); ++ii) file << ID[ii] << " ";
     file << std::endl;
 
     file << "IEN" << std::endl;
-    std::copy(IEN.begin(), IEN.end(), std::ostream_iterator<int>(file, " "));
+    for (int ii = 0; ii < IEN.size(); ++ii) file << IEN[ii] << " ";
+    file << std::endl;
+
+    file << std::setprecision(16);
+
+    file << "CP" << std::endl;
+    for (int ii = 0; ii < CP.size(); ++ii) file << CP[ii] << " ";
     file << std::endl;
 
     file << "NURBSExtraction1" << std::endl;
-    std::copy(NURBSExtraction1.begin(), NURBSExtraction1.end(), std::ostream_iterator<double>(file, " "));
+    for (int ii = 0; ii < NURBSExtraction1.size(); ++ii) file << NURBSExtraction1[ii] << " ";
     file << std::endl;
 
     file << "NURBSExtraction2" << std::endl;
-    std::copy(NURBSExtraction2.begin(), NURBSExtraction2.end(), std::ostream_iterator<double>(file, " "));
+    for (int ii = 0; ii < NURBSExtraction1.size(); ++ii) file << NURBSExtraction1[ii] << " ";
     file << std::endl;
 
     file.close();
