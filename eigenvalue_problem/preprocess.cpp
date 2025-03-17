@@ -79,8 +79,8 @@ int main(int argc, char *argv[])
     std::vector<int> ID = idgen->GenerateID2D(basis1, basis2);
 
     NURBSExtractionGenerator * neg = new NURBSExtractionGenerator();
-    std::vector<int> NURBSExtraction1 = neg->GenerateNURBSExtraction(basis1);
-    std::vector<int> NURBSExtraction2 = neg->GenerateNURBSExtraction(basis2);
+    std::vector<double> NURBSExtraction1 = neg->GenerateExtraction1D(basis1);
+    std::vector<double> NURBSExtraction2 = neg->GenerateExtraction1D(basis2);
 
     Partition * part = new Partition(part_num_1d, dim, base_name);
     part->GeneratePartition(basis1, basis2, CP, IEN, ID, NURBSExtraction1, NURBSExtraction2);

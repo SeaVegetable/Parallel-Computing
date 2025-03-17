@@ -26,4 +26,18 @@ set(SOURCES ${SOURCE_DIR}/BSplineBasis.cpp
             ${SOURCE_DIR}/NURBSExtractionGenerator.cpp
             ${SOURCE_DIR}/Partition.cpp)
 
-add_executable(test ${SOURCES} test.cpp)
+# Find PETSc
+set(PETSC_DIR $ENV{HOME}/lib/petsc-3.18.6-opt)
+set(PETSC_ARCH .)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/module")
+find_package(PETSc REQUIRED)
+
+set(CMAKE_C_COMPILER  /opt/homebrew/opt/mpich/bin/mpicc)
+set(CMAKE_CXX_COMPILER /opt/homebrew/opt/mpich/bin/mpicxx)
+
+include_directories(${PETSC_INC})
+
+add_executable(preprocess ${SOURCES} preprocess.cpp)
+add_executable(solve driver.cpp)
+
+target_link_libraries(solve ${PETSC_LIB})
