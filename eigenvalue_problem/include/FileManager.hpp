@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -10,13 +11,13 @@ class FileManager
 {
 public:
     FileManager(){}
-    ~FileManager();
+    ~FileManager(){}
 
-    void WritePartition(const std::string &filename, const std::vector<int> &local_to_global,
+    void WritePartition(const std::string &filename,
         const std::vector<double> &CP, const std::vector<int> &ID, const std::vector<int> &IEN,
         const std::vector<double> &NURBSExtraction1, const std::vector<double> &NURBSExtraction2) const;
     
-    void ReadPartition(const std::string &filename, std::vector<int> &local_to_global,
+    void ReadPartition(const std::string &filename,
         std::vector<double> &CP, std::vector<int> &ID, std::vector<int> &IEN,
         std::vector<double> &NURBSExtraction1, std::vector<double> &NURBSExtraction2) const;
     

@@ -1,6 +1,6 @@
 #include "FileManager.hpp"
 
-void FileManager::WritePartition(const std::string &filename, const std::vector<int> &local_to_global,
+void FileManager::WritePartition(const std::string &filename,
     const std::vector<double> &CP, const std::vector<int> &ID, const std::vector<int> &IEN,
     const std::vector<double> &NURBSExtraction1, const std::vector<double> &NURBSExtraction2) const
 {
@@ -10,10 +10,6 @@ void FileManager::WritePartition(const std::string &filename, const std::vector<
         std::cerr << "Error: Could not open file " << filename << std::endl;
         exit(1);
     }
-
-    file << "local_to_global" << std::endl;
-    std::copy(local_to_global.begin(), local_to_global.end(), std::ostream_iterator<int>(file, " "));
-    file << std::endl;
 
     file << "CP" << std::endl;
     std::copy(CP.begin(), CP.end(), std::ostream_iterator<int>(file, " "));
@@ -38,7 +34,7 @@ void FileManager::WritePartition(const std::string &filename, const std::vector<
     file.close();
 }
 
-void FileManager::ReadPartition(const std::string &filename, std::vector<int> &local_to_global,
+void FileManager::ReadPartition(const std::string &filename,
     std::vector<double> &CP, std::vector<int> &ID, std::vector<int> &IEN,
     std::vector<double> &NURBSExtraction1, std::vector<double> &NURBSExtraction2) const
 {
@@ -52,21 +48,7 @@ void FileManager::ReadPartition(const std::string &filename, std::vector<int> &l
     std::string line;
     while (std::getline(file, line))
     {
-        if (line == "local_to_global")
-        {
-            std::string local_to_global_str;
-            std::getline(file, local_to_global_str);
-            std::istringstream local_to_global_ss(local_to_global_str);
-            local_to_global.clear();
-            int i;
-            while (local_to_global_ss >> i)
-            {
-                local_to_global.push_back(i);
-                if (local_to_global_ss.peek() == ' ')
-                    local_to_global_ss.ignore();
-            }
-        }
-        else if (line == "CP")
+        if (line == "CP")
         {
             std::string CP_str;
             std::getline(file, CP_str);

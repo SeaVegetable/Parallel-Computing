@@ -1,4 +1,3 @@
-#include "FileManager.hpp"
 #include "ControlPointGenerator.hpp"
 #include "IENGenerator.hpp"
 #include "IDGenerator.hpp"
@@ -7,14 +6,14 @@
 
 int main(int argc, char *argv[])
 {
-    int p = 2;
-    int q = 2;
+    int p = 3;
+    int q = 3;
 
     double Lx = 1.0;
     double Ly = 1.0;
 
-    int nElemX = 3;
-    int nElemY = 3;
+    int nElemX = 15;
+    int nElemY = 15;
 
     int part_num_1d = 2;
     int dim = 2;
@@ -55,7 +54,7 @@ int main(int argc, char *argv[])
     double P2min = 0.0;
     double P2max = Ly;
 
-    std::vector<double> CP = cpg->GenerateControlPoints2D(basis1, basis2, 0.0, Lx, 0.0, Ly);
+    std::vector<double> CP = cpg->GenerateControlPoints2D(basis1, basis2, P1min, P1max, P2min, P2max);
 
     IENGenerator * igen = new IENGenerator();
     std::vector<int> IEN = igen->GenerateIEN2D(basis1, basis2);
@@ -67,16 +66,8 @@ int main(int argc, char *argv[])
     std::vector<double> NURBSExtraction1 = neg->GenerateExtraction1D(basis1);
     std::vector<double> NURBSExtraction2 = neg->GenerateExtraction1D(basis2);
 
-    Partition * part = new Partition(part_num_1d, dim, base_name);
+    Partition * part = new Partition(part_num_1d, part_num_1d, dim, base_name);
     part->GeneratePartition(basis1, basis2, CP, IEN, ID, NURBSExtraction1, NURBSExtraction2);
 
-    delete fm; fm = nullptr;
-    delete cpg; cpg = nullptr;
-    delete basis1; basis1 = nullptr;
-    delete basis2; basis2 = nullptr;
-    delete igen; igen = nullptr;
-    delete idgen; idgen = nullptr;
-    delete neg; neg = nullptr;
-    delete part; part = nullptr;
     return 0;
 }

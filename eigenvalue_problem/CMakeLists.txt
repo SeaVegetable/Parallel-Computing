@@ -24,7 +24,8 @@ set(SOURCES ${SOURCE_DIR}/BSplineBasis.cpp
             ${SOURCE_DIR}/IENGenerator.cpp
             ${SOURCE_DIR}/IDGenerator.cpp
             ${SOURCE_DIR}/NURBSExtractionGenerator.cpp
-            ${SOURCE_DIR}/Partition.cpp)
+            ${SOURCE_DIR}/Partition.cpp
+            ${SOURCE_DIR}/FileManager.cpp)
 
 # Find PETSc
 set(PETSC_DIR $ENV{HOME}/lib/petsc-3.18.6-opt)
@@ -37,7 +38,10 @@ set(CMAKE_CXX_COMPILER /opt/homebrew/opt/mpich/bin/mpicxx)
 
 include_directories(${PETSC_INC})
 
-add_executable(preprocess ${SOURCES} preprocess.cpp)
-add_executable(solve driver.cpp)
+add_library(eigenvalue_problem_lib ${SOURCES})
 
-target_link_libraries(solve ${PETSC_LIB})
+add_executable(preprocess preprocess.cpp)
+target_link_libraries(preprocess eigenvalue_problem_lib)
+
+add_executable(solve driver.cpp)
+target_link_libraries(solve eigenvalue_problem_lib ${PETSC_LIB})
