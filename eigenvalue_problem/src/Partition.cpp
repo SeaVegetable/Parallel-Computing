@@ -66,14 +66,20 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
                         localIEN.push_back(std::distance(local_to_global.begin(),
                             std::find(local_to_global.begin(), local_to_global.end(), IEN[index * nLocBas + ii])));
                     }
-
-                    size_t start = (i + locali) * extSizeX;
-                    size_t end = (i + locali + 1) * extSizeX;
-                    
-                    std::copy(NURBSExtraction1.begin() + start, NURBSExtraction1.begin() + end,
-                        std::back_inserter(localNURBSExtraction1));
                 }
+            }
 
+            for (int locali = 0; locali < localnElemX; ++locali)
+            {
+                size_t start = (i + locali) * extSizeX;
+                size_t end = (i + locali + 1) * extSizeX;
+                    
+                std::copy(NURBSExtraction1.begin() + start, NURBSExtraction1.begin() + end,
+                    std::back_inserter(localNURBSExtraction1));
+            }
+
+            for (int localj = 0; localj < localnElemY; ++localj)
+            {
                 size_t start = (j + localj) * extSizeY;
                 size_t end = (j + localj + 1) * extSizeY;
 
@@ -90,7 +96,7 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
                 localID.push_back(ID[local_to_global[ii]]);
             }
 
-            std::string filename = GetPartitionFilename("Partition", count);
+            std::string filename = GetPartitionFilename(base_name, count);
             WritePartition(filename, local_to_global, localCP, localID,
                 localIEN, localNURBSExtraction1, localNURBSExtraction2);
 
@@ -115,38 +121,45 @@ void Partition::WritePartition(const std::string &filename, const std::vector<in
     file << "LocalToGlobal" << std::endl;
     for (int i = 0; i < local_to_global.size(); ++i)
     {
-        file << local_to_global[i] << std::endl;
+        file << local_to_global[i] << " ";
     }
+    file << std::endl;
 
     file << "CP" << std::endl;
     for (int i = 0; i < CP.size(); ++i)
     {
-        file << CP[i] << std::endl;
+        file << CP[i] << " ";
     }
+    file << std::endl;
 
     file << "IEN" << std::endl;
     for (int i = 0; i < IEN.size(); ++i)
     {
-        file << IEN[i] << std::endl;
+        file << IEN[i] << " ";
     }
+    file << std::endl;
 
     file << "ID" << std::endl;
     for (int i = 0; i < ID.size(); ++i)
     {
-        file << ID[i] << std::endl;
+        file << ID[i] << " ";
     }
+    file << std::endl;
 
+    file << std::setprecision(16);
     file << "NURBSExtraction1" << std::endl;
     for (int i = 0; i < NURBSExtraction1.size(); ++i)
     {
-        file << NURBSExtraction1[i] << std::endl;
+        file << NURBSExtraction1[i] << " ";
     }
+    file << std::endl;
 
     file << "NURBSExtraction2" << std::endl;
     for (int i = 0; i < NURBSExtraction2.size(); ++i)
     {
-        file << NURBSExtraction2[i] << std::endl;
+        file << NURBSExtraction2[i] << " ";
     }
+    file << std::endl;
 
     file.close();
 }
