@@ -1,13 +1,24 @@
 #ifndef BERNSTEINBASIS_HPP
 #define BERNSTEINBASIS_HPP
 
-#include <vector>
+#include QuadraturePoint.hpp
 
 class BernsteinBasis {
     public:
-        std::vector<double> GetBernsteinBasis1D(const int &p, const double &xi);
+        BernsteinBasis(const int &p, const QuadraturePoint * const &quad);
+        ~BernsteinBasis(){}
 
-        std::vector<double> GetBernsteinBasis1DDerivative(const int &p, const double &xi);
+        std::vector<double> GetBernsteinBasisSingleQP(const int &p, const double &xi);
+
+        std::vector<double> GetBernsteinBasisDerivativeSingleQP(const int &p, const double &xi);
+
+        std::vector<double> GetBernsteinBasis() const { return BB; }
+
+        std::vector<double> GetBernsteinBasisDerivative() const { return dBB; }
+
+    private:
+        std::vector<double> BB{};
+        std::vector<double> dBB{};
 };
 
 #endif

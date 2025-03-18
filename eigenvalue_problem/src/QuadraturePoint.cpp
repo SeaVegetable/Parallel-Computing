@@ -1,6 +1,7 @@
 #include "QuadraturePoint.hpp"
 
 QuadraturePoint::QuadraturePoint(const int &nqp, const int &left, const int &right)
+    : nqp(nqp)
 {
     switch (nqp)
     {

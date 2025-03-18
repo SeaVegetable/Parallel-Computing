@@ -9,10 +9,12 @@ class QuadraturePoint
         QuadraturePoint(const int &nqp, const int &left, const int &right);
         ~QuadraturePoint() {}
 
+        int GetNumQuadraturePoint() const { return nqp; }
         std::vector<double> GetQuadraturePoint() const { return qp; }
         std::vector<double> GetWeight() const { return w; }
 
     private:
+        const int nqp;
         std::vector<double> qp;
         std::vector<double> w;
 };
