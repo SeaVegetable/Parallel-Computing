@@ -131,8 +131,10 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
                     std::back_inserter(localNURBSExtraction2));
             }
 
+            const int nlocalfunc = num_local_funcs_x[i] * num_local_funcs_y[j];
+
             std::string filename = fm->GetPartitionFilename(base_name, count);
-            fm->WritePartition(filename, localCP, localID,
+            fm->WritePartition(filename, nlocalfunc, localCP, localID,
                 localIEN, localNURBSExtraction1, localNURBSExtraction2);
 
             std::cout << "Partition " << count << " generated." << std::endl;

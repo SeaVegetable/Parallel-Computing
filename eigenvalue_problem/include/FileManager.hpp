@@ -10,11 +10,11 @@
 class FileManager
 {
 public:
-    void WritePartition(const std::string &filename,
+    void WritePartition(const std::string &filename, const int &nlocalfunc,
         const std::vector<double> &CP, const std::vector<int> &ID, const std::vector<int> &IEN,
         const std::vector<double> &NURBSExtraction1, const std::vector<double> &NURBSExtraction2) const;
     
-    void ReadPartition(const std::string &filename,
+    void ReadPartition(const std::string &filename, const int &nlocalfunc,
         std::vector<double> &CP, std::vector<int> &ID, std::vector<int> &IEN,
         std::vector<double> &NURBSExtraction1, std::vector<double> &NURBSExtraction2) const;
     

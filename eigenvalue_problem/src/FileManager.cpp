@@ -1,6 +1,6 @@
 #include "FileManager.hpp"
 
-void FileManager::WritePartition(const std::string &filename,
+void FileManager::WritePartition(const std::string &filename, const int &nlocalfunc,
     const std::vector<double> &CP, const std::vector<int> &ID, const std::vector<int> &IEN,
     const std::vector<double> &NURBSExtraction1, const std::vector<double> &NURBSExtraction2) const
 {
@@ -10,6 +10,8 @@ void FileManager::WritePartition(const std::string &filename,
         std::cerr << "Error: Could not open file " << filename << std::endl;
         exit(1);
     }
+
+    file << "nlocalfunc: " << nlocalfunc << std::endl;
 
     file << "ID" << std::endl;
     for (int ii = 0; ii < ID.size(); ++ii) file << ID[ii] << " ";
@@ -36,7 +38,7 @@ void FileManager::WritePartition(const std::string &filename,
     file.close();
 }
 
-void FileManager::ReadPartition(const std::string &filename,
+void FileManager::ReadPartition(const std::string &filename, int &nlocalfunc,
     std::vector<double> &CP, std::vector<int> &ID, std::vector<int> &IEN,
     std::vector<double> &NURBSExtraction1, std::vector<double> &NURBSExtraction2) const
 {
@@ -48,6 +50,10 @@ void FileManager::ReadPartition(const std::string &filename,
     }
 
     std::string line;
+    if (line.find("nlocalfunc: ") != std::string::npos)
+    {
+        nlocalfunc = std::stoi(line.substr(12));
+    }
     while (std::getline(file, line))
     {
         if (line == "CP")
