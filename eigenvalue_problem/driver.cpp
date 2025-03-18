@@ -36,9 +36,10 @@ int main(int argc, char *argv[])
     std::vector<int> IEN;
     std::vector<double> NURBSExtraction1;
     std::vector<double> NURBSExtraction2;
+    int nlocalfunc;
 
     std::string filename = fm->GetPartitionFilename(base_name, rank);
-    fm->ReadPartition(filename, CP, ID, IEN, NURBSExtraction1, NURBSExtraction2);
+    fm->ReadPartition(filename, nlocalfunc, CP, ID, IEN, NURBSExtraction1, NURBSExtraction2);
 
     PetscFinalize();
     return 0;

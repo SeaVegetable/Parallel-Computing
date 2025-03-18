@@ -30,6 +30,34 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
     for (int i = 0; i < n; i += part_size_y) num_local_funcs_y[i/part_size_y] = part_size_y;
     num_local_funcs_y[part_num_y - 1] = n - (part_num_y - 1) * part_size_y;
 
+    std::vector<int> newID{};
+
+    int newcount = 0;
+    for (int j = 0; j < part_num_y; ++j)
+    {
+        for (int i = 0; i < part_num_x; ++i)
+        {
+            for (int localj = 0; localj < num_local_funcs_y[j]; ++localj)
+            {
+                for (int locali = 0; locali < num_local_funcs_x[i]; ++locali)
+                {
+                    const int globali = i * part_size_x + locali;
+                    const int globalj = j * part_size_y + localj;
+                    const int global = globalj * m + globali;
+                    if (ID[global] != -1)
+                    {
+                        newID.push_back(newcount);
+                        ++newcount;
+                    }
+                    else
+                    {
+                        newID.push_back(-1);
+                    }
+                }
+            }
+        }
+    }
+
     std::vector<int> elem_start_idx_x(part_num_x, 0);
     std::vector<int> elem_start_idx_y(part_num_y, 0);
     std::vector<int> elem_end_idx_x(part_num_x, 0);
@@ -92,7 +120,7 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
                     localCP.push_back(CP[local_to_global_total[ii] * dim + jj]);
                 }
                 if (std::find(local_to_global.begin(), local_to_global.end(), local_to_global_total[ii]) != local_to_global.end())
-                    localID.push_back(ID[local_to_global_total[ii]]);
+                    localID.push_back(newID[local_to_global_total[ii]]);
                 else
                     localID.push_back(-1);
             }            
