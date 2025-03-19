@@ -8,6 +8,9 @@
 class LocalAssembly
 {
     public:
+        PetscScalar *Kloc;
+        PetscScalar *Floc;
+
         LocalAssembly(const double &p, const double &q)
             : n((p+1)*(q+1))
         {
@@ -31,15 +34,13 @@ class LocalAssembly
         void AssemNonZero()
         {
             for (int i = 0; i < n*n; ++i)
-                Kloc[kk] = 1.0;
+                Kloc[i] = 1.0;
         }
 
     private:
         const int n;
         QuadraturePoint * quad1;
         QuadraturePoint * quad2;
-        PetscScalar *Kloc;
-        PetscScalar *Floc;
 
         double Getf(const double &xi, const double &eta)
         {

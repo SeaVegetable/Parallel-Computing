@@ -2,6 +2,7 @@
 #define QUADRATUREPOINT_HPP
 
 #include <vector>
+#include <iostream>
 
 class QuadraturePoint
 {

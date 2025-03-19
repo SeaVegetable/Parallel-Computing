@@ -15,6 +15,7 @@ void LocalAssembly::AssemLocalStiffnessLoad(const Element * const &elem,
     std::vector<double> dR_dx{};
     std::vector<double> dR_dy{};
     double jacobian;
+    double xx, yy;
 
     ResetStiffnessLoad();
 
@@ -22,7 +23,7 @@ void LocalAssembly::AssemLocalStiffnessLoad(const Element * const &elem,
     {
         for (int ii = 0; ii < nqp1; ++ii)
         {
-            elem->GenerateElementSingleQP(qp1[ii], qp2[jj], eCP, R, dR_dx, dR_dy);
+            elem->GenerateElementSingleQP(qp1[ii], qp2[jj], eCP, R, dR_dx, dR_dy, xx, yy, jacobian);
 
             double J_W = w1[ii]*w2[jj]*jacobian;
 
@@ -32,7 +33,7 @@ void LocalAssembly::AssemLocalStiffnessLoad(const Element * const &elem,
                 {
                     Kloc[kk*n+ll] += J_W * (dR_dx[kk]*dR_dx[ll] + dR_dy[kk]*dR_dy[ll]);
                 }
-                Floc[kk] += J_W * R[kk] * Getf(qp1[ii], qp2[jj]);
+                Floc[kk] += J_W * R[kk] * Getf(xx, yy);
             }
         }
     }

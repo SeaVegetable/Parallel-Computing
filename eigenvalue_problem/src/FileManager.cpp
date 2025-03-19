@@ -58,7 +58,8 @@ void FileManager::WritePartition(const std::string &filename,
 void FileManager::ReadPartition(const std::string &filename,
     int &nlocalfunc,
     int &nlocalelem,
-    std::vector<double> &elem_size,
+    std::vector<double> &elem_size1,
+    std::vector<double> &elem_size2,
     std::vector<double> &CP,
     std::vector<int> &ID,
     std::vector<int> &IEN,
@@ -90,11 +91,11 @@ void FileManager::ReadPartition(const std::string &filename,
             std::string elem_size_str;
             std::getline(file, elem_size_str);
             std::istringstream elem_size_ss(elem_size_str);
-            elem_size.clear();
+            elem_size1.clear();
             double d;
             while (elem_size_ss >> d)
             {
-                elem_size.push_back(d);
+                elem_size1.push_back(d);
                 if (elem_size_ss.peek() == ' ')
                     elem_size_ss.ignore();
             }
@@ -104,11 +105,11 @@ void FileManager::ReadPartition(const std::string &filename,
             std::string elem_size_str;
             std::getline(file, elem_size_str);
             std::istringstream elem_size_ss(elem_size_str);
-            elem_size.clear();
+            elem_size2.clear();
             double d;
             while (elem_size_ss >> d)
             {
-                elem_size.push_back(d);
+                elem_size2.push_back(d);
                 if (elem_size_ss.peek() == ' ')
                     elem_size_ss.ignore();
             }

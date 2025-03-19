@@ -1,7 +1,7 @@
 #ifndef GLOBALASSEMBLY_HPP
 #define GLOBALASSEMBLY_HPP
 
-#include <petscksp.h>
+#include <petscmat.h>
 #include "LocalAssembly.hpp"
 
 class GlobalAssembly
@@ -11,18 +11,18 @@ class GlobalAssembly
         Vec F;
 
         GlobalAssembly(const std::vector<int> &IEN, const std::vector<int> &ID,
-            const LocalAssembly * const &locassem, const int &nLocBas,
+            LocalAssembly * const &locassem, const int &nLocBas,
             const int &nlocalfunc, const int &nlocalelem);
 
         ~GlobalAssembly();
 
         void NonZeroCount(const Mat &K, std::vector<int> &dnz, std::vector<int> &onz);
 
-        void AssemNonZeroEstimate(const LocalAssembly * const &locassem,
+        void AssemNonZeroEstimate(LocalAssembly * const &locassem,
             const std::vector<int> &IEN,
             const std::vector<int> &ID);
 
-        void AssemStiffnessLoad(const LocalAssembly * const &locassem,
+        void AssemStiffnessLoad(LocalAssembly * const &locassem,
             const std::vector<int> &IEN,
             const std::vector<int> &ID,
             const std::vector<double> &CP,

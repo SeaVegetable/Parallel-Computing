@@ -1,7 +1,7 @@
 #include "GlobalAssembly.hpp"
 
 GlobalAssembly::GlobalAssembly(const std::vector<int> &IEN, const std::vector<int> &ID,
-    const LocalAssembly * const &locassem, const int &nLocBas,
+    LocalAssembly * const &locassem, const int &nLocBas,
     const int &nlocalfunc, const int &nlocalelem)
     : nLocBas(nLocBas), nlocalfunc(nlocalfunc), nlocalelem(nlocalelem)
 {
@@ -24,7 +24,6 @@ GlobalAssembly::GlobalAssembly(const std::vector<int> &IEN, const std::vector<in
 
     MatCreateAIJ(PETSC_COMM_WORLD, nlocalfunc, nlocalfunc, PETSC_DETERMINE,
         PETSC_DETERMINE, 0, &Dnz[0], 0, &Onz[0], &K);
-    MatSetOption(mat, MAT_IGNORE_NEGATIVE_INDICES, PETSC_TRUE);
 }
 
 GlobalAssembly::~GlobalAssembly()
@@ -67,11 +66,11 @@ void GlobalAssembly::NonZeroCount(const Mat &K, std::vector<int> &dnz, std::vect
     }
 }
 
-void GlobalAssembly::AssemNonZeroEstimate(const LocalAssembly * const &locassem,
+void GlobalAssembly::AssemNonZeroEstimate(LocalAssembly * const &locassem,
     const std::vector<int> &IEN,
     const std::vector<int> &ID)
 {
-    PetscInt * eID = new PetscInt[nLocBas]
+    PetscInt * eID = new PetscInt[nLocBas];
 
     for (int i = 0; i < nlocalelem; ++i)
     {
@@ -91,7 +90,7 @@ void GlobalAssembly::AssemNonZeroEstimate(const LocalAssembly * const &locassem,
     MatAssemblyEnd(K, MAT_FINAL_ASSEMBLY);
 }
 
-void GlobalAssembly::AssemStiffnessLoad(const LocalAssembly * const &locassem,
+void GlobalAssembly::AssemStiffnessLoad(LocalAssembly * const &locassem,
     const std::vector<int> &IEN,
     const std::vector<int> &ID,
     const std::vector<double> &CP,
@@ -101,7 +100,7 @@ void GlobalAssembly::AssemStiffnessLoad(const LocalAssembly * const &locassem,
     const std::vector<double> &elem_size2,
     Element * const &elem)
 {
-    PetscInt * eID = new PetscInt[nLocBas]
+    PetscInt * eID = new PetscInt[nLocBas];
     std::vector<double> eCP(2*nLocBas, 0.0);
     const int pp = elem->GetNumLocalBasis1D(0);
     const int qq = elem->GetNumLocalBasis1D(1);

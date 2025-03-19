@@ -1,6 +1,8 @@
 #ifndef REFELEMENT_HPP
 #define REFELEMENT_HPP
 
+#include "BernsteinBasis.hpp"
+
 class RefElement
 {
     public:

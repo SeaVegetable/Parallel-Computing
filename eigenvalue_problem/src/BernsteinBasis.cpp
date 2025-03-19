@@ -1,6 +1,6 @@
 #include "BernsteinBasis.hpp"
 
-std::vector<double> BernsteinBasis::GetBernsteinBasisSingleQP(const double &xi)
+std::vector<double> BernsteinBasis::GetBernsteinBasisSingleQP(const double &xi) const
 {
     std::vector<double> B(p + 1, 0.0);
     switch (p) {
@@ -71,7 +71,7 @@ std::vector<double> BernsteinBasis::GetBernsteinBasisSingleQP(const double &xi)
     return B;
 }
 
-std::vector<double> BernsteinBasis::GetBernsteinBasisDerivativeSingleQP(const double &xi, const double &h)
+std::vector<double> BernsteinBasis::GetBernsteinBasisDerivativeSingleQP(const double &xi, const double &h) const
 {
     std::vector<double> dB(p + 1, 0.0);
     switch (p) {

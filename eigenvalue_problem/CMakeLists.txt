@@ -25,7 +25,13 @@ set(SOURCES ${SOURCE_DIR}/BSplineBasis.cpp
             ${SOURCE_DIR}/IDGenerator.cpp
             ${SOURCE_DIR}/NURBSExtractionGenerator.cpp
             ${SOURCE_DIR}/Partition.cpp
-            ${SOURCE_DIR}/FileManager.cpp)
+            ${SOURCE_DIR}/FileManager.cpp
+            ${SOURCE_DIR}/BernsteinBasis.cpp
+            ${SOURCE_DIR}/Element.cpp
+            ${SOURCE_DIR}/RefElement.cpp
+            ${SOURCE_DIR}/QuadraturePoint.cpp
+            ${SOURCE_DIR}/LocalAssembly.cpp
+            ${SOURCE_DIR}/GlobalAssembly.cpp)
 
 # Find PETSc
 set(PETSC_DIR $ENV{HOME}/lib/petsc-3.18.6-opt)

@@ -1,14 +1,17 @@
 #ifndef BERNSTEINBASIS_HPP
 #define BERNSTEINBASIS_HPP
 
+#include <vector>
+#include <iostream>
+
 class BernsteinBasis {
     public:
         BernsteinBasis(const int &p) : p(p) {}
         ~BernsteinBasis(){}
 
-        std::vector<double> GetBernsteinBasisSingleQP(const double &xi);
+        std::vector<double> GetBernsteinBasisSingleQP(const double &xi) const;
 
-        std::vector<double> GetBernsteinBasisDerivativeSingleQP(const double &xi, const double &h);
+        std::vector<double> GetBernsteinBasisDerivativeSingleQP(const double &xi, const double &h) const;
 
         int GetDegree() const { return p; }
 

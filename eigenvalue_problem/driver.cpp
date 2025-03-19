@@ -53,10 +53,12 @@ int main(int argc, char *argv[])
     LocalAssembly * locassem = new LocalAssembly(p, q);
     GlobalAssembly * globalassem = new GlobalAssembly(IEN, ID, locassem,
         nLocBas, nlocalfunc, nlocalelem);
+
+    globalassem->AssemNonZeroEstimate(locassem, IEN, ID);
     
-    globalassem->AssemStiffnessLoad(locassem, IEN, ID, CP,
-        NURBSExtraction1, NURBSExtraction2,
-        elem_size1, elem_size2, elem);
+    // globalassem->AssemStiffnessLoad(locassem, IEN, ID, CP,
+    //     NURBSExtraction1, NURBSExtraction2,
+    //     elem_size1, elem_size2, elem);
 
     PetscFinalize();
     return 0;

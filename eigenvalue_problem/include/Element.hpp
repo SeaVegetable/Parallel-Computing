@@ -29,9 +29,9 @@ class Element
 
         void GenerateElementSingleQP(const double &xi, const double &eta,
             const std::vector<double> &eCP, 
-            std::vector<double> &R, std::vector<double> &dR_dx, std::vector<double> &dR_dy
+            std::vector<double> &R, std::vector<double> &dR_dx, std::vector<double> &dR_dy,
             double &x, double &y,
-            double &jacobian);
+            double &jacobian) const;
     
     private:
         const double p;

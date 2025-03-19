@@ -22,8 +22,8 @@ public:
         const std::vector<double> &NURBSExtraction2) const;
     
     void ReadPartition(const std::string &filename,
-        const int &nlocalfunc,
-        const int &nlocalelem,
+        int &nlocalfunc,
+        int &nlocalelem,
         std::vector<double> &elem_size1,
         std::vector<double> &elem_size2,
         std::vector<double> &CP,
