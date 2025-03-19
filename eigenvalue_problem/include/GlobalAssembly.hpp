@@ -10,16 +10,29 @@ class GlobalAssembly
         Mat K;
         Vec F;
 
-        GlobalAssembly(const int &nlocalfunc, const int &nLocBas);
+        GlobalAssembly(const std::vector<int> &IEN, const std::vector<int> &ID,
+            const LocalAssembly * const &locassem, const int &nLocBas,
+            const int &nlocalfunc, const int &nlocalelem);
 
         ~GlobalAssembly();
 
         void NonZeroCount(const Mat &K, std::vector<int> &dnz, std::vector<int> &onz);
 
-        GetNonZeroEstimate();
+        void AssemNonZeroEstimate(const LocalAssembly * const &locassem,
+            const std::vector<int> &IEN,
+            const std::vector<int> &ID);
+
+        void AssemStiffnessLoad(const LocalAssembly * const &locassem,
+            const std::vector<int> &IEN,
+            const std::vector<int> &ID,
+            const std::vector<double> &CP,
+            const std::vector<double> &,
+            Element * const &elem);
     
     private:
+        const int nLocBas;
         const int nlocalfunc;
+        const int nlocalelem;
 };
 
 #endif
