@@ -15,6 +15,8 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
     const int nLocBas = (p + 1) * (q + 1);
     const int extSizeX = (p + 1) * (p + 1);
     const int extSizeY = (q + 1) * (q + 1);
+    const double hx = (S.back() - S.front()) / nElemX;
+    const double hy = (T.back() - T.front()) / nElemY;
 
     FileManager * fm = new FileManager();
 
@@ -83,6 +85,10 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
         for (int i = 0; i < part_num_x; ++i)
         {
             std::cout << "Generating partition " << count << "..." << std::endl;
+
+            std::vector<double> elem_size1(elem_end_idx_x[i] - elem_start_idx_x[i] + 1, hx);
+            std::vector<double> elem_size2(elem_end_idx_y[j] - elem_start_idx_y[j] + 1, hy);
+
             std::vector<int> local_to_global_total{};
             for (int localj = elem_start_idx_y[j]; localj <= elem_end_idx_y[j]; ++localj)
             {
@@ -162,7 +168,8 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
             const int nlocalfunc = num_local_funcs_x[i] * num_local_funcs_y[j];
 
             std::string filename = fm->GetPartitionFilename(base_name, count);
-            fm->WritePartition(filename, nlocalfunc, localCP, localID,
+            fm->WritePartition(filename, nlocalfunc, 
+                elem_size1, elem_size2, localCP, localID,
                 localIEN, localNURBSExtraction1, localNURBSExtraction2);
 
             std::cout << "Partition " << count << " generated." << std::endl;

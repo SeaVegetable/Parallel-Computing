@@ -5,20 +5,21 @@
 
 class BernsteinBasis {
     public:
-        BernsteinBasis(const int &p, const QuadraturePoint * const &quad);
+        BernsteinBasis(const int &p) : p(p) {}
         ~BernsteinBasis(){}
 
-        std::vector<double> GetBernsteinBasisSingleQP(const int &p, const double &xi);
+        std::vector<double> GetBernsteinBasisSingleQP(const double &xi);
 
-        std::vector<double> GetBernsteinBasisDerivativeSingleQP(const int &p, const double &xi);
+        std::vector<double> GetBernsteinBasisDerivativeSingleQP(const double &xi);
 
-        std::vector<double> GetBernsteinBasis() const { return BB; }
+        int GetDegree() const { return p; }
 
-        std::vector<double> GetBernsteinBasisDerivative() const { return dBB; }
+        std::vector<double> GetBernsteinBasis(const QuadraturePoint * const &quad);
+
+        std::vector<double> GetBernsteinBasisDerivative(const QuadraturePoint * const &quad);
 
     private:
-        std::vector<double> BB{};
-        std::vector<double> dBB{};
+        const int p;
 };
 
 #endif

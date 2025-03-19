@@ -1,16 +1,6 @@
 #include "BernsteinBasis.hpp"
 
-BernsteinBasis::BernsteinBasis(const int &p, const QuadraturePoint * const &quad)
-{
-    const int nqp = quad->GetNumQuadraturePoint();
-    const std::vector<double> qp = quad->GetQuadraturePoint();
-    for (int ii = 0; ii < nqp; ++ii) {
-        BB.push_back(GetBernsteinBasisSingleQP(p, qp[ii]));
-        dBB.push_back(GetBernsteinBasisDerivativeSingleQP(p, qp[ii]));
-    }
-}
-
-std::vector<double> BernsteinBasis::GetBernsteinBasisSingleQP(const int &p, const double &xi)
+std::vector<double> BernsteinBasis::GetBernsteinBasisSingleQP(const double &xi)
 {
     std::vector<double> B(p + 1, 0.0);
     switch (p) {
@@ -81,7 +71,7 @@ std::vector<double> BernsteinBasis::GetBernsteinBasisSingleQP(const int &p, cons
     return B;
 }
 
-std::vector<double> BernsteinBasis::GetBernsteinBasisDerivativeSingleQP(const int &p, const double &xi)
+std::vector<double> BernsteinBasis::GetBernsteinBasisDerivativeSingleQP(const double &xi)
 {
     std::vector<double> dB(p + 1, 0.0);
     switch (p) {
@@ -152,3 +142,20 @@ std::vector<double> BernsteinBasis::GetBernsteinBasisDerivativeSingleQP(const in
     return dB;
 }
 
+std::vector<double> BernsteinBasis::GetBernsteinBasis(const QuadraturePoint * const &quad)
+{
+    const int nqp = quad->GetNumQuadraturePoint();
+    const std::vector<double> qp = quad->GetQuadraturePoint();
+    std::vector<double> BB{};
+    for (int ii = 0; ii < nqp; ++ii)
+        BB.push_back(GetBernsteinBasisSingleQP(qp[ii]));
+}
+
+std::vector<double> BernsteinBasis::GetBernsteinBasisDerivative(const QuadraturePoint * const &quad)
+{
+    const int nqp = quad->GetNumQuadraturePoint();
+    const std::vector<double> qp = quad->GetQuadraturePoint();
+    std::vector<double> dBB{};
+    for (int ii = 0; ii < nqp; ++ii)
+        dBB.push_back(GetBernsteinBasisDerivativeSingleQP(qp[ii]));
+}

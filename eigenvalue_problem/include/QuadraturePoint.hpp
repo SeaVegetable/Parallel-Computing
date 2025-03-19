@@ -15,8 +15,8 @@ class QuadraturePoint
 
     private:
         const int nqp;
-        std::vector<double> qp;
-        std::vector<double> w;
+        std::vector<double> qp{};
+        std::vector<double> w{};
 };
 
 #endif
