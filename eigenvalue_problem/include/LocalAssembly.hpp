@@ -26,8 +26,6 @@ class LocalAssembly
         }
 
         void AssemLocalStiffness(const Element * const &elem,
-            const QuadraturePoint * const &quad1,
-            const QuadraturePoint * const &quad2,
             const std::vector<double> &eCP);
 
     private:
