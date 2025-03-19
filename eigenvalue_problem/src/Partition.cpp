@@ -136,7 +136,7 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
             {
                 for (int locali = elem_start_idx_x[i]; locali <= elem_end_idx_x[i]; ++locali)
                 {
-                    int index = localj * nElemX + locali;
+                    int index = locali * nElemX + localj;
                     for (int ii = 0; ii < nLocBas; ++ii)
                     {
                         localIEN.push_back(std::distance(local_to_global_total.begin(),

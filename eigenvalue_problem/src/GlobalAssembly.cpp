@@ -63,6 +63,8 @@ void GlobalAssembly::NonZeroCount(const Mat &K, std::vector<int> &dnz, std::vect
                 ++onz[i];
             }
         }
+
+        MatRestoreRow(K, globalrow, &ncols, &cols, nullptr);
     }
 }
 

@@ -53,13 +53,20 @@ int main(int argc, char *argv[])
     LocalAssembly * locassem = new LocalAssembly(p, q);
     GlobalAssembly * globalassem = new GlobalAssembly(IEN, ID, locassem,
         nLocBas, nlocalfunc, nlocalelem);
-
+    
     globalassem->AssemNonZeroEstimate(locassem, IEN, ID);
+
+    MatView(globalassem->K, PETSC_VIEWER_STDOUT_WORLD);
+
     
     // globalassem->AssemStiffnessLoad(locassem, IEN, ID, CP,
     //     NURBSExtraction1, NURBSExtraction2,
     //     elem_size1, elem_size2, elem);
 
     PetscFinalize();
+
+    delete fm; fm = nullptr;
+    delete elem; elem = nullptr;
+    delete locassem; locassem = nullptr;
     return 0;
 }
