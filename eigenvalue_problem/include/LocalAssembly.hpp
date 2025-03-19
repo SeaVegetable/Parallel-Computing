@@ -9,10 +9,10 @@ class LocalAssembly
 {
     public:
         LocalAssembly(const double &p, const double &q)
+            : n((p+1)*(q+1))
         {
             quad1 = new QuadraturePoint(p+1, 0, 1);
             quad2 = new QuadraturePoint(q+1, 0, 1);
-            const int n = (p+1)*(q+1);
             Kloc = new PetscScalar[n*n];
             Floc = new PetscScalar[n];
         }
@@ -28,7 +28,14 @@ class LocalAssembly
         void AssemLocalStiffnessLoad(const Element * const &elem,
             const std::vector<double> &eCP);
 
+        void AssemNonZero()
+        {
+            for (int i = 0; i < n*n; ++i)
+                Kloc[kk] = 1.0;
+        }
+
     private:
+        const int n;
         QuadraturePoint * quad1;
         QuadraturePoint * quad2;
         PetscScalar *Kloc;
@@ -37,6 +44,14 @@ class LocalAssembly
         double Getf(const double &xi, const double &eta)
         {
             return 1.0;
+        }
+
+        void ResetStiffnessLoad()
+        {
+            for (int i = 0; i < n*n; ++i)
+                Kloc[i] = 0.0;
+            for (int i = 0; i < n; ++i)
+                Floc[i] = 0.0;
         }
 };
 

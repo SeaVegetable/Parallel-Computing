@@ -16,6 +16,8 @@ void LocalAssembly::AssemLocalStiffnessLoad(const Element * const &elem,
     std::vector<double> dR_dy{};
     double jacobian;
 
+    ResetStiffnessLoad();
+
     for (int jj = 0; jj < nqp2; ++jj)
     {
         for (int ii = 0; ii < nqp1; ++ii)
