@@ -11,9 +11,9 @@ Element::GenerateElementSingleQP(const double &xi, const double &eta,
     RefElement * ref = new RefElement();
 
     std::vector<double> N1 = ref->GenerateBasis1DSingleQP(bern1, extraction1, xi);
-    std::vector<double> dN1 = ref->GenerateBasisDerivative1DSingleQP(bern1, extraction1, xi);
+    std::vector<double> dN1 = ref->GenerateBasisDerivative1DSingleQP(bern1, extraction1, xi, hx);
     std::vector<double> N2 = ref->GenerateBasis1DSingleQP(bern2, extraction2, eta);
-    std::vector<double> dN2 = ref->GenerateBasisDerivative1DSingleQP(bern2, extraction2, eta);
+    std::vector<double> dN2 = ref->GenerateBasisDerivative1DSingleQP(bern2, extraction2, eta, hy);
 
     delete bern1;
     delete bern2;
@@ -77,6 +77,8 @@ Element::GenerateElementSingleQP(const double &xi, const double &eta,
     }
 
     jacobian = dx_dxi*dy_deta - dx_deta*dy_dxi;
+
+    jacobian *= hx*hy;
 
     dxi_dx = dy_deta/jacobian;
     dxi_dy = -dx_deta/jacobian;
