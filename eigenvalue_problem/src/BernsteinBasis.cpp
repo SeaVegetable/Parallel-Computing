@@ -71,7 +71,7 @@ std::vector<double> BernsteinBasis::GetBernsteinBasisSingleQP(const double &xi)
     return B;
 }
 
-std::vector<double> BernsteinBasis::GetBernsteinBasisDerivativeSingleQP(const double &xi)
+std::vector<double> BernsteinBasis::GetBernsteinBasisDerivativeSingleQP(const double &xi, const double &h)
 {
     std::vector<double> dB(p + 1, 0.0);
     switch (p) {
@@ -139,23 +139,7 @@ std::vector<double> BernsteinBasis::GetBernsteinBasisDerivativeSingleQP(const do
             std::cerr << "Error: Invalid polynomial degree" << std::endl;
             exit(1);
     }
+    for (int i = 0; i < p + 1; ++i)
+        dB[i] = dB[i] / h;
     return dB;
-}
-
-std::vector<double> BernsteinBasis::GetBernsteinBasis(const QuadraturePoint * const &quad)
-{
-    const int nqp = quad->GetNumQuadraturePoint();
-    const std::vector<double> qp = quad->GetQuadraturePoint();
-    std::vector<double> BB{};
-    for (int ii = 0; ii < nqp; ++ii)
-        BB.push_back(GetBernsteinBasisSingleQP(qp[ii]));
-}
-
-std::vector<double> BernsteinBasis::GetBernsteinBasisDerivative(const QuadraturePoint * const &quad)
-{
-    const int nqp = quad->GetNumQuadraturePoint();
-    const std::vector<double> qp = quad->GetQuadraturePoint();
-    std::vector<double> dBB{};
-    for (int ii = 0; ii < nqp; ++ii)
-        dBB.push_back(GetBernsteinBasisDerivativeSingleQP(qp[ii]));
 }

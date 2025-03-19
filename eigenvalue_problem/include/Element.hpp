@@ -1,0 +1,36 @@
+#ifndef ELEMENT_HPP
+#define ELEMENT_HPP
+
+#include "RefElement.hpp"
+
+class Element
+{
+    public:
+        Element(const double &p, const double &q) : p(p), q(q) {}
+        ~Element(){}
+
+        void SetElement(const std::vector<double> &extraction1,
+            const std::vector<double> &extraction2,
+            const double &hx, const double &hy)
+        {
+            this->extraction1 = extraction1;
+            this->extraction2 = extraction2;
+            this->hx = hx;
+            this->hy = hy;
+        }
+
+        void GenerateElementSingleQP(const double &xi, const double &eta,
+            const std::vector<double> &eCP, 
+            std::vector<double> &R, std::vector<double> &dR_dx, std::vector<double> &dR_dy);
+    
+    private:
+        const double p;
+        const double q;
+
+        std::vector<double> extraction1{};
+        std::vector<double> extraction2{};
+        double hx;
+        double hy;
+};
+
+#endif
