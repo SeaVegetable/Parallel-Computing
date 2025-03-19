@@ -1,6 +1,7 @@
 #ifndef ELEMENT_HPP
 #define ELEMENT_HPP
 
+#include <algorithm>
 #include "RefElement.hpp"
 
 class Element
