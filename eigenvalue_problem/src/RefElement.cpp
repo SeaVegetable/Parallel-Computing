@@ -1,6 +1,6 @@
 #include "RefElement.hpp"
 
-std::vector<double> Element::GenerateBasis(const BernsteinBasis * const &bern,
+std::vector<double> Element::GenerateBasis1D(const BernsteinBasis * const &bern,
     const std::vector<double> &extraction,
     const QuadraturePoint * const &quad)
 {
@@ -21,7 +21,7 @@ std::vector<double> Element::GenerateBasis(const BernsteinBasis * const &bern,
     return basis;
 }
 
-std::vector<double> Element::GenerateBasisDerivative(const BernsteinBasis * const &bern,
+std::vector<double> Element::GenerateBasisDerivative1D(const BernsteinBasis * const &bern,
     const std::vector<double> &extraction,
     const QuadraturePoint * const &quad)
 {

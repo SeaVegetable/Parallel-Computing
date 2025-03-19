@@ -6,11 +6,11 @@
 class RefElement
 {
     public:
-        std::vector<double> GenerateBasis(const BernsteinBasis * const &bern,
+        std::vector<double> GenerateBasis1D(const BernsteinBasis * const &bern,
             const std::vector<double> &extraction,
             const QuadraturePoint * const &quad);
         
-        std::vector<double> GenerateBasisDerivative(const BernsteinBasis * const &bern,
+        std::vector<double> GenerateBasisDerivative1D(const BernsteinBasis * const &bern,
             const std::vector<double> &extraction,
             const QuadraturePoint * const &quad);
 };
