@@ -1,6 +1,6 @@
 #include "LocalAssembly.hpp"
 
-void LocalAssembly::AssemLocalStiffness(const Element * const &elem,
+void LocalAssembly::AssemLocalStiffnessLoad(const Element * const &elem,
     const std::vector<double> &eCP)
 {
     const int nqp1 = quad1->GetNumQuadraturePoint();
@@ -30,6 +30,7 @@ void LocalAssembly::AssemLocalStiffness(const Element * const &elem,
                 {
                     Kloc[kk*n+ll] += J_W * (dR_dx[kk]*dR_dx[ll] + dR_dy[kk]*dR_dy[ll]);
                 }
+                Floc[kk] += J_W * R[kk] * Getf(qp1[ii], qp2[jj]);
             }
         }
     }

@@ -25,7 +25,7 @@ class LocalAssembly
             delete[] Floc; Floc = nullptr;
         }
 
-        void AssemLocalStiffness(const Element * const &elem,
+        void AssemLocalStiffnessLoad(const Element * const &elem,
             const std::vector<double> &eCP);
 
     private:
@@ -33,6 +33,11 @@ class LocalAssembly
         QuadraturePoint * quad2;
         PetscScalar *Kloc;
         PetscScalar *Floc;
+
+        double Getf(const double &xi, const double &eta)
+        {
+            return 1.0;
+        }
 };
 
 #endif
