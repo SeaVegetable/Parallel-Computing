@@ -3,6 +3,7 @@
 Element::GenerateElementSingleQP(const double &xi, const double &eta,
     const std::vector<double> &eCP,
     std::vector<double> &R, std::vector<double> &dR_dx, std::vector<double> &dR_dy,
+    double &x, double &y,
     double &jacobian)
 {
     BernsteinBasis * bern1 = new BernsteinBasis(p);
@@ -58,17 +59,22 @@ Element::GenerateElementSingleQP(const double &xi, const double &eta,
     double dy_dxi = 0.0;
     double dy_deta = 0.0;
 
-    double jacobian = 0.0;
+    jacobian = 0.0;
 
     double dxi_dx = 0.0;
     double dxi_dy = 0.0;
     double deta_dx = 0.0;
     double deta_dy = 0.0;
 
+    x = 0.0;
+    y = 0.0;
+
     for (int j = 0; j<q+1; ++j)
     {
         for (int i = 0; i<p+1; ++i)
         {
+            x += eCP[2*(j*(p+1)+i)] * R[j*(p+1)+i];
+            y += eCP[2*(j*(p+1)+i)+1] * R[j*(p+1)+i];
             dx_dxi += eCP[2*(j*(p+1)+i)] * dR_dxi[j*(p+1)+i];
             dx_deta += eCP[2*(j*(p+1)+i)] * dR_deta[j*(p+1)+i];
             dy_dxi += eCP[2*(j*(p+1)+i)+1] * dR_dxi[j*(p+1)+i];
