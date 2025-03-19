@@ -2,6 +2,7 @@
 
 void FileManager::WritePartition(const std::string &filename,
     const int &nlocalfunc,
+    const int &nlocalelem,
     const std::vector<double> &elem_size1,
     const std::vector<double> &elem_size2,
     const std::vector<double> &CP,
@@ -18,6 +19,8 @@ void FileManager::WritePartition(const std::string &filename,
     }
 
     file << "nlocalfunc: " << nlocalfunc << std::endl;
+
+    file << "nlocalelem: " << nlocalelem << std::endl;
 
     file << "ID" << std::endl;
     for (int ii = 0; ii < ID.size(); ++ii) file << ID[ii] << " ";
@@ -54,6 +57,7 @@ void FileManager::WritePartition(const std::string &filename,
 
 void FileManager::ReadPartition(const std::string &filename,
     int &nlocalfunc,
+    int &nlocalelem,
     std::vector<double> &elem_size,
     std::vector<double> &CP,
     std::vector<int> &ID,
@@ -69,9 +73,15 @@ void FileManager::ReadPartition(const std::string &filename,
     }
 
     std::string line;
+    std::getline(file, line);
     if (line.find("nlocalfunc: ") != std::string::npos)
     {
         nlocalfunc = std::stoi(line.substr(12));
+    }
+    std::getline(file, line);
+    if (line.find("nlocalelem: ") != std::string::npos)
+    {
+        nlocalelem = std::stoi(line.substr(12));
     }
     while (std::getline(file, line))
     {

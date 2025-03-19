@@ -1,5 +1,6 @@
 #include <petscksp.h>
 #include "FileManager.hpp"
+#include "GlobalAssembly.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -39,10 +40,23 @@ int main(int argc, char *argv[])
     std::vector<double> NURBSExtraction1;
     std::vector<double> NURBSExtraction2;
     int nlocalfunc;
+    int nlocalelem;
 
     std::string filename = fm->GetPartitionFilename(base_name, rank);
-    fm->ReadPartition(filename, nlocalfunc, elem_size1, elem_size2,
+    fm->ReadPartition(filename, nlocalfunc, nlocalelem,
+        elem_size1, elem_size2,
         CP, ID, IEN, NURBSExtraction1, NURBSExtraction2);
+    
+    
+    Element * elem = new Element(p, q);
+    const int nLocBas = elem->GetNumLocalBasis();
+    LocalAssembly * locassem = new LocalAssembly(p, q);
+    GlobalAssembly * globalassem = new GlobalAssembly(IEN, ID, locassem,
+        nLocBas, nlocalfunc, nlocalelem);
+    
+    globalassem->AssemStiffnessLoad(locassem, IEN, ID, CP,
+        NURBSExtraction1, NURBSExtraction2,
+        elem_size1, elem_size2, elem);
 
     PetscFinalize();
     return 0;
