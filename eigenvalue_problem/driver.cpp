@@ -57,9 +57,9 @@ int main(int argc, char *argv[])
 
     MatView(globalassem->K, PETSC_VIEWER_STDOUT_WORLD);
    
-    // globalassem->AssemStiffnessLoad(locassem, IEN, ID, CP,
-    //     NURBSExtraction1, NURBSExtraction2,
-    //     elem_size1, elem_size2, elem);
+    globalassem->AssemStiffnessLoad(locassem, IEN, ID, CP,
+        NURBSExtraction1, NURBSExtraction2,
+        elem_size1, elem_size2, elem);
 
     PetscFinalize();
 
