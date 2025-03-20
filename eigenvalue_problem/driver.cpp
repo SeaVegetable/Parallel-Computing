@@ -47,7 +47,6 @@ int main(int argc, char *argv[])
         elem_size1, elem_size2,
         CP, ID, IEN, NURBSExtraction1, NURBSExtraction2);
     
-    
     Element * elem = new Element(p, q);
     const int nLocBas = elem->GetNumLocalBasis();
     LocalAssembly * locassem = new LocalAssembly(p, q);
@@ -57,8 +56,7 @@ int main(int argc, char *argv[])
     globalassem->AssemNonZeroEstimate(locassem, IEN, ID);
 
     MatView(globalassem->K, PETSC_VIEWER_STDOUT_WORLD);
-
-    
+   
     // globalassem->AssemStiffnessLoad(locassem, IEN, ID, CP,
     //     NURBSExtraction1, NURBSExtraction2,
     //     elem_size1, elem_size2, elem);

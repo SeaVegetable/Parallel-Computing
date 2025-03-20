@@ -132,7 +132,7 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
             {
                 for (int locali = elem_start_idx_x[i]; locali <= elem_end_idx_x[i]; ++locali)
                 {
-                    int index = locali * nElemX + localj;
+                    int index = localj * nElemX + locali;
                     for (int ii = 0; ii < nLocBas; ++ii)
                     {
                         localIEN.push_back(std::distance(local_to_global_total.begin(),
@@ -161,7 +161,7 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
                     std::back_inserter(localNURBSExtraction2));
             }
 
-            const int nlocalfunc = num_local_funcs_x[i] * num_local_funcs_y[j];
+            const int nlocalfunc = std::count_if(localID.begin(), localID.end(), [](int id) { return id != -1; });
             const int nlocalelem = (elem_end_idx_x[i] - elem_start_idx_x[i] + 1) * (elem_end_idx_y[j] - elem_start_idx_y[j] + 1);
 
             std::string filename = fm->GetPartitionFilename(base_name, count);
