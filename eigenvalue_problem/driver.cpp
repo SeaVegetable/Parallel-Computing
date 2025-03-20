@@ -61,6 +61,8 @@ int main(int argc, char *argv[])
     
     MatView(globalassem->K, PETSC_VIEWER_STDOUT_WORLD);
 
+    VecView(globalassem->F, PETSC_VIEWER_STDOUT_WORLD);
+
     delete fm; fm = nullptr;
     delete elem; elem = nullptr;
     delete locassem; locassem = nullptr;

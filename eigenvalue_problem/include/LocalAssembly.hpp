@@ -44,7 +44,7 @@ class LocalAssembly
 
         double Getf(const double &xi, const double &eta)
         {
-            return 1.0;
+            return 100.0;
         }
 
         void ResetStiffnessLoad()

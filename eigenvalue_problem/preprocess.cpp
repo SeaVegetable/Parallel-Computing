@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     int nElemX = 6;
     int nElemY = 6;
 
-    int part_num_1d = 1;
+    int part_num_1d = 2;
     int dim = 2;
     std::string base_name = "part";
 
