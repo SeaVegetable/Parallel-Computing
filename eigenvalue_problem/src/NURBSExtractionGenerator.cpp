@@ -1,4 +1,5 @@
 #include "NURBSExtractionGenerator.hpp"
+#include <iostream>
 
 std::vector<double> NURBSExtractionGenerator::GenerateExtraction1D(const BSplineBasis * const &basis)
 {
@@ -8,13 +9,13 @@ std::vector<double> NURBSExtractionGenerator::GenerateExtraction1D(const BSpline
     const int nFunc = m - p - 1;
     const int nElem = nFunc - p;
 
-    int a = p + 1;
+    const int a = p + 1;
     std::vector<double> C(a * a * nElem, 0.0);
 
     std::vector<double> I(a * a, 0.0);
     for (int i = 0; i < a; ++i) I[i * a + i] = 1.0;
 
-    for (int i = 1; i <= a; ++i) C[this->idxC(i, i, 1, a)] = 1.0;
+    for (int i = 1; i <= a; ++i) C[idxC(i, i, 1, a)] = 1.0;
 
     int nb = 1;
     int A = p + 1;
@@ -22,7 +23,7 @@ std::vector<double> NURBSExtractionGenerator::GenerateExtraction1D(const BSpline
 
     while (B < m)
     {
-        for (int i = 1; i <= a; ++i) C[this->idxC(i, i, nb+1, a)] = 1.0;
+        for (int i = 1; i <= a; ++i) C[idxC(i, i, nb+1, a)] = 1.0;
         int iVal = B;
 
         while (B < m && S[B] == S[B-1]) B++;
@@ -49,8 +50,8 @@ std::vector<double> NURBSExtractionGenerator::GenerateExtraction1D(const BSpline
 
                     for (int row = 1; row <= a; ++row)
                     {
-                        double oldVal_k = C[this->idxC(row, k, nb, a)];
-                        double oldVal_km1 = C[this->idxC(row, k - 1, nb, a)];
+                        double oldVal_k = C[idxC(row, k, nb, a)];
+                        double oldVal_km1 = C[idxC(row, k - 1, nb, a)];
                         C[idxC(row, k, nb, a)] = alpha * oldVal_k + (1.0 - alpha) * oldVal_km1;
                     }
                 }
@@ -62,12 +63,13 @@ std::vector<double> NURBSExtractionGenerator::GenerateExtraction1D(const BSpline
                         int rowLeft = save + offset;
                         int rowRight = p - j + 1 + offset;
 
-                        C[this->idxC(rowLeft, save, nb+1, a)] = C[this->idxC(rowRight, p + 1, nb, a)];
+                        C[idxC(rowLeft, save, nb+1, a)] = C[idxC(rowRight, p + 1, nb, a)];
                     }
                 }
             }
 
             nb++;
+            if (nb >= nElem) break;
             if (B < m)
             {
                 A = B;
