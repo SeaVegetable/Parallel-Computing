@@ -2,8 +2,9 @@
 
 GlobalAssembly::GlobalAssembly(const std::vector<int> &IEN, const std::vector<int> &ID,
     LocalAssembly * const &locassem, const int &nLocBas,
-    const int &nlocalfunc, const int &nlocalelem)
-    : nLocBas(nLocBas), nlocalfunc(nlocalfunc), nlocalelem(nlocalelem)
+    const int &nlocalfunc, const int &nlocalelemx, const int &nlocalelemy)
+    : nLocBas(nLocBas), nlocalfunc(nlocalfunc),
+      nlocalelemx(nlocalelemx), nlocalelemy(nlocalelemy)
 {
     const int dnz = nlocalfunc;
     const int onz = dnz;
@@ -74,6 +75,8 @@ void GlobalAssembly::AssemNonZeroEstimate(LocalAssembly * const &locassem,
 {
     PetscInt * eID = new PetscInt[nLocBas];
 
+    const int nlocalelem = nlocalelemx * nlocalelemy;
+
     for (int i = 0; i < nlocalelem; ++i)
     {
         for (int j = 0; j < nLocBas; ++j)
@@ -109,29 +112,33 @@ void GlobalAssembly::AssemStiffnessLoad(LocalAssembly * const &locassem,
     std::vector<double> eNURBSExtraction1(pp*pp, 0.0);
     std::vector<double> eNURBSExtraction2(qq*qq, 0.0);
 
-    for (int i = 0; i < nlocalelem; ++i)
+    for (int jj = 0; jj < nlocalelemy; ++jj)
     {
-        for (int j = 0; j < nLocBas; ++j)
+        for (int ii = 0; ii < nlocalelemx; ++ii)
         {
-            eID[j] = ID[IEN[i*nLocBas+j]];
-            eCP[2*j] = CP[2*IEN[i*nLocBas+j]];
-            eCP[2*j+1] = CP[2*IEN[i*nLocBas+j]+1];
-        }
+            int elemIndex = jj*nlocalelemx + ii;
+            for (int j = 0; j < nLocBas; ++j)
+            {
+                eID[j] = ID[IEN[elemIndex*nLocBas+j]];
+                eCP[2*j] = CP[2*IEN[elemIndex*nLocBas+j]];
+                eCP[2*j+1] = CP[2*IEN[elemIndex*nLocBas+j]+1];
+            }
 
-        std::copy(NURBSExtraction1.begin() + i * pp * pp, 
-              NURBSExtraction1.begin() + (i + 1) * pp * pp, 
-              eNURBSExtraction1.begin());
-        std::copy(NURBSExtraction2.begin() + i * qq * qq,
-              NURBSExtraction2.begin() + (i + 1) * qq * qq,
-              eNURBSExtraction2.begin());
+            std::copy(NURBSExtraction1.begin() + ii * pp * pp, 
+                NURBSExtraction1.begin() + (ii + 1) * pp * pp, 
+                eNURBSExtraction1.begin());
+            std::copy(NURBSExtraction2.begin() + jj * qq * qq,
+                NURBSExtraction2.begin() + (jj + 1) * qq * qq,
+                eNURBSExtraction2.begin());
         
-        elem->SetElement(eNURBSExtraction1, eNURBSExtraction2, elem_size1[i], elem_size2[i]);
+            elem->SetElement(eNURBSExtraction1, eNURBSExtraction2, elem_size1[ii], elem_size2[jj]);
 
-        locassem->AssemLocalStiffnessLoad(elem, eCP);
+            locassem->AssemLocalStiffnessLoad(elem, eCP);
 
-        MatSetValues(K, nLocBas, eID, nLocBas, eID, locassem->Kloc, ADD_VALUES);
+            MatSetValues(K, nLocBas, eID, nLocBas, eID, locassem->Kloc, ADD_VALUES);
 
-        VecSetValues(F, nLocBas, eID, locassem->Floc, ADD_VALUES);
+            VecSetValues(F, nLocBas, eID, locassem->Floc, ADD_VALUES);
+        }
     }
 
     delete[] eID; eID = nullptr;

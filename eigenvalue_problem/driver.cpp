@@ -40,10 +40,12 @@ int main(int argc, char *argv[])
     std::vector<double> NURBSExtraction1;
     std::vector<double> NURBSExtraction2;
     int nlocalfunc;
-    int nlocalelem;
+    int nlocalelemx;
+    int nlocalelemy;
 
     std::string filename = fm->GetPartitionFilename(base_name, rank);
-    fm->ReadPartition(filename, nlocalfunc, nlocalelem,
+    fm->ReadPartition(filename, nlocalfunc,
+        nlocalelemx, nlocalelemy,
         elem_size1, elem_size2,
         CP, ID, IEN, NURBSExtraction1, NURBSExtraction2);
     
@@ -51,17 +53,13 @@ int main(int argc, char *argv[])
     const int nLocBas = elem->GetNumLocalBasis();
     LocalAssembly * locassem = new LocalAssembly(p, q);
     GlobalAssembly * globalassem = new GlobalAssembly(IEN, ID, locassem,
-        nLocBas, nlocalfunc, nlocalelem);
-    
-    globalassem->AssemNonZeroEstimate(locassem, IEN, ID);
-
-    MatView(globalassem->K, PETSC_VIEWER_STDOUT_WORLD);
+        nLocBas, nlocalfunc, nlocalelemx, nlocalelemy);
    
     globalassem->AssemStiffnessLoad(locassem, IEN, ID, CP,
         NURBSExtraction1, NURBSExtraction2,
         elem_size1, elem_size2, elem);
-
-    PetscFinalize();
+    
+    MatView(globalassem->K, PETSC_VIEWER_STDOUT_WORLD);
 
     delete fm; fm = nullptr;
     delete elem; elem = nullptr;

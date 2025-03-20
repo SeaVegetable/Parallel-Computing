@@ -12,7 +12,7 @@ class GlobalAssembly
 
         GlobalAssembly(const std::vector<int> &IEN, const std::vector<int> &ID,
             LocalAssembly * const &locassem, const int &nLocBas,
-            const int &nlocalfunc, const int &nlocalelem);
+            const int &nlocalfunc, const int &nlocalelemx, const int &nlocalelemy);
 
         ~GlobalAssembly();
 
@@ -35,7 +35,8 @@ class GlobalAssembly
     private:
         const int nLocBas;
         const int nlocalfunc;
-        const int nlocalelem;
+        const int nlocalelemx;
+        const int nlocalelemy;
 };
 
 #endif

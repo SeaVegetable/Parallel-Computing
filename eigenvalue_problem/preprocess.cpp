@@ -7,16 +7,16 @@
 
 int main(int argc, char *argv[])
 {
-    int p = 3;
-    int q = 3;
+    int p = 2;
+    int q = 2;
 
     double Lx = 1.0;
     double Ly = 1.0;
 
-    int nElemX = 100;
-    int nElemY = 100;
+    int nElemX = 6;
+    int nElemY = 6;
 
-    int part_num_1d = 3;
+    int part_num_1d = 1;
     int dim = 2;
     std::string base_name = "part";
 
@@ -83,17 +83,17 @@ int main(int argc, char *argv[])
     std::cout << "Generating extraction 2..." << std::endl;
     std::vector<double> NURBSExtraction2 = neg->GenerateExtraction1D(basis2);
 
-    // std::cout << "Generating partition..." << std::endl;
-    // Partition * part = new Partition(part_num_1d, part_num_1d, dim, base_name);
-    // part->GeneratePartition(basis1, basis2, CP, IEN, ID, NURBSExtraction1, NURBSExtraction2);
+    std::cout << "Generating partition..." << std::endl;
+    Partition * part = new Partition(part_num_1d, part_num_1d, dim, base_name);
+    part->GeneratePartition(basis1, basis2, CP, IEN, ID, NURBSExtraction1, NURBSExtraction2);
 
-    // delete cpg; cpg = nullptr;
-    // delete basis1; basis1 = nullptr;
-    // delete basis2; basis2 = nullptr;
-    // delete igen; igen = nullptr;
-    // delete idgen; idgen = nullptr;
-    // delete neg; neg = nullptr;
-    // delete part; part = nullptr;
+    delete cpg; cpg = nullptr;
+    delete basis1; basis1 = nullptr;
+    delete basis2; basis2 = nullptr;
+    delete igen; igen = nullptr;
+    delete idgen; idgen = nullptr;
+    delete neg; neg = nullptr;
+    delete part; part = nullptr;
 
     return 0;
 }

@@ -12,7 +12,8 @@ class FileManager
 public:
     void WritePartition(const std::string &filename,
         const int &nlocalfunc,
-        const int &nlocalelem,
+        const int &nlocalelemx,
+        const int &nlocalelemy,
         const std::vector<double> &elem_size1,
         const std::vector<double> &elem_size2,
         const std::vector<double> &CP,
@@ -23,7 +24,8 @@ public:
     
     void ReadPartition(const std::string &filename,
         int &nlocalfunc,
-        int &nlocalelem,
+        int &nlocalelemx,
+        int &nlocalelemy,
         std::vector<double> &elem_size1,
         std::vector<double> &elem_size2,
         std::vector<double> &CP,
