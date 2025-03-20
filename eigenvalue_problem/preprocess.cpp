@@ -1,3 +1,4 @@
+#include <filesystem>
 #include "ControlPointGenerator.hpp"
 #include "IENGenerator.hpp"
 #include "IDGenerator.hpp"
@@ -12,14 +13,24 @@ int main(int argc, char *argv[])
     double Lx = 1.0;
     double Ly = 1.0;
 
-    int nElemX = 15;
-    int nElemY = 15;
+    int nElemX = 100;
+    int nElemY = 100;
 
     int part_num_1d = 3;
     int dim = 2;
     std::string base_name = "part";
 
     std::string file_info = "info.txt";
+
+    for (const auto& entry : std::__fs::filesystem::directory_iterator(std::__fs::filesystem::current_path())) {
+        if (entry.is_regular_file()) {
+            std::string filename = entry.path().filename().string();
+            if (filename.find(base_name) == 0 || filename == file_info) {
+                std::cout << "Deleting file: " << filename << std::endl;
+                std::__fs::filesystem::remove(entry.path());
+            }
+        }
+    }
     
     FileManager * fm = new FileManager();
     fm->WritePreprocessInfo(file_info, p, q, Lx, Ly, nElemX, nElemY, part_num_1d, dim, base_name);
@@ -54,28 +65,35 @@ int main(int argc, char *argv[])
     double P2min = 0.0;
     double P2max = Ly;
 
-    std::vector<double> CP = cpg->GenerateControlPoints2D(basis1, basis2, P1min, P1max, P2min, P2max);
-
+    std::cout << "Generating IEN..." << std::endl;
     IENGenerator * igen = new IENGenerator();
     std::vector<int> IEN = igen->GenerateIEN2D(basis1, basis2);
 
+    std::cout << "Generating ID..." << std::endl;
     IDGenerator * idgen = new IDGenerator();
     std::vector<int> ID = idgen->GenerateID2D(basis1, basis2);
 
+    std::cout << "Generating control points..." << std::endl;
+    std::vector<double> CP = cpg->GenerateControlPoints2D(basis1, basis2, P1min, P1max, P2min, P2max);
+
+    std::cout << "Generating NURBS extraction..." << std::endl;
     NURBSExtractionGenerator * neg = new NURBSExtractionGenerator();
+    std::cout << "Generating extraction 1..." << std::endl;
     std::vector<double> NURBSExtraction1 = neg->GenerateExtraction1D(basis1);
+    std::cout << "Generating extraction 2..." << std::endl;
     std::vector<double> NURBSExtraction2 = neg->GenerateExtraction1D(basis2);
 
-    Partition * part = new Partition(part_num_1d, part_num_1d, dim, base_name);
-    part->GeneratePartition(basis1, basis2, CP, IEN, ID, NURBSExtraction1, NURBSExtraction2);
+    // std::cout << "Generating partition..." << std::endl;
+    // Partition * part = new Partition(part_num_1d, part_num_1d, dim, base_name);
+    // part->GeneratePartition(basis1, basis2, CP, IEN, ID, NURBSExtraction1, NURBSExtraction2);
 
-    delete cpg; cpg = nullptr;
-    delete basis1; basis1 = nullptr;
-    delete basis2; basis2 = nullptr;
-    delete igen; igen = nullptr;
-    delete idgen; idgen = nullptr;
-    delete neg; neg = nullptr;
-    delete part; part = nullptr;
+    // delete cpg; cpg = nullptr;
+    // delete basis1; basis1 = nullptr;
+    // delete basis2; basis2 = nullptr;
+    // delete igen; igen = nullptr;
+    // delete idgen; idgen = nullptr;
+    // delete neg; neg = nullptr;
+    // delete part; part = nullptr;
 
     return 0;
 }
