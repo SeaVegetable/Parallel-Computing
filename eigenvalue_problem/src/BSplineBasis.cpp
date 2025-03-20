@@ -71,7 +71,7 @@ std::vector<double> BSplineBasis::DerBasisFuns(const double &u, const int &i, co
         int s2 = 1;
         std::vector<double> a(2*(p+1), 0.0);
         a[0] = 1.0;
-        for (int k = 1; k <= p; k++)
+        for (int k = 1; k <= n; k++)
         {
             double d = 0.0;
             int rk = r - k;
