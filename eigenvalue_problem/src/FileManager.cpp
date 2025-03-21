@@ -52,7 +52,7 @@ void FileManager::WritePartition(const std::string &filename,
     file << std::endl;
 
     file << "NURBSExtraction2" << std::endl;
-    for (int ii = 0; ii < NURBSExtraction1.size(); ++ii) file << NURBSExtraction1[ii] << " ";
+    for (int ii = 0; ii < NURBSExtraction2.size(); ++ii) file << NURBSExtraction2[ii] << " ";
     file << std::endl;
 
     file.close();

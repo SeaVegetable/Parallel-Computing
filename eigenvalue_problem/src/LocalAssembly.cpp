@@ -31,7 +31,7 @@ void LocalAssembly::AssemLocalStiffnessLoad(const Element * const &elem,
             {
                 for (int ll = 0; ll < n; ++ll)
                 {
-                    Kloc[kk*n+ll] += J_W * (dR_dx[kk]*dR_dx[ll] + dR_dy[kk]*dR_dy[ll]);
+                    Kloc[kk*n+ll] -= J_W * (dR_dx[kk]*dR_dx[ll] + dR_dy[kk]*dR_dy[ll]);
                 }
                 Floc[kk] += J_W * R[kk] * Getf(xx, yy);
             }

@@ -84,8 +84,6 @@ void Element::GenerateElementSingleQP(const double &xi, const double &eta,
 
     jacobian = dx_dxi*dy_deta - dx_deta*dy_dxi;
 
-    jacobian *= hx*hy;
-
     dxi_dx = dy_deta/jacobian;
     dxi_dy = -dx_deta/jacobian;
     deta_dx = -dy_dxi/jacobian;
@@ -102,4 +100,6 @@ void Element::GenerateElementSingleQP(const double &xi, const double &eta,
             dR_dy.push_back(dxi_dy*dR_dxi[j*(p+1)+i] + deta_dy*dR_deta[j*(p+1)+i]);
         }
     }
+
+    jacobian *= hx*hy;
 }
