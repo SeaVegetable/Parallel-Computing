@@ -20,6 +20,9 @@ class Partition
             const std::vector<double> &CP, const std::vector<int> &IEN, const std::vector<int> &ID,
             const std::vector<double> &NURBSExtraction1, const std::vector<double> &NURBSExtraction2);
 
+        void GeneratePartition(const int &p, const int &q, const double &hx, const double &hy,
+            const std::vector<double> &CP, const std::vector<int> &ID, const std::vector<int> &IEN);
+
     private:
         const int part_num_x, part_num_y;
         const int dim;
