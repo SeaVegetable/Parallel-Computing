@@ -36,8 +36,6 @@ class GlobalAssembly
             const std::vector<int> &IEN,
             const std::vector<int> &ID,
             const std::vector<double> &CP,
-            const std::vector<double> &elem_size1,
-            const std::vector<double> &elem_size2,
             ElementFEM * const &elem);
     
     private:

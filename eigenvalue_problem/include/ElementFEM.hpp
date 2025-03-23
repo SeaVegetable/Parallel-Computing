@@ -10,12 +10,6 @@ class ElementFEM
         ElementFEM(const double &p, const double &q) : p(p), q(q) {}
         ~ElementFEM(){}
 
-        void SetElement(const double &hx, const double &hy)
-        {
-            this->hx = hx;
-            this->hy = hy;
-        }
-
         int GetNumLocalBasis() const { return (p+1)*(q+1); }
 
         int GetNumLocalBasis1D(const int &dim) const
@@ -32,9 +26,6 @@ class ElementFEM
     private:
         const double p;
         const double q;
-
-        double hx;
-        double hy;
 
         std::vector<double> GenerateBasis1DSingleQP(const double &xi, const int &pp) const;
 
