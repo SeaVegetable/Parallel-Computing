@@ -44,13 +44,13 @@ void ElementFEM::GenerateElementSingleQP(const double &xi, const double &eta,
     {
         for (int i = 0; i<p+1; ++i)
         {
-            x += eCP[j*(p+1)+i*2] * R[j*(p+1)+i];
-            y += eCP[j*(p+1)+i*2+1] * R[j*(p+1)+i];
+            x += eCP[(j*(p+1)+i)*2] * R[j*(p+1)+i];
+            y += eCP[(j*(p+1)+i)*2+1] * R[j*(p+1)+i];
 
-            dx_dxi += eCP[j*(p+1)+i*2] * dN_dxi[j*(p+1)+i];
-            dx_deta += eCP[j*(p+1)+i*2] * dN_deta[j*(p+1)+i];
-            dy_dxi += eCP[j*(p+1)+i*2+1] * dN_dxi[j*(p+1)+i];
-            dy_deta += eCP[j*(p+1)+i*2+1] * dN_deta[j*(p+1)+i];
+            dx_dxi += eCP[(j*(p+1)+i)*2] * dN_dxi[j*(p+1)+i];
+            dx_deta += eCP[(j*(p+1)+i)*2] * dN_deta[j*(p+1)+i];
+            dy_dxi += eCP[(j*(p+1)+i)*2+1] * dN_dxi[j*(p+1)+i];
+            dy_deta += eCP[(j*(p+1)+i)*2+1] * dN_deta[j*(p+1)+i];
         }
     }
 

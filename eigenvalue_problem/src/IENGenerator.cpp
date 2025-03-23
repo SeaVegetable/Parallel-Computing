@@ -57,8 +57,8 @@ std::vector<int> IENGenerator::GenerateIEN2D(
         {
             IEN.push_back(j * nFuncX + i);
             IEN.push_back(j * nFuncX + i + 1);
-            IEN.push_back((j + 1) * nFuncX + i + 1);
             IEN.push_back((j + 1) * nFuncX + i);
+            IEN.push_back((j + 1) * nFuncX + i + 1);
         }
     }
 

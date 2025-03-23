@@ -157,10 +157,6 @@ void GlobalAssembly::AssemStiffnessLoad(LocalAssembly * const &locassem,
 {
     PetscInt * eID = new PetscInt[nLocBas];
     std::vector<double> eCP(2*nLocBas, 0.0);
-    const int pp = elem->GetNumLocalBasis1D(0);
-    const int qq = elem->GetNumLocalBasis1D(1);
-    std::vector<double> eNURBSExtraction1(pp*pp, 0.0);
-    std::vector<double> eNURBSExtraction2(qq*qq, 0.0);
 
     for (int jj = 0; jj < nlocalelemy; ++jj)
     {
