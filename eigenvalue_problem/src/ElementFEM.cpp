@@ -72,8 +72,6 @@ void ElementFEM::GenerateElementSingleQP(const double &xi, const double &eta,
             dR_dy.push_back(deta_dx*dN_dxi[j*(p+1)+i] + deta_dy*dN_deta[j*(p+1)+i]);
         }
     }
-
-    jacobian *= hx * hy;
 }
 
 std::vector<double> ElementFEM::GenerateBasis1DSingleQP(const double &xi, const int &pp) const

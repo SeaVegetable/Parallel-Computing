@@ -58,11 +58,14 @@ int main(int argc, char *argv[])
     IENGenerator * ien = new IENGenerator();
     std::vector<int> IEN = ien->GenerateIEN2D(nElemX, nElemY);
 
+    std::cout << "nElemX: " << nElemX << std::endl;
+    std::cout << "nElemY: " << nElemY << std::endl;
+
     IDGenerator * idgen = new IDGenerator();
     std::vector<int> ID = idgen->GenerateID2D(nFuncX, nFuncY);
 
     Partition * part = new Partition(part_num_1d, part_num_1d, dim, base_name_fem);
-    part->GeneratePartition(p, q, hx, hy, CP, ID, IEN);
+    part->GeneratePartition(nElemX, nElemY, CP, IEN, ID);
 
     delete fm; fm = nullptr;
     delete ien; ien = nullptr;

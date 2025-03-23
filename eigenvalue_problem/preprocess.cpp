@@ -13,8 +13,8 @@ int main(int argc, char *argv[])
     double Lx = 1.0;
     double Ly = 1.0;
 
-    int nElemX =7;
-    int nElemY =7;
+    int nElemX =8;
+    int nElemY =8;
 
     int part_num_1d = 3;
     int dim = 2;

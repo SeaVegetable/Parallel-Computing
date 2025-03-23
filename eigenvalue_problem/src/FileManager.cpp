@@ -62,8 +62,6 @@ void FileManager::WritePartition(const std::string &filename,
     const int &nlocalfunc,
     const int &nlocalelemx,
     const int &nlocalelemy,
-    const std::vector<double> &elem_size1,
-    const std::vector<double> &elem_size2,
     const std::vector<double> &CP,
     const std::vector<int> &ID,
     const std::vector<int> &IEN) const
@@ -90,14 +88,6 @@ void FileManager::WritePartition(const std::string &filename,
     file << std::endl;
 
     file << std::setprecision(16);
-
-    file << "ElemSize1" << std::endl;
-    for (int ii = 0; ii < elem_size1.size(); ++ii) file << elem_size1[ii] << " ";
-    file << std::endl;
-
-    file << "ElemSize2" << std::endl;
-    for (int ii = 0; ii < elem_size2.size(); ++ii) file << elem_size2[ii] << " ";
-    file << std::endl;
 
     file << "CP" << std::endl;
     for (int ii = 0; ii < CP.size(); ++ii) file << CP[ii] << " ";
@@ -248,8 +238,6 @@ void FileManager::ReadPartition(const std::string &filename,
     int &nlocalfunc,
     int &nlocalelemx,
     int &nlocalelemy,
-    std::vector<double> &elem_size1,
-    std::vector<double> &elem_size2,
     std::vector<double> &CP,
     std::vector<int> &ID,
     std::vector<int> &IEN) const
@@ -279,35 +267,7 @@ void FileManager::ReadPartition(const std::string &filename,
     }
     while (std::getline(file, line))
     {
-        if (line == "ElemSize1")
-        {
-            std::string elem_size_str;
-            std::getline(file, elem_size_str);
-            std::istringstream elem_size_ss(elem_size_str);
-            elem_size1.clear();
-            double d;
-            while (elem_size_ss >> d)
-            {
-                elem_size1.push_back(d);
-                if (elem_size_ss.peek() == ' ')
-                    elem_size_ss.ignore();
-            }
-        }
-        else if (line == "ElemSize2")
-        {
-            std::string elem_size_str;
-            std::getline(file, elem_size_str);
-            std::istringstream elem_size_ss(elem_size_str);
-            elem_size2.clear();
-            double d;
-            while (elem_size_ss >> d)
-            {
-                elem_size2.push_back(d);
-                if (elem_size_ss.peek() == ' ')
-                    elem_size_ss.ignore();
-            }
-        }
-        else if (line == "CP")
+        if (line == "CP")
         {
             std::string CP_str;
             std::getline(file, CP_str);

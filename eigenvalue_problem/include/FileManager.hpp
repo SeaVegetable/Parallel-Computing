@@ -26,8 +26,6 @@ public:
         const int &nlocalfunc,
         const int &nlocalelemx,
         const int &nlocalelemy,
-        const std::vector<double> &elem_size1,
-        const std::vector<double> &elem_size2,
         const std::vector<double> &CP,
         const std::vector<int> &ID,
         const std::vector<int> &IEN) const;
@@ -48,8 +46,6 @@ public:
         int &nlocalfunc,
         int &nlocalelemx,
         int &nlocalelemy,
-        std::vector<double> &elem_size1,
-        std::vector<double> &elem_size2,
         std::vector<double> &CP,
         std::vector<int> &ID,
         std::vector<int> &IEN) const;

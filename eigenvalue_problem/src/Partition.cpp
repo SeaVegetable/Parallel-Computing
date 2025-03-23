@@ -66,14 +66,38 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
         elem_start_idx_x[i] = elem_start_idx_x[i - 1] + num_local_funcs_x[i - 1] - p;
         elem_end_idx_x[i - 1] = elem_start_idx_x[i] - 1 + p;
     }
+    elem_start_idx_x[part_num_x - 1] += p;
     elem_end_idx_x[part_num_x - 1] = nElemX - 1;
+    for (int i = 1; i < part_num_x; ++i)
+    {
+        if (nElemX - 1 - elem_end_idx_x[i] < p)
+        {
+            elem_end_idx_x[i] = nElemX - 1;
+        }
+        else
+        {
+            elem_end_idx_x[i] += p;
+        }
+    }
     
     for (int i = 1; i < part_num_y; ++i)
     {
         elem_start_idx_y[i] = elem_start_idx_y[i - 1] + num_local_funcs_y[i - 1] - q;
         elem_end_idx_y[i - 1] = elem_start_idx_y[i] - 1 + q;
     }
+    elem_start_idx_y[part_num_y - 1] += q;
     elem_end_idx_y[part_num_y - 1] = nElemY - 1;
+    for (int i = 1; i < part_num_y; ++i)
+    {
+        if (nElemY - 1 - elem_end_idx_y[i] < q)
+        {
+            elem_end_idx_y[i] = nElemY - 1;
+        }
+        else
+        {
+            elem_end_idx_y[i] += q;
+        }
+    }
 
     int count = 0;
     for (int j = 0; j < part_num_y; ++j)
@@ -177,16 +201,14 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
     }
 }
 
-void Partition::GeneratePartition(const int &p, const int &q, const double &hx, const double &hy,
+void Partition::GeneratePartition(const int &nElemX, const int &nElemY,
     const std::vector<double> &CP, const std::vector<int> &IEN, const std::vector<int> &ID)
 {
     FileManager * fm = new FileManager();
 
-    const int m = static_cast<int>(CP.size()) / 2;
-    const int n = static_cast<int>(CP.size()) / 2;
-    const int nElemX = m / p;
-    const int nElemY = n / q;
-    const int nLocBas = (p + 1) * (q + 1);
+    const int m = nElemX + 1;
+    const int n = nElemY + 1;
+    const int nLocBas = 4;
 
     const int part_size_x = (m % part_num_x == 0) ? m / part_num_x : m / part_num_x + 1;
     const int part_size_y = (n % part_num_y == 0) ? n / part_num_y : n / part_num_y + 1;
@@ -231,17 +253,41 @@ void Partition::GeneratePartition(const int &p, const int &q, const double &hx, 
 
     for (int i = 1; i < part_num_x; ++i)
     {
-        elem_start_idx_x[i] = elem_start_idx_x[i - 1] + num_local_funcs_x[i - 1] - p;
-        elem_end_idx_x[i - 1] = elem_start_idx_x[i] - 1 + p;
+        elem_start_idx_x[i] = elem_start_idx_x[i - 1] + num_local_funcs_x[i - 1] - 1;
+        elem_end_idx_x[i - 1] = elem_start_idx_x[i];
     }
+    elem_start_idx_x[part_num_x - 1] += 1;
     elem_end_idx_x[part_num_x - 1] = nElemX - 1;
+    for (int i = 1; i < part_num_x; ++i)
+    {
+        if (nElemX - 1 - elem_end_idx_x[i] < 1)
+        {
+            elem_end_idx_x[i] = nElemX - 1;
+        }
+        else
+        {
+            elem_end_idx_x[i] += 1;
+        }
+    }
     
     for (int i = 1; i < part_num_y; ++i)
     {
-        elem_start_idx_y[i] = elem_start_idx_y[i - 1] + num_local_funcs_y[i - 1] - q;
-        elem_end_idx_y[i - 1] = elem_start_idx_y[i] - 1 + q;
+        elem_start_idx_y[i] = elem_start_idx_y[i - 1] + num_local_funcs_y[i - 1] - 1;
+        elem_end_idx_y[i - 1] = elem_start_idx_y[i];
     }
+    elem_start_idx_y[part_num_y - 1] += 1;
     elem_end_idx_y[part_num_y - 1] = nElemY - 1;
+    for (int i = 1; i < part_num_y; ++i)
+    {
+        if (nElemY - 1 - elem_end_idx_y[i] < 1)
+        {
+            elem_end_idx_y[i] = nElemY - 1;
+        }
+        else
+        {
+            elem_end_idx_y[i] += 1;
+        }
+    }
 
     int count = 0;
     for (int j = 0; j < part_num_y; ++j)
@@ -249,9 +295,6 @@ void Partition::GeneratePartition(const int &p, const int &q, const double &hx, 
         for (int i = 0; i < part_num_x; ++i)
         {
             std::cout << "Generating partition " << count << "..." << std::endl;
-
-            std::vector<double> elem_size1(elem_end_idx_x[i] - elem_start_idx_x[i] + 1, hx);
-            std::vector<double> elem_size2(elem_end_idx_y[j] - elem_start_idx_y[j] + 1, hy);
 
             std::vector<int> local_to_global_total{};
             for (int localj = elem_start_idx_y[j]; localj <= elem_end_idx_y[j]; ++localj)
@@ -293,7 +336,7 @@ void Partition::GeneratePartition(const int &p, const int &q, const double &hx, 
                     localID.push_back(newID[local_to_global_total[ii]]);
                 else
                     localID.push_back(-1);
-            }            
+            }
 
             std::vector<int> localIEN{};
             for (int localj = elem_start_idx_y[j]; localj <= elem_end_idx_y[j]; ++localj)
@@ -315,9 +358,7 @@ void Partition::GeneratePartition(const int &p, const int &q, const double &hx, 
 
             std::string filename = fm->GetPartitionFilename(base_name, count);
             fm->WritePartition(filename, nlocalfunc,
-                nlocalelemx, nlocalelemy,
-                elem_size1, elem_size2, localCP, localID,
-                localIEN);
+                nlocalelemx, nlocalelemy, localCP, localID, localIEN);
 
             std::cout << "Partition " << count << " generated." << std::endl;
             ++count;
