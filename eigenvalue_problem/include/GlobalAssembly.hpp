@@ -31,6 +31,16 @@ class GlobalAssembly
             const std::vector<double> &elem_size1,
             const std::vector<double> &elem_size2,
             Element * const &elem);
+        
+        void AssemStiffnessLoad(LocalAssembly * const &locassem,
+            const std::vector<int> &IEN,
+            const std::vector<int> &ID,
+            const std::vector<double> &CP,
+            const std::vector<double> &NURBSExtraction1,
+            const std::vector<double> &NURBSExtraction2,
+            const std::vector<double> &elem_size1,
+            const std::vector<double> &elem_size2,
+            ElementFEM * const &elem);
     
     private:
         const int nLocBas;

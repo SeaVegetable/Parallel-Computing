@@ -3,6 +3,7 @@
 
 #include <petscmat.h>
 #include "Element.hpp"
+#include "ElementFEM.hpp"
 #include "QuadraturePoint.hpp"
 
 class LocalAssembly
@@ -29,6 +30,9 @@ class LocalAssembly
         }
 
         void AssemLocalStiffnessLoad(const Element * const &elem,
+            const std::vector<double> &eCP);
+        
+        void AssemLocalStiffnessLoad(const ElementFEM * const &elem,
             const std::vector<double> &eCP);
 
         void AssemNonZero()
