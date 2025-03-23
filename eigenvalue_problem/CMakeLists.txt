@@ -31,7 +31,9 @@ set(SOURCES ${SOURCE_DIR}/BSplineBasis.cpp
             ${SOURCE_DIR}/RefElement.cpp
             ${SOURCE_DIR}/QuadraturePoint.cpp
             ${SOURCE_DIR}/LocalAssembly.cpp
-            ${SOURCE_DIR}/GlobalAssembly.cpp)
+            ${SOURCE_DIR}/GlobalAssembly.cpp
+            ${SOURCE_DIR}/AbscissaeGenerator.cpp
+            ${SOURCE_DIR}/ElementFEM.cpp)
 
 # Find PETSc
 set(PETSC_DIR $ENV{HOME}/lib/petsc-3.18.6-opt)
@@ -48,6 +50,9 @@ add_library(eigenvalue_problem_lib ${SOURCES})
 
 add_executable(preprocess preprocess.cpp)
 target_link_libraries(preprocess eigenvalue_problem_lib)
+
+add_executable(preprocess_fem preprocess_fem.cpp)
+target_link_libraries(preprocess_fem eigenvalue_problem_lib)
 
 add_executable(solve driver.cpp)
 target_link_libraries(solve eigenvalue_problem_lib ${PETSC_LIB})

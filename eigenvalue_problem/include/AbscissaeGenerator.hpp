@@ -1,6 +1,8 @@
 #ifndef ABSCISSAE_GENERATOR_HPP
 #define ABSCISSAE_GENERATOR_HPP
 
+#include <vector>
+
 class AbscissaeGenerator
 {
     public:

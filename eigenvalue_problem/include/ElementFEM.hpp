@@ -1,6 +1,9 @@
 #ifndef ELEMENTFEM_HPP
 #define ELEMENTFEM_HPP
 
+#include <vector>
+#include <iostream>
+
 class ElementFEM
 {
     public:
@@ -33,9 +36,9 @@ class ElementFEM
         double hx;
         double hy;
 
-        std::vector<double> GenerateBasis1DSingleQP(const double &xi, const int &pp);
+        std::vector<double> GenerateBasis1DSingleQP(const double &xi, const int &pp) const;
 
-        std::vector<double> GenerateBasisDerivative1DSingleQP(const double &xi, const int &pp);
-}
+        std::vector<double> GenerateBasisDerivative1DSingleQP(const double &xi, const int &pp) const;
+};
 
 #endif

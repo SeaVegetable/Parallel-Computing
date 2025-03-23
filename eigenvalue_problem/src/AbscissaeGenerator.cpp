@@ -1,18 +1,9 @@
 #include "AbscissaeGenerator.hpp"
 
-std::doubel<double> AbscissaeGenerator::GenerateAbscissae1D(
+std::vector<double> AbscissaeGenerator::GenerateAbscissae1D(
     const std::vector<double> &S, const int &p, const int &idx)
 {
-    std::vector<double> abscissae;
-    if (idx == 0)
-    {
-        abscissae = GrevilleAbscissae(S, p);
-    }
-    else if (idx == 1)
-    {
-        abscissae = DemkoAbscissae(S, p);
-    }
-    return abscissae;
+    return GrevilleAbscissae(S, p);
 }
 
 std::vector<double> AbscissaeGenerator::GenerateAbscissae2D(
@@ -30,6 +21,7 @@ std::vector<double> AbscissaeGenerator::GenerateAbscissae2D(
             abscissae.push_back(t);
         }
     }
+    return abscissae;
 }
 
 std::vector<double> AbscissaeGenerator::GrevilleAbscissae(
@@ -45,6 +37,7 @@ std::vector<double> AbscissaeGenerator::GrevilleAbscissae(
         }
         abscissae[ii] /= p;
     }
+    return abscissae;
 }
 
 // std::vector<double> AbscissaeGenerator::DemkoAbscissae(

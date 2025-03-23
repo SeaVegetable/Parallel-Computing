@@ -153,8 +153,6 @@ void GlobalAssembly::AssemStiffnessLoad(LocalAssembly * const &locassem,
     const std::vector<int> &IEN,
     const std::vector<int> &ID,
     const std::vector<double> &CP,
-    const std::vector<double> &NURBSExtraction1,
-    const std::vector<double> &NURBSExtraction2,
     const std::vector<double> &elem_size1,
     const std::vector<double> &elem_size2,
     ElementFEM * const &elem)
@@ -177,15 +175,8 @@ void GlobalAssembly::AssemStiffnessLoad(LocalAssembly * const &locassem,
                 eCP[2*j] = CP[2*IEN[elemIndex*nLocBas+j]];
                 eCP[2*j+1] = CP[2*IEN[elemIndex*nLocBas+j]+1];
             }
-
-            std::copy(NURBSExtraction1.begin() + ii * pp * pp, 
-                NURBSExtraction1.begin() + (ii + 1) * pp * pp, 
-                eNURBSExtraction1.begin());
-            std::copy(NURBSExtraction2.begin() + jj * qq * qq,
-                NURBSExtraction2.begin() + (jj + 1) * qq * qq,
-                eNURBSExtraction2.begin());
         
-            elem->SetElement(eNURBSExtraction1, eNURBSExtraction2, elem_size1[ii], elem_size2[jj]);
+            elem->SetElement(elem_size1[ii], elem_size2[jj]);
 
             locassem->AssemLocalStiffnessLoad(elem, eCP);
 

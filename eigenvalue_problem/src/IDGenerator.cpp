@@ -1,5 +1,14 @@
 #include "IDGenerator.hpp"
 
+std::vector<int> IDGenerator::GenerateID1D(const int &nFuncX)
+{
+    std::vector<int> ID(nFuncX, -1);
+
+    for (int i = 1; i < nFuncX-1; ++i) ID[i] = i - 1;  
+
+    return ID;
+}
+
 std::vector<int> IDGenerator::GenerateID1D(const BSplineBasis * const &basis)
 {
     const int p = basis->GetDegree();
@@ -9,6 +18,23 @@ std::vector<int> IDGenerator::GenerateID1D(const BSplineBasis * const &basis)
     std::vector<int> ID(nFunc, -1);
 
     for (int i = 1; i < nFunc-1; ++i) ID[i] = i - 1;  
+
+    return ID;
+}
+
+std::vector<int> IDGenerator::GenerateID2D(const int &nFuncX, const int &nFuncY)
+{
+    std::vector<int> ID(nFuncX*nFuncY, -1);
+
+    int A = 0;
+    for (int j = 1; j < nFuncY-1; ++j)
+    {
+        for (int i = 1; i < nFuncX-1; ++i)
+        {
+            ID[j*nFuncX+i] = A;
+            A++;
+        }
+    }
 
     return ID;
 }

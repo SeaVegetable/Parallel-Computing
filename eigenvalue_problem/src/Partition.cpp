@@ -182,6 +182,12 @@ void Partition::GeneratePartition(const int &p, const int &q, const double &hx, 
 {
     FileManager * fm = new FileManager();
 
+    const int m = static_cast<int>(CP.size()) / 2;
+    const int n = static_cast<int>(CP.size()) / 2;
+    const int nElemX = m / p;
+    const int nElemY = n / q;
+    const int nLocBas = (p + 1) * (q + 1);
+
     const int part_size_x = (m % part_num_x == 0) ? m / part_num_x : m / part_num_x + 1;
     const int part_size_y = (n % part_num_y == 0) ? n / part_num_y : n / part_num_y + 1;
     
@@ -301,26 +307,6 @@ void Partition::GeneratePartition(const int &p, const int &q, const double &hx, 
                             std::find(local_to_global_total.begin(), local_to_global_total.end(), IEN[index * nLocBas + ii])));
                     }
                 }
-            }
-
-            std::vector<double> localNURBSExtraction1{};
-            for (int ii = elem_start_idx_x[i]; ii <= elem_end_idx_x[i]; ++ii)
-            {
-                size_t start = ii * extSizeX;
-                size_t end = (ii + 1) * extSizeX;
-                    
-                std::copy(NURBSExtraction1.begin() + start, NURBSExtraction1.begin() + end,
-                    std::back_inserter(localNURBSExtraction1));
-            }
-
-            std::vector<double> localNURBSExtraction2{};
-            for (int jj = elem_start_idx_y[j]; jj <= elem_end_idx_y[j]; ++jj)
-            {
-                size_t start = jj * extSizeY;
-                size_t end = (jj + 1) * extSizeY;
-                    
-                std::copy(NURBSExtraction2.begin() + start, NURBSExtraction2.begin() + end,
-                    std::back_inserter(localNURBSExtraction2));
             }
 
             const int nlocalfunc = std::count_if(localID.begin(), localID.end(), [](int id) { return id != -1; });

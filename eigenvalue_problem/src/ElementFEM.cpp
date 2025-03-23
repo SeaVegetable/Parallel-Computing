@@ -76,9 +76,9 @@ void ElementFEM::GenerateElementSingleQP(const double &xi, const double &eta,
     jacobian *= hx * hy;
 }
 
-std::vector<double> ElementFEM::GenerateBasis1DSingleQP(const double &xi, const int &pp)
+std::vector<double> ElementFEM::GenerateBasis1DSingleQP(const double &xi, const int &pp) const
 {
-    switch pp
+    switch (pp)
     {
         case 1:
             return {1.0-xi, xi};
@@ -92,14 +92,14 @@ std::vector<double> ElementFEM::GenerateBasis1DSingleQP(const double &xi, const 
                     -27*xi*xi*xi + 36*xi*xi - 9*xi,
                     9*xi*xi*xi - 9*xi*xi + xi};
         default:
-            cerr << "Invalid polynomial degree" << endl;
+            std::cerr << "Invalid polynomial degree" << std::endl;
             exit(1);
     }
 }
 
-std::vector<double> ElementFEM::GenerateBasisDerivative1DSingleQP(const double &xi, const int &pp)
+std::vector<double> ElementFEM::GenerateBasisDerivative1DSingleQP(const double &xi, const int &pp) const
 {
-    switch pp
+    switch (pp)
     {
         case 1:
             return {-1.0, 1.0};
@@ -113,7 +113,7 @@ std::vector<double> ElementFEM::GenerateBasisDerivative1DSingleQP(const double &
                     -81*xi*xi + 72*xi - 9,
                     27*xi*xi - 18*xi + 1};
         default:
-            cerr << "Invalid polynomial degree" << endl;
+            std::cerr << "Invalid polynomial degree" << std::endl;
             exit(1);
     }
 }
