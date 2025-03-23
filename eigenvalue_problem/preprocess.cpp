@@ -7,8 +7,8 @@
 
 int main(int argc, char *argv[])
 {
-    int p = 2;
-    int q = 2;
+    int p = 3;
+    int q = 3;
 
     double Lx = 1.0;
     double Ly = 1.0;

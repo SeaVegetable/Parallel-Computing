@@ -31,7 +31,7 @@ std::vector<double> AbscissaeGenerator::GrevilleAbscissae(
     std::vector<double> abscissae(n, 0.0);
     for (int ii = 0; ii < n; ++ii)
     {
-        for (int jj = 0; jj < p; ++jj)
+        for (int jj = 1; jj <= p; ++jj)
         {
             abscissae[ii] += S[ii + jj];
         }
