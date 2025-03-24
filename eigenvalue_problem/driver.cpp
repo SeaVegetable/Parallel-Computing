@@ -54,17 +54,57 @@ int main(int argc, char *argv[])
     LocalAssembly * locassem = new LocalAssembly(p, q);
     GlobalAssembly * globalassem = new GlobalAssembly(IEN, ID, locassem,
         nLocBas, nlocalfunc, nlocalelemx, nlocalelemy);
-   
+    
+    MatSetOption(globalassem->K, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_TRUE);
+
     globalassem->AssemStiffnessLoad(locassem, IEN, ID, CP,
         NURBSExtraction1, NURBSExtraction2,
         elem_size1, elem_size2, elem);
+
+    MPI_Barrier(PETSC_COMM_WORLD);
+
+    std::vector<double> CP_fem;
+    std::vector<int> ID_fem;
+    std::vector<int> IEN_fem;
+    int nlocalfunc_fem;
+    int nlocalelemx_fem;
+    int nlocalelemy_fem;
+
+    std::string base_name_fem = "part_fem";
+    std::string filename_fem = fm->GetPartitionFilename(base_name_fem, rank);
+    fm->ReadPartition(filename_fem, nlocalfunc_fem,
+        nlocalelemx_fem, nlocalelemy_fem,
+        CP_fem, ID_fem, IEN_fem);
+
+    ElementFEM * elem_fem = new ElementFEM(1, 1);
+    LocalAssembly * locassem_fem = new LocalAssembly(1, 1);
+    GlobalAssembly * globalassem_fem = new GlobalAssembly(IEN_fem, ID_fem, locassem_fem,
+        4, nlocalfunc_fem, nlocalelemx_fem, nlocalelemy_fem);
     
-    MatView(globalassem->K, PETSC_VIEWER_STDOUT_WORLD);
+    globalassem_fem->AssemStiffnessLoad(locassem_fem, IEN_fem, ID_fem, CP_fem, elem_fem);
 
-    VecView(globalassem->F, PETSC_VIEWER_STDOUT_WORLD);
+    MPI_Barrier(PETSC_COMM_WORLD);
 
+    Vec x;
+    VecDuplicate(globalassem_fem->F, &x);
+
+    KSP ksp;
+    KSPCreate(PETSC_COMM_WORLD, &ksp);
+    KSPSetOperators(ksp, globalassem->K, globalassem->K);
+    KSPSetFromOptions(ksp);
+    KSPSetTolerances(ksp, 1e-8, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT);
+    KSPSolve(ksp, globalassem->F, x);
+
+    // Clean up
+    VecDestroy(&x);
+    KSPDestroy(&ksp);
+    
     delete fm; fm = nullptr;
     delete elem; elem = nullptr;
     delete locassem; locassem = nullptr;
+    delete globalassem; globalassem = nullptr;
+    delete elem_fem; elem_fem = nullptr;
+    delete locassem_fem; locassem_fem = nullptr;
+    delete globalassem_fem; globalassem_fem = nullptr;
     return 0;
 }

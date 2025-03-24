@@ -16,6 +16,7 @@ GlobalAssembly::GlobalAssembly(const std::vector<int> &IEN, const std::vector<in
     VecSet(F, 0.0);
     VecSetOption(F, VEC_IGNORE_NEGATIVE_INDICES, PETSC_TRUE);
 
+    MatSetOption(K, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
     AssemNonZeroEstimate(locassem, IEN, ID);
 
     std::vector<int> Dnz, Onz;

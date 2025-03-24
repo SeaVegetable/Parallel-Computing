@@ -58,9 +58,6 @@ int main(int argc, char *argv[])
     IENGenerator * ien = new IENGenerator();
     std::vector<int> IEN = ien->GenerateIEN2D(nElemX, nElemY);
 
-    std::cout << "nElemX: " << nElemX << std::endl;
-    std::cout << "nElemY: " << nElemY << std::endl;
-
     IDGenerator * idgen = new IDGenerator();
     std::vector<int> ID = idgen->GenerateID2D(nFuncX, nFuncY);
 
