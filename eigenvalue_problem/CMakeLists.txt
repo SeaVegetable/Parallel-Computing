@@ -5,6 +5,8 @@ project(EigenvalueProblem)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+
 # Add your source files here
 set(EIGEN3_INCLUDE_DIR "$ENV{HOME}/lib/eigen-3.4.0")
 set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
