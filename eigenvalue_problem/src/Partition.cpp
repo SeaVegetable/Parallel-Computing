@@ -70,11 +70,13 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
     }
     elem_end_idx_y[part_num_y - 1] = nElemY - 1;
 
-    int count = 0;
-    for (int j = 0; j < part_num_y; ++j)
+    int i,j;
+    #pragma omp parallel for collapse(2) private(i, j)
+    for (j = 0; j < part_num_y; ++j)
     {
-        for (int i = 0; i < part_num_x; ++i)
+        for (i = 0; i < part_num_x; ++i)
         {
+            int count = j * part_num_y + i;
             std::cout << "Generating partition " << count << "..." << std::endl;
 
             std::vector<double> elem_size1(elem_end_idx_x[i] - elem_start_idx_x[i] + 1, hx);
@@ -169,7 +171,6 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
                 localIEN, localNURBSExtraction1, localNURBSExtraction2);
 
             std::cout << "Partition " << count << " generated." << std::endl;
-            ++count;
         }
     }
 }
@@ -233,11 +234,13 @@ void Partition::GeneratePartition(const int &nElemX, const int &nElemY,
     }
     elem_end_idx_y[part_num_y - 1] = nElemY - 1;
 
-    int count = 0;
-    for (int j = 0; j < part_num_y; ++j)
+    int i,j;
+    #pragma omp parallel for collapse(2) private(i, j)
+    for (j = 0; j < part_num_y; ++j)
     {
-        for (int i = 0; i < part_num_x; ++i)
+        for (i = 0; i < part_num_x; ++i)
         {
+            int count = j * part_num_x + i;
             std::cout << "Generating partition " << count << "..." << std::endl;
 
             std::vector<int> local_to_global_total{};
@@ -307,7 +310,6 @@ void Partition::GeneratePartition(const int &nElemX, const int &nElemY,
                 nlocalelemx, nlocalelemy, localCP, localID, localIEN);
 
             std::cout << "Partition " << count << " generated." << std::endl;
-            ++count;
         }
     }
 }

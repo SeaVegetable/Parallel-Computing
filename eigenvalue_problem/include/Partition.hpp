@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <iterator>
 #include "BSplineBasis.hpp"
+#include "omp.h"
 
 class Partition
 {
