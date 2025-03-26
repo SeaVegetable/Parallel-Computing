@@ -51,11 +51,19 @@ set(PETSC_DIR $ENV{HOME}/lib/petsc-3.18.6-opt)
 set(PETSC_ARCH .)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/module")
 find_package(PETSc REQUIRED)
+message(STATUS "PETSC_INC: ${PETSC_INC}")
+message(STATUS "PETSC_LIB: ${PETSC_LIB}")
+
+set(SLEPC_DIR $ENV{HOME}/lib/slepc-3.18.3-opt)
+find_package(SLEPc REQUIRED)
 
 set(CMAKE_C_COMPILER  /opt/homebrew/opt/mpich/bin/mpicc)
 set(CMAKE_CXX_COMPILER /opt/homebrew/opt/mpich/bin/mpicxx)
 
 include_directories(${PETSC_INC})
+include_directories(${SLEPC_INC})
+message(STATUS "SLEPC_INC: ${SLEPC_INC}")
+message(STATUS "SLEPC_LIB: ${SLEPC_LIB}")
 
 add_library(eigenvalue_problem_lib ${SOURCES})
 
@@ -66,7 +74,7 @@ add_executable(preprocess_fem preprocess_fem.cpp)
 target_link_libraries(preprocess_fem eigenvalue_problem_lib)
 
 add_executable(solve driver.cpp)
-target_link_libraries(solve eigenvalue_problem_lib ${PETSC_LIB})
+target_link_libraries(solve eigenvalue_problem_lib ${PETSC_LIB} ${SLEPC_LIB})
 
 if(OPENMP_CXX_FOUND)
   set_target_properties( eigenvalue_problem_lib PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )

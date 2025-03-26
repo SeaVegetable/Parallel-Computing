@@ -1,4 +1,5 @@
 #include <petscksp.h>
+#include <slepcsvd.h>
 #include "FileManager.hpp"
 #include "GlobalAssembly.hpp"
 
@@ -132,6 +133,23 @@ double GetMinimumEigenvalue(Mat &K, Vec &u0, const double &tol)
     return lambda_new;
 }
 
+typedef struct
+{
+    Mat K;
+    KSP ksp;
+} UserCtx;
+
+void MyMatMult(Mat K, Vec x, Vec y)
+{
+    UserCtx *ctx;
+    Vec t;
+
+    MatShellGetContext(K, &ctx);
+    MatMult(ctx->K, x, t);
+    KSPSolve(ctx->ksp, t, y);
+    VecDestroy(&t);
+}
+
 int main(int argc, char *argv[])
 {
     int p, q, nElemX, nElemY, part_num_1d, dim;
@@ -217,34 +235,53 @@ int main(int argc, char *argv[])
 
     MPI_Barrier(PETSC_COMM_WORLD);
 
-    Vec x;
-    VecDuplicate(globalassem->F, &x);
-    VecSet(x, 1.0);
+    // Compute the condition number
+    KSP ksp;
+    KSPCreate(PETSC_COMM_WORLD, &ksp);
+    KSPSetOperators(ksp, globalassem_fem->K, globalassem_fem->K);
+    KSPSetFromOptions(ksp);
 
-    const double tol = 1.0e-8;
+    UserCtx ctx;
+    Mat M;
+    PetscInt mm, nn;
+    MatGetSize(globalassem->K, &mm, &nn);
+    MatCreateShell(PETSC_COMM_WORLD, mm, nn, mm, nn, &ctx, &M);
+    MatShellSetOperation(M, MATOP_MULT, (void(*)(void))MyMatMult);
 
-    const double max_eigen = sqrt(
-        GetMaximumEigenvalue(globalassem->K, globalassem_fem->K, x, tol));
-    const double min_eigen = 1.0/sqrt(
-        GetMaximumEigenvalue(globalassem_fem->K, globalassem->K, x, tol));
-    
-    const double cond = max_eigen / min_eigen;
+    ctx.ksp = ksp;
+    ctx.K = globalassem->K;
 
-    const double max_eigen_iga = sqrt(
-        GetMaximumEigenvalue(globalassem->K, x, tol));
-    const double min_eigen_iga = 1.0/sqrt(
-        GetMinimumEigenvalue(globalassem->K, x, tol));
-    
-    const double cond_iga = max_eigen_iga / min_eigen_iga;
+    SVD svd;
+    SVDCreate(PETSC_COMM_WORLD, &svd);
+    SVDSetOperators(svd, M, NULL);
+    SVDSetProblemType(svd, SVD_STANDARD);
 
-    if (rank == 0)
-    {
-        std::cout << std::setprecision(15);
-        std::cout << "cond_iga: " << cond_iga << std::endl;
-        std::cout << "cond: " << cond << std::endl;
-    }
+    SVDSetDimensions(svd, 2, PETSC_DEFAULT, PETSC_DEFAULT);
+    SVDSetWhichSingularTriplets(svd, SVD_LARGEST);
 
-    VecDestroy(&x);
+    PetscInt nconv;
+    SVDSolve(svd);
+    SVDGetConverged(svd, &nconv);
+
+    PetscReal smax;
+    if (nconv > 0)
+        SVDGetSingularTriplet(svd, 0, &smax, NULL, NULL);
+    else
+        PetscPrintf(PETSC_COMM_WORLD, "Maximum singular value: Diverge\n");
+
+    SVDSetWhichSingularTriplets(svd, SVD_SMALLEST);
+    SVDSolve(svd);
+    SVDGetConverged(svd, &nconv);
+
+    PetscReal smin;
+    if (nconv > 0)
+        SVDGetSingularTriplet(svd, 0, &smin, NULL, NULL);
+    else
+        PetscPrintf(PETSC_COMM_WORLD, "Maximum singular value: Diverge\n");
+
+    PetscPrintf(PETSC_COMM_WORLD, "Maximum singular value: %g\n", smax);
+    PetscPrintf(PETSC_COMM_WORLD, "Minimum singular value: %g\n", smin);
+    PetscPrintf(PETSC_COMM_WORLD, "Condition number: %g\n", smax/smin);
     
     delete fm; fm = nullptr;
     delete elem; elem = nullptr;
@@ -253,5 +290,7 @@ int main(int argc, char *argv[])
     delete elem_fem; elem_fem = nullptr;
     delete locassem_fem; locassem_fem = nullptr;
     delete globalassem_fem; globalassem_fem = nullptr;
+    
+    PetscFinalize();
     return 0;
 }
