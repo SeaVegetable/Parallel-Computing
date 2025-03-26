@@ -58,14 +58,14 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
 
     for (int i = 1; i < part_num_x; ++i)
     {
-        elem_start_idx_x[i] = node_start_idx_x[i] - p;
+        elem_start_idx_x[i] = node_start_idx_x[i] - p/2;
         elem_end_idx_x[i - 1] = elem_start_idx_x[i] - 1;
     }
     elem_end_idx_x[part_num_x - 1] = nElemX - 1;
     
     for (int i = 1; i < part_num_y; ++i)
     {
-        elem_start_idx_y[i] = node_start_idx_y[i] - q;
+        elem_start_idx_y[i] = node_start_idx_y[i] - q/2;
         elem_end_idx_y[i - 1] = elem_start_idx_y[i] - 1;
     }
     elem_end_idx_y[part_num_y - 1] = nElemY - 1;
@@ -221,14 +221,14 @@ void Partition::GeneratePartition(const int &nElemX, const int &nElemY,
 
     for (int i = 1; i < part_num_x; ++i)
     {
-        elem_start_idx_x[i] = node_start_idx_x[i] - 1;
+        elem_start_idx_x[i] = node_start_idx_x[i];
         elem_end_idx_x[i - 1] = elem_start_idx_x[i] - 1;
     }
     elem_end_idx_x[part_num_x - 1] = nElemX - 1;
     
     for (int i = 1; i < part_num_y; ++i)
     {
-        elem_start_idx_y[i] = node_start_idx_y[i] - 1;
+        elem_start_idx_y[i] = node_start_idx_y[i];
         elem_end_idx_y[i - 1] = elem_start_idx_y[i] - 1;
     }
     elem_end_idx_y[part_num_y - 1] = nElemY - 1;

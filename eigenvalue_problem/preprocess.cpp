@@ -7,33 +7,24 @@
 
 int main(int argc, char *argv[])
 {
-    int p = 3;
-    int q = 3;
-
-    double Lx = 1.0;
-    double Ly = 1.0;
-
-    int nElemX =8;
-    int nElemY =8;
-
-    int part_num_1d = 3;
-    int dim = 2;
-    std::string base_name = "part";
+    int p, q, nElemX, nElemY, part_num_1d, dim;
+    double Lx, Ly;
+    std::string base_name;
 
     std::string file_info = "info.txt";
+
+    FileManager * fm = new FileManager();
+    fm->ReadPreprocessInfo(file_info, p, q, Lx, Ly, nElemX, nElemY, part_num_1d, dim, base_name);
 
     for (const auto& entry : std::__fs::filesystem::directory_iterator(std::__fs::filesystem::current_path())) {
         if (entry.is_regular_file()) {
             std::string filename = entry.path().filename().string();
-            if (filename.find(base_name) == 0 || filename == file_info) {
+            if (filename.find(base_name) == 0) {
                 std::cout << "Deleting file: " << filename << std::endl;
                 std::__fs::filesystem::remove(entry.path());
             }
         }
     }
-    
-    FileManager * fm = new FileManager();
-    fm->WritePreprocessInfo(file_info, p, q, Lx, Ly, nElemX, nElemY, part_num_1d, dim, base_name);
 
     double hx = Lx / nElemX;
     double hy = Ly / nElemY;

@@ -2,6 +2,55 @@
 #include "FileManager.hpp"
 #include "GlobalAssembly.hpp"
 
+double GetMaximumEigenvalue(Mat &Kiga, Mat &Kfem, Vec &u0,
+    const double &tol)
+{   
+    double norm_u0;
+    VecNorm(u0, NORM_2, &norm_u0);
+    
+    VecScale(u0, 1.0 / norm_u0);
+
+    Vec u;
+    VecDuplicate(u0, &u);
+
+    double lambda_old = 0;
+    double lambda_new;
+
+    KSP ksp;
+    KSPCreate(PETSC_COMM_WORLD, &ksp);
+    KSPSetOperators(ksp, Kfem, Kfem);
+    KSPSetFromOptions(ksp);
+    KSPSetTolerances(ksp, 1e-10, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT);
+
+    while (true)
+    {
+        MatMult(Kiga, u0, u);
+
+        KSPSolve(ksp, u, u);
+
+        KSPSolve(ksp, u, u);
+
+        MatMult(Kiga, u, u0);
+
+        VecNorm(u0, NORM_2, &norm_u0);
+        VecScale(u0, 1.0 / norm_u0);
+
+        lambda_new = norm_u0;
+
+        if (fabs(lambda_new - lambda_old) < tol)
+        {
+            break;
+        }
+
+        lambda_old = lambda_new;
+    }
+
+    VecDestroy(&u);
+    KSPDestroy(&ksp);
+
+    return lambda_new;
+}
+
 int main(int argc, char *argv[])
 {
     int p, q, nElemX, nElemY, part_num_1d, dim;
@@ -81,23 +130,34 @@ int main(int argc, char *argv[])
     GlobalAssembly * globalassem_fem = new GlobalAssembly(IEN_fem, ID_fem, locassem_fem,
         4, nlocalfunc_fem, nlocalelemx_fem, nlocalelemy_fem);
     
+    MatSetOption(globalassem_fem->K, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_TRUE);
+    
     globalassem_fem->AssemStiffnessLoad(locassem_fem, IEN_fem, ID_fem, CP_fem, elem_fem);
 
     MPI_Barrier(PETSC_COMM_WORLD);
 
     Vec x;
-    VecDuplicate(globalassem_fem->F, &x);
+    VecDuplicate(globalassem->F, &x);
+    VecSet(x, 1.0);
 
-    KSP ksp;
-    KSPCreate(PETSC_COMM_WORLD, &ksp);
-    KSPSetOperators(ksp, globalassem->K, globalassem->K);
-    KSPSetFromOptions(ksp);
-    KSPSetTolerances(ksp, 1e-8, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT);
-    KSPSolve(ksp, globalassem->F, x);
+    const double tol = 1.0e-8;
 
-    // Clean up
+    const double max_eigen = sqrt(
+        GetMaximumEigenvalue(globalassem->K, globalassem_fem->K, x, tol));
+    const double min_eigen = 1.0/sqrt(
+        GetMaximumEigenvalue(globalassem_fem->K, globalassem->K, x, tol));
+    
+    const double cond = max_eigen / min_eigen;
+
+    if (rank == 0)
+    {
+        std::cout << std::setprecision(15);
+        std::cout << "max_eigen: " << max_eigen << std::endl;
+        std::cout << "min_eigen: " << min_eigen << std::endl;
+        std::cout << "cond: " << cond << std::endl;
+    }
+
     VecDestroy(&x);
-    KSPDestroy(&ksp);
     
     delete fm; fm = nullptr;
     delete elem; elem = nullptr;
