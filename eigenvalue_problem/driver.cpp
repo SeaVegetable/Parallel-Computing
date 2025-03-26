@@ -51,6 +51,87 @@ double GetMaximumEigenvalue(Mat &Kiga, Mat &Kfem, Vec &u0,
     return lambda_new;
 }
 
+double GetMaximumEigenvalue(Mat &K, Vec &u0, const double &tol)
+{   
+    double norm_u0;
+    VecNorm(u0, NORM_2, &norm_u0);
+    
+    VecScale(u0, 1.0 / norm_u0);
+
+    Vec u;
+    VecDuplicate(u0, &u);
+
+    double lambda_old = 0;
+    double lambda_new;
+
+    while (true)
+    {
+        MatMult(K, u0, u);
+
+        MatMult(K, u, u0);
+
+        VecNorm(u0, NORM_2, &norm_u0);
+        VecScale(u0, 1.0 / norm_u0);
+
+        lambda_new = norm_u0;
+
+        if (fabs(lambda_new - lambda_old) < tol)
+        {
+            break;
+        }
+
+        lambda_old = lambda_new;
+    }
+
+    VecDestroy(&u);
+
+    return lambda_new;
+}
+
+double GetMinimumEigenvalue(Mat &K, Vec &u0, const double &tol)
+{   
+    double norm_u0;
+    VecNorm(u0, NORM_2, &norm_u0);
+    
+    VecScale(u0, 1.0 / norm_u0);
+
+    Vec u;
+    VecDuplicate(u0, &u);
+
+    double lambda_old = 0;
+    double lambda_new;
+
+    KSP ksp;
+    KSPCreate(PETSC_COMM_WORLD, &ksp);
+    KSPSetOperators(ksp, K, K);
+    KSPSetFromOptions(ksp);
+    KSPSetTolerances(ksp, 1e-10, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT);
+
+    while (true)
+    {
+        KSPSolve(ksp, u0, u);
+
+        KSPSolve(ksp, u, u0);
+
+        VecNorm(u0, NORM_2, &norm_u0);
+        VecScale(u0, 1.0 / norm_u0);
+
+        lambda_new = norm_u0;
+
+        if (fabs(lambda_new - lambda_old) < tol)
+        {
+            break;
+        }
+
+        lambda_old = lambda_new;
+    }
+
+    VecDestroy(&u);
+    KSPDestroy(&ksp);
+
+    return lambda_new;
+}
+
 int main(int argc, char *argv[])
 {
     int p, q, nElemX, nElemY, part_num_1d, dim;
@@ -149,11 +230,17 @@ int main(int argc, char *argv[])
     
     const double cond = max_eigen / min_eigen;
 
+    const double max_eigen_iga = sqrt(
+        GetMaximumEigenvalue(globalassem->K, x, tol));
+    const double min_eigen_iga = 1.0/sqrt(
+        GetMinimumEigenvalue(globalassem->K, x, tol));
+    
+    const double cond_iga = max_eigen_iga / min_eigen_iga;
+
     if (rank == 0)
     {
         std::cout << std::setprecision(15);
-        std::cout << "max_eigen: " << max_eigen << std::endl;
-        std::cout << "min_eigen: " << min_eigen << std::endl;
+        std::cout << "cond_iga: " << cond_iga << std::endl;
         std::cout << "cond: " << cond << std::endl;
     }
 
