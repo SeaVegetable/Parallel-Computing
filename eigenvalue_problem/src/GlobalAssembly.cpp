@@ -26,6 +26,7 @@ GlobalAssembly::GlobalAssembly(const std::vector<int> &IEN, const std::vector<in
 
     MatCreateAIJ(PETSC_COMM_WORLD, nlocalfunc, nlocalfunc, PETSC_DETERMINE,
         PETSC_DETERMINE, 0, &Dnz[0], 0, &Onz[0], &K);
+    MatSetOption(K, MAT_SYMMETRIC, PETSC_TRUE);
 }
 
 GlobalAssembly::~GlobalAssembly()
