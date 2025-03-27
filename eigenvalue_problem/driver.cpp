@@ -300,6 +300,8 @@ int main(int argc, char *argv[])
     PetscReal smax;
     SVDGetSingularTriplet(svd, 0, &smax, NULL, NULL);
 
+    PetscPrintf(PETSC_COMM_WORLD, "Maximum singular value of Kfull: %.15g\n", smax);
+
     MatDestroy(&M);
     KSPDestroy(&ksp);
     SVDDestroy(&svd);
@@ -332,6 +334,9 @@ int main(int argc, char *argv[])
     PetscReal smin;
     SVDGetSingularTriplet(svd_inv, 0, &smin, NULL, NULL);
 
+    PetscPrintf(PETSC_COMM_WORLD, "Minimum singular value of Kfull: %.15g\n", 1/smin);
+    PetscPrintf(PETSC_COMM_WORLD, "Condition number of Kfull: %.15g\n", smax*smin);
+
     MatDestroy(&M_inv);
     KSPDestroy(&ksp_inv);
     SVDDestroy(&svd_inv);
@@ -351,6 +356,8 @@ int main(int argc, char *argv[])
     SVDGetSingularTriplet(svd_K, 0, &smax_K, NULL, NULL);
 
     SVDDestroy(&svd_K);
+
+    PetscPrintf(PETSC_COMM_WORLD, "Maximum singular value of K: %.15g\n", smax_K);
 
     // Compute the maximum singular value of the inverse of K
     KSP ksp_K_inv;
@@ -383,13 +390,8 @@ int main(int argc, char *argv[])
     KSPDestroy(&ksp_K_inv);
     SVDDestroy(&svd_K_inv);
 
-    PetscPrintf(PETSC_COMM_WORLD, "Maximum singular value of K: %.15g\n", smax_K);
     PetscPrintf(PETSC_COMM_WORLD, "Minimum singular value of K: %.15g\n", 1/smax_K_inv);
     PetscPrintf(PETSC_COMM_WORLD, "Condition number of K: %.15g\n", smax_K * smax_K_inv);
-
-    PetscPrintf(PETSC_COMM_WORLD, "Maximum singular value of Kfull: %.15g\n", smax);
-    PetscPrintf(PETSC_COMM_WORLD, "Minimum singular value of Kfull: %.15g\n", 1/smin);
-    PetscPrintf(PETSC_COMM_WORLD, "Condition number of Kfull: %.15g\n", smax*smin);
     
     delete fm; fm = nullptr;
     delete elem; elem = nullptr;
