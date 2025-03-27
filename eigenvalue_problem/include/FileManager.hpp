@@ -2,7 +2,7 @@
 #define FILEMANAGER_HPP
 
 #include <iostream>
-#include <iosmanip>
+#include <iomanip>
 #include <fstream>
 #include <sstream>
 #include <string>
