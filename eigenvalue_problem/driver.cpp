@@ -139,14 +139,27 @@ typedef struct
     KSP ksp;
 } UserCtx;
 
-void MyMatMult(Mat K, Vec x, Vec y)
+void MyMatMult(Mat M, Vec x, Vec y)
 {
     UserCtx *ctx;
     Vec t;
+    VecDuplicate(x, &t);
 
-    MatShellGetContext(K, &ctx);
+    MatShellGetContext(M, &ctx);
     MatMult(ctx->K, x, t);
     KSPSolve(ctx->ksp, t, y);
+    VecDestroy(&t);
+}
+
+void MyMatMultTranspose(Mat M, Vec x, Vec y)
+{
+    UserCtx *ctx;
+    Vec t;
+    VecDuplicate(x, &t);
+
+    MatShellGetContext(M, &ctx);
+    KSPSolve(ctx->ksp, x, t);
+    MatMult(ctx->K, t, y);
     VecDestroy(&t);
 }
 
@@ -161,7 +174,7 @@ int main(int argc, char *argv[])
     FileManager * fm = new FileManager();
     fm->ReadPreprocessInfo(file_info, p, q, Lx, Ly, nElemX, nElemY, part_num_1d, dim, base_name);
 
-    PetscInitialize(&argc, &argv, NULL, NULL);
+    SlepcInitialize(&argc, &argv, NULL, NULL);
 
     PetscMPIInt rank, size;
     MPI_Comm_rank(PETSC_COMM_WORLD, &rank);
@@ -234,54 +247,85 @@ int main(int argc, char *argv[])
     globalassem_fem->AssemStiffnessLoad(locassem_fem, IEN_fem, ID_fem, CP_fem, elem_fem);
 
     MPI_Barrier(PETSC_COMM_WORLD);
+    PetscPrintf(PETSC_COMM_WORLD, "Assembling stiffness matrix and load vector...done\n");
 
-    // Compute the condition number
+    // Compute the maximum singular value
     KSP ksp;
     KSPCreate(PETSC_COMM_WORLD, &ksp);
     KSPSetOperators(ksp, globalassem_fem->K, globalassem_fem->K);
     KSPSetFromOptions(ksp);
+    PetscReal rtol = 1e-10;
+    PetscReal abstol = 1e-10;
+    PetscReal divtol = 1e4;
+    PetscInt maxits = 10000;
+    KSPSetTolerances(ksp, rtol, abstol, divtol, maxits);
 
     UserCtx ctx;
+    ctx.ksp = ksp;
+    ctx.K = globalassem->K;
     Mat M;
     PetscInt mm, nn;
     MatGetSize(globalassem->K, &mm, &nn);
-    MatCreateShell(PETSC_COMM_WORLD, mm, nn, mm, nn, &ctx, &M);
+    MatCreateShell(PETSC_COMM_WORLD, nlocalfunc, nlocalfunc, mm, nn, &ctx, &M);
     MatShellSetOperation(M, MATOP_MULT, (void(*)(void))MyMatMult);
-
-    ctx.ksp = ksp;
-    ctx.K = globalassem->K;
+    MatShellSetOperation(M, MATOP_MULT_TRANSPOSE, (void(*)(void))MyMatMultTranspose);
 
     SVD svd;
     SVDCreate(PETSC_COMM_WORLD, &svd);
     SVDSetOperators(svd, M, NULL);
     SVDSetProblemType(svd, SVD_STANDARD);
+    SVDSetType(svd, SVDTRLANCZOS);
 
-    SVDSetDimensions(svd, 2, PETSC_DEFAULT, PETSC_DEFAULT);
+    PetscReal tol = 1e-10;
+    PetscInt max_it = 10000;
+    SVDSetTolerances(svd, tol, max_it);
+
+    SVDSetDimensions(svd, 1, PETSC_DEFAULT, PETSC_DEFAULT);
+
     SVDSetWhichSingularTriplets(svd, SVD_LARGEST);
-
-    PetscInt nconv;
     SVDSolve(svd);
-    SVDGetConverged(svd, &nconv);
-
     PetscReal smax;
-    if (nconv > 0)
-        SVDGetSingularTriplet(svd, 0, &smax, NULL, NULL);
-    else
-        PetscPrintf(PETSC_COMM_WORLD, "Maximum singular value: Diverge\n");
+    SVDGetSingularTriplet(svd, 0, &smax, NULL, NULL);
 
-    SVDSetWhichSingularTriplets(svd, SVD_SMALLEST);
-    SVDSolve(svd);
-    SVDGetConverged(svd, &nconv);
+    MatDestroy(&M);
+    KSPDestroy(&ksp);
+    SVDDestroy(&svd);
 
+    // Compute the minimum singular value
+    KSP ksp_inv;
+    KSPCreate(PETSC_COMM_WORLD, &ksp_inv);
+    KSPSetOperators(ksp_inv, globalassem->K, globalassem->K);
+    KSPSetFromOptions(ksp_inv);
+    KSPSetTolerances(ksp_inv, rtol, abstol, divtol, maxits);
+    
+    UserCtx ctx_inv;
+    ctx_inv.ksp = ksp_inv;
+    ctx_inv.K = globalassem_fem->K;
+    Mat M_inv;
+    MatCreateShell(PETSC_COMM_WORLD, nlocalfunc, nlocalfunc, mm, nn, &ctx_inv, &M_inv);
+    MatShellSetOperation(M_inv, MATOP_MULT, (void(*)(void))MyMatMult);
+    MatShellSetOperation(M_inv, MATOP_MULT_TRANSPOSE, (void(*)(void))MyMatMultTranspose);
+
+    SVD svd_inv;
+    SVDCreate(PETSC_COMM_WORLD, &svd_inv);
+    SVDSetOperators(svd_inv, M_inv, NULL);
+    SVDSetProblemType(svd_inv, SVD_STANDARD);
+    SVDSetType(svd_inv, SVDTRLANCZOS);
+    SVDSetTolerances(svd_inv, tol, max_it);
+
+    SVDSetDimensions(svd_inv, 1, PETSC_DEFAULT, PETSC_DEFAULT);
+    SVDSetWhichSingularTriplets(svd_inv, SVD_LARGEST);
+    SVDSolve(svd_inv);
     PetscReal smin;
-    if (nconv > 0)
-        SVDGetSingularTriplet(svd, 0, &smin, NULL, NULL);
-    else
-        PetscPrintf(PETSC_COMM_WORLD, "Maximum singular value: Diverge\n");
+    SVDGetSingularTriplet(svd_inv, 0, &smin, NULL, NULL);
 
-    PetscPrintf(PETSC_COMM_WORLD, "Maximum singular value: %g\n", smax);
-    PetscPrintf(PETSC_COMM_WORLD, "Minimum singular value: %g\n", smin);
-    PetscPrintf(PETSC_COMM_WORLD, "Condition number: %g\n", smax/smin);
+    MatDestroy(&M_inv);
+    KSPDestroy(&ksp_inv);
+    SVDDestroy(&svd_inv);
+
+    PetscPrintf(PETSC_COMM_WORLD, "Maximum singular value: %.15g\n", smax);
+    PetscPrintf(PETSC_COMM_WORLD, "Minimum singular value: %.15g\n", 1/smin);
+    PetscPrintf(PETSC_COMM_WORLD, "Condition number: %.15g\n", smax*smin);
     
     delete fm; fm = nullptr;
     delete elem; elem = nullptr;
@@ -291,6 +335,6 @@ int main(int argc, char *argv[])
     delete locassem_fem; locassem_fem = nullptr;
     delete globalassem_fem; globalassem_fem = nullptr;
     
-    PetscFinalize();
+    SlepcFinalize();
     return 0;
 }
