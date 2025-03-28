@@ -297,6 +297,11 @@ int main(int argc, char *argv[])
 
     SVDSetWhichSingularTriplets(svd, SVD_LARGEST);
     SVDSolve(svd);
+
+    SVDConvergedReason reason;
+    SVDGetConvergedReason(svd, &reason);
+    PetscPrintf(PETSC_COMM_WORLD, "Convergence reason: %d\n", reason);
+
     PetscReal smax;
     SVDGetSingularTriplet(svd, 0, &smax, NULL, NULL);
 
@@ -331,6 +336,10 @@ int main(int argc, char *argv[])
     SVDSetDimensions(svd_inv, 1, PETSC_DEFAULT, PETSC_DEFAULT);
     SVDSetWhichSingularTriplets(svd_inv, SVD_LARGEST);
     SVDSolve(svd_inv);
+
+    SVDGetConvergedReason(svd_inv, &reason);
+    PetscPrintf(PETSC_COMM_WORLD, "Convergence reason: %d\n", reason);
+
     PetscReal smin;
     SVDGetSingularTriplet(svd_inv, 0, &smin, NULL, NULL);
 
@@ -352,6 +361,10 @@ int main(int argc, char *argv[])
     SVDSetDimensions(svd_K, 1, PETSC_DEFAULT, PETSC_DEFAULT);
     SVDSetWhichSingularTriplets(svd_K, SVD_LARGEST);
     SVDSolve(svd_K);
+
+    SVDGetConvergedReason(svd_K, &reason);
+    PetscPrintf(PETSC_COMM_WORLD, "Convergence reason: %d\n", reason);
+
     PetscReal smax_K;
     SVDGetSingularTriplet(svd_K, 0, &smax_K, NULL, NULL);
 
@@ -383,6 +396,10 @@ int main(int argc, char *argv[])
     SVDSetDimensions(svd_K_inv, 1, PETSC_DEFAULT, PETSC_DEFAULT);
     SVDSetWhichSingularTriplets(svd_K_inv, SVD_LARGEST);
     SVDSolve(svd_K_inv);
+
+    SVDGetConvergedReason(svd_K_inv, &reason);
+    PetscPrintf(PETSC_COMM_WORLD, "Convergence reason: %d\n", reason);
+
     PetscReal smax_K_inv;
     SVDGetSingularTriplet(svd_K_inv, 0, &smax_K_inv, NULL, NULL);
 
