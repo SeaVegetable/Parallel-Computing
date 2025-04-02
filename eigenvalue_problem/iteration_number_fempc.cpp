@@ -1,6 +1,28 @@
 #include <petscksp.h>
+#include <petscpc.h>
 #include "FileManager.hpp"
 #include "GlobalAssembly.hpp"
+
+typedef struct {
+    KSP innerksp;
+} MyPCCtx;
+
+PetscErrorCode MyPCApply(PC pc, Vec x, Vec y)
+{
+    MyPCCtx *ctx;
+    PCShellGetContext(pc, (void**)&ctx);
+    KSPSolve(ctx->innerksp, x, y);
+    return 0;
+}
+
+PetscErrorCode MyPCDestroy(PC pc)
+{
+    MyPCCtx *ctx;
+    PCShellGetContext(pc, (void**)&ctx);
+    KSPDestroy(&ctx->innerksp);
+    PetscFree(ctx);
+    return 0;
+}
 
 int main(int argc, char *argv[])
 {
@@ -63,25 +85,67 @@ int main(int argc, char *argv[])
 
     MPI_Barrier(PETSC_COMM_WORLD);
 
+    std::vector<double> CP_fem;
+    std::vector<int> ID_fem;
+    std::vector<int> IEN_fem;
+    int nlocalfunc_fem;
+    int nlocalelemx_fem;
+    int nlocalelemy_fem;
+
+    std::string base_name_fem = "part_fem";
+    std::string filename_fem = fm->GetPartitionFilename(base_name_fem, rank);
+    fm->ReadPartition(filename_fem, nlocalfunc_fem,
+        nlocalelemx_fem, nlocalelemy_fem,
+        CP_fem, ID_fem, IEN_fem);
+
+    ElementFEM * elem_fem = new ElementFEM(1, 1);
+    LocalAssembly * locassem_fem = new LocalAssembly(1, 1);
+    GlobalAssembly * globalassem_fem = new GlobalAssembly(IEN_fem, ID_fem, locassem_fem,
+        4, nlocalfunc_fem, nlocalelemx_fem, nlocalelemy_fem);
+    
+    MatSetOption(globalassem_fem->K, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_TRUE);
+    
+    globalassem_fem->AssemStiffnessLoad(locassem_fem, IEN_fem, ID_fem, CP_fem, elem_fem);
+
+    MPI_Barrier(PETSC_COMM_WORLD);
+    PetscPrintf(PETSC_COMM_WORLD, "Assembling stiffness matrix and load vector...done\n");
+
     PetscLogDouble tstart, tend;
     PetscTime(&tstart);
 
     KSP ksp;
     KSPCreate(PETSC_COMM_WORLD, &ksp);
+    KSPSetOperators(ksp, globalassem->K, globalassem->K);
+
+    PC pc;
+    KSPGetPC(ksp, &pc);
+    PCSetType(pc, PCSHELL);
+
+    MyPCCtx *ctx;
+    PetscNew(&ctx);
+    KSPCreate(PETSC_COMM_WORLD, &ctx->innerksp);
+    KSPSetOperators(ctx->innerksp, globalassem_fem->K, globalassem_fem->K);
+    KSPSetType(ctx->innerksp, KSPCG);
+
+    PC innerpc;
+    KSPGetPC(ctx->innerksp, &innerpc);
+    PCSetType(innerpc, PCJACOBI);
+    PCSetFromOptions(innerpc);
+
     PetscReal rtol = 1e-10;
     PetscReal abstol = 1e-10;
     PetscReal divtol = 1e4;
     PetscInt maxits = 10000;
+    KSPSetTolerances(ctx->innerksp, rtol, abstol, divtol, maxits);
     KSPSetTolerances(ksp, rtol, abstol, divtol, maxits);
-    KSPSetFromOptions(ksp);
 
-    PC ksp_pc;
-    KSPGetPC(ksp, &ksp_pc);
-    PCSetFromOptions(ksp_pc);
+    PCShellSetContext(pc, ctx);
+    PCShellSetApply(pc, MyPCApply);
+    PCShellSetDestroy(pc, MyPCDestroy);
 
-    KSPSetOperators(ksp, globalassem->K, globalassem->K);
     Vec u;
     VecDuplicate(globalassem->F, &u);
+    KSPSetFromOptions(ksp);
     KSPSolve(ksp, globalassem->F, u);
 
     PetscTime(&tend);
@@ -100,6 +164,12 @@ int main(int argc, char *argv[])
     delete elem; elem = nullptr;
     delete locassem; locassem = nullptr;
     delete globalassem; globalassem = nullptr;
+    delete elem_fem; elem_fem = nullptr;
+    delete locassem_fem; locassem_fem = nullptr;
+    delete globalassem_fem; globalassem_fem = nullptr;
+
+    VecDestroy(&u);
+    KSPDestroy(&ksp);
     
     PetscFinalize();
     return 0;
