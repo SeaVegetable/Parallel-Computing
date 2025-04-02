@@ -76,6 +76,9 @@ target_link_libraries(preprocess_fem eigenvalue_problem_lib)
 add_executable(solve driver.cpp)
 target_link_libraries(solve eigenvalue_problem_lib ${PETSC_LIB} ${SLEPC_LIB})
 
+add_executable(iter_num iteration_number.cpp)
+target_link_libraries(iter_num eigenvalue_problem_lib ${PETSC_LIB})
+
 if(OPENMP_CXX_FOUND)
   set_target_properties( eigenvalue_problem_lib PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )
   set_target_properties( preprocess PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )
