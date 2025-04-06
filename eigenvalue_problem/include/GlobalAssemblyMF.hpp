@@ -15,7 +15,7 @@ class GlobalAssemblyMF
 
         ~GlobalAssemblyMF();
 
-        void AssemStiffnessLoad(LocalAssembly * const &locassem,
+        void AssemLoad(LocalAssembly * const &locassem,
             const std::vector<int> &IEN,
             const std::vector<int> &ID,
             const std::vector<double> &CP,
@@ -24,6 +24,17 @@ class GlobalAssemblyMF
             const std::vector<double> &elem_size1,
             const std::vector<double> &elem_size2,
             Element * const &elem);
+        
+        void MatMulMF(LocalAssembly * const &locassem,
+            const std::vector<int> &IEN,
+            const std::vector<int> &ID,
+            const std::vector<double> &CP,
+            const std::vector<double> &NURBSExtraction1,
+            const std::vector<double> &NURBSExtraction2,
+            const std::vector<double> &elem_size1,
+            const std::vector<double> &elem_size2,
+            Element * const &elem,
+            Vec x, Vec y);
     
     private:
         const int nLocBas;

@@ -9,6 +9,8 @@
 class LocalAssemblyMF
 {
     public:
+        PetscScalar *Floc_in;
+        PetscScalar *Floc_out;
         PetscScalar *Floc;
 
         LocalAssemblyMF(const double &p, const double &q)
@@ -26,7 +28,10 @@ class LocalAssemblyMF
             delete[] Floc; Floc = nullptr;
         }
 
-        void AssemLocalStiffnessLoad(const Element * const &elem,
+        void AssemLocalLoad(const Element * const &elem,
+            const std::vector<double> &eCP);
+        
+        void LocalMatMulMF(const Element * const &elem,
             const std::vector<double> &eCP);
 
     private:
