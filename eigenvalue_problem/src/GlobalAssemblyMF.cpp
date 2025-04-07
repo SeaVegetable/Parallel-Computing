@@ -12,7 +12,7 @@ GlobalAssemblyMF::GlobalAssemblyMF(const int &nLocBas, const int &nlocalfunc,
     VecSetOption(F, VEC_IGNORE_NEGATIVE_INDICES, PETSC_TRUE);
 }
 
-void GlobalAssemblyMF::AssemLoad(LocalAssembly * const &locassem,
+void GlobalAssemblyMF::AssemLoad(LocalAssemblyMF * const &locassem,
     const std::vector<int> &IEN,
     const std::vector<int> &ID,
     const std::vector<double> &CP,
@@ -24,8 +24,8 @@ void GlobalAssemblyMF::AssemLoad(LocalAssembly * const &locassem,
 {
     PetscInt * eID = new PetscInt[nLocBas];
     std::vector<double> eCP(2*nLocBas, 0.0);
-    const int pp = elem->GetNumLocalBasis1D(0);
-    const int qq = elem->GetNumLocalBasis1D(1);
+    const int pp = elemmf->GetNumLocalBasis1D(0);
+    const int qq = elemmf->GetNumLocalBasis1D(1);
     std::vector<double> eNURBSExtraction1(pp*pp, 0.0);
     std::vector<double> eNURBSExtraction2(qq*qq, 0.0);
 
@@ -50,7 +50,7 @@ void GlobalAssemblyMF::AssemLoad(LocalAssembly * const &locassem,
         
             elemmf->SetElement(eNURBSExtraction1, eNURBSExtraction2, elem_size1[ii], elem_size2[jj]);
 
-            locassem->AssemLocalLoad(elem, eCP);
+            locassem->AssemLocalLoad(elemmf, eCP);
 
             VecSetValues(F, nLocBas, eID, locassem->Floc, ADD_VALUES);
         }
@@ -62,7 +62,7 @@ void GlobalAssemblyMF::AssemLoad(LocalAssembly * const &locassem,
     VecAssemblyEnd(F);
 }
 
-void GlobalAssemblyMF::MatMulMF(LocalAssembly * const &locassem,
+void GlobalAssemblyMF::MatMulMF(LocalAssemblyMF * const &locassem,
     const std::vector<int> &IEN,
     const std::vector<int> &ID,
     const std::vector<double> &CP,
@@ -99,11 +99,11 @@ void GlobalAssemblyMF::MatMulMF(LocalAssembly * const &locassem,
                 NURBSExtraction2.begin() + (jj + 1) * qq * qq,
                 eNURBSExtraction2.begin());
         
-            elem->SetElement(eNURBSExtraction1, eNURBSExtraction2, elem_size1[ii], elem_size2[jj]);
+            elemmf->SetElement(eNURBSExtraction1, eNURBSExtraction2, elem_size1[ii], elem_size2[jj]);
 
             VecGetValues(x, nLocBas, eID, locassem->Floc_in);
 
-            locassem->LocalMatMulMF(elem, eCP);
+            locassem->LocalMatMulMF(elemmf, eCP);
 
             VecSetValues(y, nLocBas, eID, locassem->Floc_out, ADD_VALUES);
         }

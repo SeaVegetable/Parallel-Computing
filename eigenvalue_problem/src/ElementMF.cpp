@@ -65,8 +65,8 @@ void ElementMF::GenerateElementSingleQP(const double &xi, const double &eta,
     double deta_dx = 0.0;
     double deta_dy = 0.0;
 
-    x = 0.0;
-    y = 0.0;
+    double x = 0.0;
+    double y = 0.0;
 
     for (int j = 0; j<q+1; ++j)
     {

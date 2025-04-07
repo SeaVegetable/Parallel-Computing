@@ -2,6 +2,7 @@
 #include <petscpc.h>
 #include "FileManager.hpp"
 #include "GlobalAssemblyMF.hpp"
+#include "GlobalAssembly.hpp"
 
 typedef struct {
     KSP innerksp;
@@ -94,16 +95,16 @@ int main(int argc, char *argv[])
     std::string filename = fm->GetPartitionFilename(base_name, rank);
     fm->ReadPartition(filename, nlocalfunc,
         nlocalelemx, nlocalelemy,
+        data->elem_size1, data->elem_size2,
         data->CP, data->ID, data->IEN,
-        data->NURBSExtraction1, data->NURBSExtraction2,
-        data->elem_size1, data->elem_size2);
+        data->NURBSExtraction1, data->NURBSExtraction2);
     
     data->elem = elemmf;
     data->locassem = locassemmf;
     data->globalassem = new GlobalAssemblyMF(nLocBas, nlocalfunc,
         nlocalelemx, nlocalelemy);
 
-    globalassem->AssemLoad(data->locassem, data->IEN,
+    data->globalassem->AssemLoad(data->locassem, data->IEN,
         data->ID, data->CP,
         data->NURBSExtraction1, data->NURBSExtraction2,
         data->elem_size1, data->elem_size2, elemmf);
@@ -175,9 +176,9 @@ int main(int argc, char *argv[])
     PCShellSetDestroy(pc, MyPCDestroy);
 
     Vec u;
-    VecDuplicate(globalassem->F, &u);
+    VecDuplicate(data->globalassem->F, &u);
     KSPSetFromOptions(ksp);
-    KSPSolve(ksp, globalassem->F, u);
+    KSPSolve(ksp, data->globalassem->F, u);
 
     PetscTime(&tend);
     PetscLogDouble time = tend - tstart;
@@ -192,9 +193,10 @@ int main(int argc, char *argv[])
     }
 
     delete fm; fm = nullptr;
-    delete elem; elem = nullptr;
-    delete locassem; locassem = nullptr;
-    delete globalassem; globalassem = nullptr;
+    delete data->elem; data->elem = nullptr;
+    delete data->locassem; data->locassem = nullptr;
+    delete data->globalassem; data->globalassem = nullptr;
+    delete data; data = nullptr;
     delete elem_fem; elem_fem = nullptr;
     delete locassem_fem; locassem_fem = nullptr;
     delete globalassem_fem; globalassem_fem = nullptr;

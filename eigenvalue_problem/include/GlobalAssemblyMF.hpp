@@ -10,16 +10,14 @@ class GlobalAssemblyMF
         Vec F;
 
         GlobalAssemblyMF(const int &nLocBas, const int &nlocalfunc,
-            const int &nlocalelemx, const int &nlocalelemy)
-            : nLocBas(nLocBas), nlocalfunc(nlocalfunc),
-              nlocalelemx(nlocalelemx), nlocalelemy(nlocalelemy) {}
+            const int &nlocalelemx, const int &nlocalelemy);
             
         ~GlobalAssemblyMF()
         {
             VecDestroy(&F);
         }
 
-        void GlobalAssemblyMF::AssemLoad(LocalAssembly * const &locassem,
+        void AssemLoad(LocalAssemblyMF * const &locassem,
             const std::vector<int> &IEN,
             const std::vector<int> &ID,
             const std::vector<double> &CP,
@@ -29,7 +27,7 @@ class GlobalAssemblyMF
             const std::vector<double> &elem_size2,
             ElementMF * const &elemmf);
         
-        void MatMulMF(LocalAssembly * const &locassem,
+        void MatMulMF(LocalAssemblyMF * const &locassem,
             const std::vector<int> &IEN,
             const std::vector<int> &ID,
             const std::vector<double> &CP,

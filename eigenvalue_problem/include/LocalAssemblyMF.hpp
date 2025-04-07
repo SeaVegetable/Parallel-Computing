@@ -2,9 +2,7 @@
 #define LOCALASSEMBLYMF_HPP
 
 #include <petscmat.h>
-#include "Element.hpp"
-#include "ElementFEM.hpp"
-#include "QuadraturePoint.hpp"
+#include "ElementMF.hpp"
 
 class LocalAssemblyMF
 {
@@ -28,10 +26,10 @@ class LocalAssemblyMF
             delete[] Floc; Floc = nullptr;
         }
 
-        void AssemLocalLoad(const Element * const &elem,
+        void AssemLocalLoad(ElementMF * const &elem,
             const std::vector<double> &eCP);
         
-        void LocalMatMulMF(const Element * const &elem,
+        void LocalMatMulMF(ElementMF * const &elem,
             const std::vector<double> &eCP);
 
     private:

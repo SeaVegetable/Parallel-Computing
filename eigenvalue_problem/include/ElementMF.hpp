@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include "RefElement.hpp"
+#include "QuadraturePoint.hpp"
 
 class ElementMF
 {
