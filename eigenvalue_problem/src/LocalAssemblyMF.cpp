@@ -38,18 +38,11 @@ void LocalAssemblyMF::AssemLocalLoad(const Element * const &elem,
 void LocalAssemblyMF::LocalMatMulMF(ElementMF * const &elem,
     const std::vector<double> &eCP)
 {
-    const int n = elem->GetNumLocalBasis();
-
-    std::vector<double> R{};
-    std::vector<double> dR_dx{};
-    std::vector<double> dR_dy{};
-    double jacobian;
-    double xx, yy;
-
     elem->GenerateElement(quad1, quad2, eCP);
     const int nqp1 = quad1->GetNumQuadraturePoint();
     const int nqp2 = quad2->GetNumQuadraturePoint();
     const int nqp = nqp1 * nqp2;
+    const int n = elem->GetNumLocalBasis();
 
     std::vector<double> temp_x(nqp, 0.0);
     std::vector<double> temp_y(nqp, 0.0);

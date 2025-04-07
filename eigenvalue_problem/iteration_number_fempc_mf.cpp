@@ -1,7 +1,7 @@
 #include <petscksp.h>
 #include <petscpc.h>
 #include "FileManager.hpp"
-#include "GlobalAssembly.hpp"
+#include "GlobalAssemblyMF.hpp"
 
 typedef struct {
     KSP innerksp;
@@ -21,6 +21,33 @@ PetscErrorCode MyPCDestroy(PC pc)
     PCShellGetContext(pc, (void**)&ctx);
     KSPDestroy(&ctx->innerksp);
     PetscFree(ctx);
+    return 0;
+}
+
+typedef struct {
+    std::vector<double> CP;
+    std::vector<int> ID;
+    std::vector<int> IEN;
+    std::vector<double> elem_size1;
+    std::vector<double> elem_size2;
+    std::vector<double> NURBSExtraction1;
+    std::vector<double> NURBSExtraction2;
+    GlobalAssemblyMF * globalassem;
+    LocalAssemblyMF * locassem;
+    ElementMF * elem;
+} MyMeshData;
+
+PetscErrorCode MyMatMult(Mat A, Vec x, Vec y)
+{
+    MyMeshData *data;
+    MatShellGetContext(A, (void**)&data);
+    
+    data->globalassem->MatMulMF(data->locassem,
+        data->IEN, data->ID, data->CP,
+        data->NURBSExtraction1, data->NURBSExtraction2,
+        data->elem_size1, data->elem_size2,
+        data->elem, x, y);
+
     return 0;
 }
 
@@ -54,34 +81,32 @@ int main(int argc, char *argv[])
         std::cout << "base_name: " << base_name << std::endl;
     }
 
-    std::vector<double> CP;
-    std::vector<int> ID;
-    std::vector<int> IEN;
-    std::vector<double> elem_size1;
-    std::vector<double> elem_size2;
-    std::vector<double> NURBSExtraction1;
-    std::vector<double> NURBSExtraction2;
     int nlocalfunc;
     int nlocalelemx;
     int nlocalelemy;
+    ElementMF * elemmf = new ElementMF(p, q);
+    const int nLocBas = elemmf->GetNumLocalBasis();
+    LocalAssemblyMF * locassemmf = new LocalAssemblyMF(p, q);
 
+    MyMeshData *data;
+    PetscNew(&data);
+    
     std::string filename = fm->GetPartitionFilename(base_name, rank);
     fm->ReadPartition(filename, nlocalfunc,
         nlocalelemx, nlocalelemy,
-        elem_size1, elem_size2,
-        CP, ID, IEN, NURBSExtraction1, NURBSExtraction2);
+        data->CP, data->ID, data->IEN,
+        data->NURBSExtraction1, data->NURBSExtraction2,
+        data->elem_size1, data->elem_size2);
     
-    Element * elem = new Element(p, q);
-    const int nLocBas = elem->GetNumLocalBasis();
-    LocalAssembly * locassem = new LocalAssembly(p, q);
-    GlobalAssembly * globalassem = new GlobalAssembly(IEN, ID, locassem,
-        nLocBas, nlocalfunc, nlocalelemx, nlocalelemy);
-    
-    MatSetOption(globalassem->K, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_TRUE);
+    data->elem = elemmf;
+    data->locassem = locassemmf;
+    data->globalassem = new GlobalAssemblyMF(nLocBas, nlocalfunc,
+        nlocalelemx, nlocalelemy);
 
-    globalassem->AssemStiffnessLoad(locassem, IEN, ID, CP,
-        NURBSExtraction1, NURBSExtraction2,
-        elem_size1, elem_size2, elem);
+    globalassem->AssemLoad(data->locassem, data->IEN,
+        data->ID, data->CP,
+        data->NURBSExtraction1, data->NURBSExtraction2,
+        data->elem_size1, data->elem_size2, elemmf);
 
     MPI_Barrier(PETSC_COMM_WORLD);
 
@@ -113,9 +138,15 @@ int main(int argc, char *argv[])
     PetscLogDouble tstart, tend;
     PetscTime(&tstart);
 
+    Mat K;
+    MatCreateShell(PETSC_COMM_WORLD, nlocalfunc, nlocalfunc,
+        PETSC_DECIDE, PETSC_DECIDE, data, &K);
+    MatShellSetOperation(K, MATOP_MULT, (void(*)(void))MyMatMult);
+
     KSP ksp;
     KSPCreate(PETSC_COMM_WORLD, &ksp);
-    KSPSetOperators(ksp, globalassem->K, globalassem->K);
+    KSPSetOperators(ksp, K, K);
+    KSPSetFromOptions(ksp);
 
     PC pc;
     KSPGetPC(ksp, &pc);

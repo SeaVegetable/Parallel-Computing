@@ -1,8 +1,7 @@
 #include "GlobalAssemblyMF.hpp"
 
-GlobalAssemblyMF::GlobalAssemblyMF(const std::vector<int> &IEN, const std::vector<int> &ID,
-    LocalAssembly * const &locassem, const int &nLocBas,
-    const int &nlocalfunc, const int &nlocalelemx, const int &nlocalelemy)
+GlobalAssemblyMF::GlobalAssemblyMF(const int &nLocBas, const int &nlocalfunc,
+    const int &nlocalelemx, const int &nlocalelemy)
     : nLocBas(nLocBas), nlocalfunc(nlocalfunc),
       nlocalelemx(nlocalelemx), nlocalelemy(nlocalelemy)
 {
@@ -13,11 +12,6 @@ GlobalAssemblyMF::GlobalAssemblyMF(const std::vector<int> &IEN, const std::vecto
     VecSetOption(F, VEC_IGNORE_NEGATIVE_INDICES, PETSC_TRUE);
 }
 
-GlobalAssemblyMF::~GlobalAssemblyMF()
-{
-    VecDestroy(&F);
-}
-
 void GlobalAssemblyMF::AssemLoad(LocalAssembly * const &locassem,
     const std::vector<int> &IEN,
     const std::vector<int> &ID,
@@ -26,7 +20,7 @@ void GlobalAssemblyMF::AssemLoad(LocalAssembly * const &locassem,
     const std::vector<double> &NURBSExtraction2,
     const std::vector<double> &elem_size1,
     const std::vector<double> &elem_size2,
-    Element * const &elem)
+    ElementMF * const &elemmf)
 {
     PetscInt * eID = new PetscInt[nLocBas];
     std::vector<double> eCP(2*nLocBas, 0.0);
@@ -54,9 +48,9 @@ void GlobalAssemblyMF::AssemLoad(LocalAssembly * const &locassem,
                 NURBSExtraction2.begin() + (jj + 1) * qq * qq,
                 eNURBSExtraction2.begin());
         
-            elem->SetElement(eNURBSExtraction1, eNURBSExtraction2, elem_size1[ii], elem_size2[jj]);
+            elemmf->SetElement(eNURBSExtraction1, eNURBSExtraction2, elem_size1[ii], elem_size2[jj]);
 
-            locassem->AssemLocalStiffnessLoad(elem, eCP);
+            locassem->AssemLocalLoad(elem, eCP);
 
             VecSetValues(F, nLocBas, eID, locassem->Floc, ADD_VALUES);
         }
@@ -76,13 +70,13 @@ void GlobalAssemblyMF::MatMulMF(LocalAssembly * const &locassem,
     const std::vector<double> &NURBSExtraction2,
     const std::vector<double> &elem_size1,
     const std::vector<double> &elem_size2,
-    Element * const &elem,
+    ElementMF * const &elemmf,
     Vec x, Vec y)
 {
     PetscInt * eID = new PetscInt[nLocBas];
     std::vector<double> eCP(2*nLocBas, 0.0);
-    const int pp = elem->GetNumLocalBasis1D(0);
-    const int qq = elem->GetNumLocalBasis1D(1);
+    const int pp = elemmf->GetNumLocalBasis1D(0);
+    const int qq = elemmf->GetNumLocalBasis1D(1);
     std::vector<double> eNURBSExtraction1(pp*pp, 0.0);
     std::vector<double> eNURBSExtraction2(qq*qq, 0.0);
 
