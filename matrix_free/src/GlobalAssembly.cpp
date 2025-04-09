@@ -1,7 +1,7 @@
 #include "GlobalAssembly.hpp"
 
 GlobalAssembly::GlobalAssembly(const std::vector<int> &IEN, const std::vector<int> &ID,
-    , const std::vector<int> &Dir, LocalAssembly * const &locassem, const int &nLocBas,
+    const std::vector<int> &Dir, LocalAssembly * const &locassem, const int &nLocBas,
     const int &nlocalfunc, const int &nlocalelemx, const int &nlocalelemy)
     : nLocBas(nLocBas), nlocalfunc(nlocalfunc),
       nlocalelemx(nlocalelemx), nlocalelemy(nlocalelemy)

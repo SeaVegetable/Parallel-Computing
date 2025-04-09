@@ -10,6 +10,7 @@ void FileManager::WritePartition(const std::string &filename,
     const std::vector<int> &ID,
     const std::vector<int> &ghostID,
     const std::vector<int> &Dir,
+    const std::vector<int> &EQ,
     const std::vector<int> &IEN,
     const std::vector<double> &NURBSExtraction1,
     const std::vector<double> &NURBSExtraction2) const
@@ -37,6 +38,10 @@ void FileManager::WritePartition(const std::string &filename,
 
     file << "Dir" << std::endl;
     for (int ii = 0; ii < Dir.size(); ++ii) file << Dir[ii] << " ";
+    file << std::endl;
+
+    file << "EQ" << std::endl;
+    for (int ii = 0; ii < EQ.size(); ++ii) file << EQ[ii] << " ";
     file << std::endl;
 
     file << "IEN" << std::endl;
@@ -121,6 +126,7 @@ void FileManager::ReadPartition(const std::string &filename,
     std::vector<int> &ID,
     std::vector<int> &ghostID,
     std::vector<int> &Dir,
+    std::vector<int> &EQ,
     std::vector<int> &IEN,
     std::vector<double> &NURBSExtraction1,
     std::vector<double> &NURBSExtraction2) const
@@ -232,6 +238,20 @@ void FileManager::ReadPartition(const std::string &filename,
                 Dir.push_back(i);
                 if (Dir_ss.peek() == ' ')
                     Dir_ss.ignore();
+            }
+        }
+        else if (line == "EQ")
+        {
+            std::string EQ_str;
+            std::getline(file, EQ_str);
+            std::istringstream EQ_ss(EQ_str);
+            EQ.clear();
+            int i;
+            while (EQ_ss >> i)
+            {
+                EQ.push_back(i);
+                if (EQ_ss.peek() == ' ')
+                    EQ_ss.ignore();
             }
         }
         else if (line == "IEN")
