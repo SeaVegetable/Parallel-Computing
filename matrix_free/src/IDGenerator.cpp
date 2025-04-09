@@ -26,7 +26,7 @@ std::vector<int> IDGenerator::GenerateID2D(const int &nFuncX, const int &nFuncY)
 {
     std::vector<int> ID(nFuncX*nFuncY, -1);
 
-    int A = 0;
+    int A = nFuncX + 1;
     for (int j = 1; j < nFuncY-1; ++j)
     {
         for (int i = 1; i < nFuncX-1; ++i)
@@ -34,6 +34,7 @@ std::vector<int> IDGenerator::GenerateID2D(const int &nFuncX, const int &nFuncY)
             ID[j*nFuncX+i] = A;
             A++;
         }
+        A++;
     }
 
     return ID;
@@ -51,7 +52,7 @@ std::vector<int> IDGenerator::GenerateID2D(
 
     std::vector<int> ID(m*n, -1);
 
-    int A = 0;
+    int A = m + 1;
     for (int j = 1; j < n-1; ++j)
     {
         for (int i = 1; i < m-1; ++i)
@@ -59,6 +60,7 @@ std::vector<int> IDGenerator::GenerateID2D(
             ID[j*m+i] = A;
             A++;
         }
+        A++;
     }
 
     return ID;

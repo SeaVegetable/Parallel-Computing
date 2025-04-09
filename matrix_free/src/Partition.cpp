@@ -119,10 +119,6 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
                 {
                     localCP.push_back(CP[local_to_global_total[ii] * dim + jj]);
                 }
-                if (std::find(local_to_global.begin(), local_to_global.end(), local_to_global_total[ii]) != local_to_global.end())
-                    tempID.push_back(ID[local_to_global_total[ii]]);
-                else
-                    tempID.push_back(-1);
                 localID.push_back(ID[local_to_global_total[ii]]);
             }           
 
@@ -160,7 +156,7 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
                     std::back_inserter(localNURBSExtraction2));
             }
 
-            const int nlocalfunc = std::count_if(tempID.begin(), tempID.end(), [](int id) { return id != -1; });
+            const int nlocalfunc = local_to_global.size();
             const int nlocalelemx = elem_end_idx_x[i] - elem_start_idx_x[i] + 1;
             const int nlocalelemy = elem_end_idx_y[j] - elem_start_idx_y[j] + 1;
 

@@ -79,12 +79,6 @@ target_link_libraries(preprocess_fem eigenvalue_problem_lib)
 add_executable(solve driver.cpp)
 target_link_libraries(solve eigenvalue_problem_lib ${PETSC_LIB} ${SLEPC_LIB})
 
-add_executable(iter_num iteration_number.cpp)
-target_link_libraries(iter_num eigenvalue_problem_lib ${PETSC_LIB})
-
-add_executable(iter_num_fem iteration_number_fempc.cpp)
-target_link_libraries(iter_num_fem eigenvalue_problem_lib ${PETSC_LIB})
-
 add_executable(iter_num_fem_mf iteration_number_fempc_mf.cpp)
 target_link_libraries(iter_num_fem_mf eigenvalue_problem_lib ${PETSC_LIB})
 
