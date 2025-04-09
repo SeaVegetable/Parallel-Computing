@@ -8,6 +8,7 @@ void FileManager::WritePartition(const std::string &filename,
     const std::vector<double> &elem_size2,
     const std::vector<double> &CP,
     const std::vector<int> &ID,
+    const std::vector<int> &ghostID,
     const std::vector<int> &IEN,
     const std::vector<double> &NURBSExtraction1,
     const std::vector<double> &NURBSExtraction2) const
@@ -27,6 +28,10 @@ void FileManager::WritePartition(const std::string &filename,
 
     file << "ID" << std::endl;
     for (int ii = 0; ii < ID.size(); ++ii) file << ID[ii] << " ";
+    file << std::endl;
+
+    file << "ghostID" << std::endl;
+    for (int ii = 0; ii < ghostID.size(); ++ii) file << ghostID[ii] << " ";
     file << std::endl;
 
     file << "IEN" << std::endl;
@@ -104,6 +109,7 @@ void FileManager::ReadPartition(const std::string &filename,
     std::vector<double> &elem_size2,
     std::vector<double> &CP,
     std::vector<int> &ID,
+    std::vector<int> &ghostID,
     std::vector<int> &IEN,
     std::vector<double> &NURBSExtraction1,
     std::vector<double> &NURBSExtraction2) const
@@ -187,6 +193,20 @@ void FileManager::ReadPartition(const std::string &filename,
                 ID.push_back(i);
                 if (ID_ss.peek() == ' ')
                     ID_ss.ignore();
+            }
+        }
+        else if (line == "ghostID")
+        {
+            std::string ghostID_str;
+            std::getline(file, ghostID_str);
+            std::istringstream ghostID_ss(ghostID_str);
+            ghostID.clear();
+            int i;
+            while (ghostID_ss >> i)
+            {
+                ghostID.push_back(i);
+                if (ghostID_ss.peek() == ' ')
+                    ghostID_ss.ignore();
             }
         }
         else if (line == "IEN")

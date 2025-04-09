@@ -19,6 +19,7 @@ public:
         const std::vector<double> &elem_size2,
         const std::vector<double> &CP,
         const std::vector<int> &ID,
+        const std::vector<int> &ghostID,
         const std::vector<int> &IEN,
         const std::vector<double> &NURBSExtraction1,
         const std::vector<double> &NURBSExtraction2) const;
@@ -39,6 +40,7 @@ public:
         std::vector<double> &elem_size2,
         std::vector<double> &CP,
         std::vector<int> &ID,
+        std::vector<int> &ghostID,
         std::vector<int> &IEN,
         std::vector<double> &NURBSExtraction1,
         std::vector<double> &NURBSExtraction2) const;
