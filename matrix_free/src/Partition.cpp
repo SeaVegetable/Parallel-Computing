@@ -72,6 +72,7 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
 
     int newcount = 0;
     std::vector<int> newID(m*n,-1);
+    std::vector<int> totalID{};
     for (int jj = 0; jj < part_num_y; ++jj)
     {
         for (int ii = 0; ii < part_num_x; ++ii)
@@ -85,6 +86,7 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
                     const int global = globalj * m + globali;
                     if (ID[global] != -1)
                         newID[global] = newcount;
+                    totalID.push_back(newcount);
                     ++newcount;
                 }
             }
@@ -141,8 +143,15 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
                     localCP.push_back(CP[local_to_global_total[ii] * dim + jj]);
                 }
                 if (std::find(local_to_global.begin(), local_to_global.end(), local_to_global_total[ii]) == local_to_global.end())
-                    ghostID.push_back(newID[local_to_global_total[ii]]);
+                    ghostID.push_back(totalID[local_to_global_total[ii]]);
                 localID.push_back(newID[local_to_global_total[ii]]);
+            }
+
+            std::vector<int> localDir{};
+            for (int ii = 0; ii < local_to_global.size(); ++ii)
+            {
+                if (newID[local_to_global[ii]] == -1)
+                    localDir.push_back(totalID[local_to_global[ii]]);
             }
 
             std::vector<int> localIEN{};
@@ -186,7 +195,7 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
             std::string filename = fm->GetPartitionFilename(base_name, count);
             fm->WritePartition(filename, nlocalfunc,
                 nlocalelemx, nlocalelemy,
-                elem_size1, elem_size2, localCP, localID, ghostID,
+                elem_size1, elem_size2, localCP, localID, ghostID, localDir,
                 localIEN, localNURBSExtraction1, localNURBSExtraction2);
 
             std::cout << "Partition " << count << " generated." << std::endl;
@@ -255,6 +264,7 @@ void Partition::GeneratePartition(const int &nElemX, const int &nElemY,
 
     int newcount = 0;
     std::vector<int> newID(m*n,-1);
+    std::vector<int> totalID{};
     for (int jj = 0; jj < part_num_y; ++jj)
     {
         for (int ii = 0; ii < part_num_x; ++ii)
@@ -268,6 +278,7 @@ void Partition::GeneratePartition(const int &nElemX, const int &nElemY,
                     const int global = globalj * m + globali;
                     if (ID[global] != -1)
                         newID[global] = newcount;
+                    totalID.push_back(newcount);
                     ++newcount;
                 }
             }
@@ -322,6 +333,13 @@ void Partition::GeneratePartition(const int &nElemX, const int &nElemY,
                 localID.push_back(newID[local_to_global_total[ii]]);
             }
 
+            std::vector<int> localDir{};
+            for (int ii = 0; ii < local_to_global.size(); ++ii)
+            {
+                if (newID[local_to_global[ii]] == -1)
+                    localDir.push_back(totalID[local_to_global[ii]]);
+            }
+
             std::vector<int> localIEN{};
             for (int localj = elem_start_idx_y[j]; localj <= elem_end_idx_y[j]; ++localj)
             {
@@ -342,7 +360,7 @@ void Partition::GeneratePartition(const int &nElemX, const int &nElemY,
 
             std::string filename = fm->GetPartitionFilename(base_name, count);
             fm->WritePartition(filename, nlocalfunc,
-                nlocalelemx, nlocalelemy, localCP, localID, localIEN);
+                nlocalelemx, nlocalelemy, localCP, localID, localDir, localIEN);
 
             std::cout << "Partition " << count << " generated." << std::endl;
         }

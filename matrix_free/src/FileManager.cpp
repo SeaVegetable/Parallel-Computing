@@ -9,6 +9,7 @@ void FileManager::WritePartition(const std::string &filename,
     const std::vector<double> &CP,
     const std::vector<int> &ID,
     const std::vector<int> &ghostID,
+    const std::vector<int> &Dir,
     const std::vector<int> &IEN,
     const std::vector<double> &NURBSExtraction1,
     const std::vector<double> &NURBSExtraction2) const
@@ -32,6 +33,10 @@ void FileManager::WritePartition(const std::string &filename,
 
     file << "ghostID" << std::endl;
     for (int ii = 0; ii < ghostID.size(); ++ii) file << ghostID[ii] << " ";
+    file << std::endl;
+
+    file << "Dir" << std::endl;
+    for (int ii = 0; ii < Dir.size(); ++ii) file << Dir[ii] << " ";
     file << std::endl;
 
     file << "IEN" << std::endl;
@@ -69,6 +74,7 @@ void FileManager::WritePartition(const std::string &filename,
     const int &nlocalelemy,
     const std::vector<double> &CP,
     const std::vector<int> &ID,
+    const std::vector<int> &Dir,
     const std::vector<int> &IEN) const
 {
     std::ofstream file(filename.c_str());
@@ -86,6 +92,10 @@ void FileManager::WritePartition(const std::string &filename,
 
     file << "ID" << std::endl;
     for (int ii = 0; ii < ID.size(); ++ii) file << ID[ii] << " ";
+    file << std::endl;
+
+    file << "Dir" << std::endl;
+    for (int ii = 0; ii < Dir.size(); ++ii) file << Dir[ii] << " ";
     file << std::endl;
 
     file << "IEN" << std::endl;
@@ -110,6 +120,7 @@ void FileManager::ReadPartition(const std::string &filename,
     std::vector<double> &CP,
     std::vector<int> &ID,
     std::vector<int> &ghostID,
+    std::vector<int> &Dir,
     std::vector<int> &IEN,
     std::vector<double> &NURBSExtraction1,
     std::vector<double> &NURBSExtraction2) const
@@ -209,6 +220,20 @@ void FileManager::ReadPartition(const std::string &filename,
                     ghostID_ss.ignore();
             }
         }
+        else if (line == "Dir")
+        {
+            std::string Dir_str;
+            std::getline(file, Dir_str);
+            std::istringstream Dir_ss(Dir_str);
+            Dir.clear();
+            int i;
+            while (Dir_ss >> i)
+            {
+                Dir.push_back(i);
+                if (Dir_ss.peek() == ' ')
+                    Dir_ss.ignore();
+            }
+        }
         else if (line == "IEN")
         {
             std::string IEN_str;
@@ -260,6 +285,7 @@ void FileManager::ReadPartition(const std::string &filename,
     int &nlocalelemy,
     std::vector<double> &CP,
     std::vector<int> &ID,
+    std::vector<int> &Dir,
     std::vector<int> &IEN) const
 {
     std::ifstream file(filename.c_str());
@@ -313,6 +339,20 @@ void FileManager::ReadPartition(const std::string &filename,
                 ID.push_back(i);
                 if (ID_ss.peek() == ' ')
                     ID_ss.ignore();
+            }
+        }
+        else if (line == "Dir")
+        {
+            std::string Dir_str;
+            std::getline(file, Dir_str);
+            std::istringstream Dir_ss(Dir_str);
+            Dir.clear();
+            int i;
+            while (Dir_ss >> i)
+            {
+                Dir.push_back(i);
+                if (Dir_ss.peek() == ' ')
+                    Dir_ss.ignore();
             }
         }
         else if (line == "IEN")
