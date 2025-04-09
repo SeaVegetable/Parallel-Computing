@@ -1,7 +1,7 @@
 #include "GlobalAssembly.hpp"
 
 GlobalAssembly::GlobalAssembly(const std::vector<int> &IEN, const std::vector<int> &ID,
-    LocalAssembly * const &locassem, const int &nLocBas,
+    , const std::vector<int> &Dir, LocalAssembly * const &locassem, const int &nLocBas,
     const int &nlocalfunc, const int &nlocalelemx, const int &nlocalelemy)
     : nLocBas(nLocBas), nlocalfunc(nlocalfunc),
       nlocalelemx(nlocalelemx), nlocalelemy(nlocalelemy)
@@ -17,7 +17,7 @@ GlobalAssembly::GlobalAssembly(const std::vector<int> &IEN, const std::vector<in
     VecSetOption(F, VEC_IGNORE_NEGATIVE_INDICES, PETSC_TRUE);
 
     MatSetOption(K, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
-    AssemNonZeroEstimate(locassem, IEN, ID);
+    AssemNonZeroEstimate(locassem, IEN, ID, Dir);
 
     std::vector<int> Dnz, Onz;
     NonZeroCount(K, Dnz, Onz);
@@ -73,7 +73,8 @@ void GlobalAssembly::NonZeroCount(const Mat &K, std::vector<int> &dnz, std::vect
 
 void GlobalAssembly::AssemNonZeroEstimate(LocalAssembly * const &locassem,
     const std::vector<int> &IEN,
-    const std::vector<int> &ID)
+    const std::vector<int> &ID,
+    const std::vector<int> &Dir)
 {
     PetscInt * eID = new PetscInt[nLocBas];
 
@@ -93,6 +94,8 @@ void GlobalAssembly::AssemNonZeroEstimate(LocalAssembly * const &locassem,
 
     delete[] eID; eID = nullptr;
 
+    DirichletBCK(Dir);
+
     MatAssemblyBegin(K, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(K, MAT_FINAL_ASSEMBLY);
 }
@@ -100,6 +103,7 @@ void GlobalAssembly::AssemNonZeroEstimate(LocalAssembly * const &locassem,
 void GlobalAssembly::AssemStiffnessLoad(LocalAssembly * const &locassem,
     const std::vector<int> &IEN,
     const std::vector<int> &ID,
+    const std::vector<int> &Dir,
     const std::vector<double> &CP,
     const std::vector<double> &NURBSExtraction1,
     const std::vector<double> &NURBSExtraction2,
@@ -145,6 +149,8 @@ void GlobalAssembly::AssemStiffnessLoad(LocalAssembly * const &locassem,
 
     delete[] eID; eID = nullptr;
 
+    DirichletBC(Dir);
+
     MatAssemblyBegin(K, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(K, MAT_FINAL_ASSEMBLY);
     VecAssemblyBegin(F);
@@ -154,6 +160,7 @@ void GlobalAssembly::AssemStiffnessLoad(LocalAssembly * const &locassem,
 void GlobalAssembly::AssemStiffnessLoad(LocalAssembly * const &locassem,
     const std::vector<int> &IEN,
     const std::vector<int> &ID,
+    const std::vector<int> &Dir,
     const std::vector<double> &CP,
     ElementFEM * const &elem)
 {
@@ -182,8 +189,25 @@ void GlobalAssembly::AssemStiffnessLoad(LocalAssembly * const &locassem,
 
     delete[] eID; eID = nullptr;
 
+    DirichletBC(Dir);
+
     MatAssemblyBegin(K, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(K, MAT_FINAL_ASSEMBLY);
     VecAssemblyBegin(F);
     VecAssemblyEnd(F);
+}
+
+void GlobalAssembly::DirichletBCK(const std::vector<int> &Dir)
+{
+    for (int i = 0; i < static_cast<int>(Dir.size()); ++i)
+        MatSetValue(K, i, i, 1.0, INSERT_VALUES);
+}
+
+void GlobalAssembly::DirichletBC(const std::vector<int> &Dir)
+{
+    for (int i = 0; i < static_cast<int>(Dir.size()); ++i)
+    {
+        MatSetValue(K, i, i, 1.0, INSERT_VALUES);
+        VecSetValue(F, i, 0.0, INSERT_VALUES);
+    }
 }

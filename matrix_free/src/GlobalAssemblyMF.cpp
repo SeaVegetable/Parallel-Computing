@@ -1,15 +1,26 @@
 #include "GlobalAssemblyMF.hpp"
 
 GlobalAssemblyMF::GlobalAssemblyMF(const int &nLocBas, const int &nlocalfunc,
-    const int &nlocalelemx, const int &nlocalelemy)
+    const int &nlocalelemx, const int &nlocalelemy, const std::vector<int> &ghostID)
     : nLocBas(nLocBas), nlocalfunc(nlocalfunc),
       nlocalelemx(nlocalelemx), nlocalelemy(nlocalelemy)
 {
-    VecCreate(PETSC_COMM_WORLD, &F);
-    VecSetSizes(F, nlocalfunc, PETSC_DECIDE);
+    const int nghost = static_cast<int>(ghostID.size());
+
+    PetscInt * ghostIdx = new PetscInt[nghost];
+
+    for (int ii = 0; ii < nghost; ++ii)
+    {
+        ghostIdx[ii] = ghostID[ii];
+    }
+    
+    VecCreateGhost(PETSC_COMM_WORLD, nlocalfunc, PETSC_DETERMINE,
+        nghost, ghostIdx, &F);
     VecSetFromOptions(F);
     VecSet(F, 0.0);
     VecSetOption(F, VEC_IGNORE_NEGATIVE_INDICES, PETSC_TRUE);
+
+    delete[] ghostIdx; ghostIdx = nullptr;
 }
 
 void GlobalAssemblyMF::AssemLoad(LocalAssemblyMF * const &locassem,

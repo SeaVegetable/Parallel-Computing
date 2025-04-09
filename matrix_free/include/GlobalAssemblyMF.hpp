@@ -10,7 +10,8 @@ class GlobalAssemblyMF
         Vec F;
 
         GlobalAssemblyMF(const int &nLocBas, const int &nlocalfunc,
-            const int &nlocalelemx, const int &nlocalelemy);
+            const int &nlocalelemx, const int &nlocalelemy,
+            const std::vector<int> &ghostID);
             
         ~GlobalAssemblyMF()
         {

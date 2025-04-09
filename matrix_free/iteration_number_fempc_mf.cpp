@@ -28,6 +28,7 @@ PetscErrorCode MyPCDestroy(PC pc)
 typedef struct {
     std::vector<double> CP;
     std::vector<int> ID;
+    std::vector<int> ghostID;
     std::vector<int> IEN;
     std::vector<double> elem_size1;
     std::vector<double> elem_size2;
@@ -96,13 +97,13 @@ int main(int argc, char *argv[])
     fm->ReadPartition(filename, nlocalfunc,
         nlocalelemx, nlocalelemy,
         data->elem_size1, data->elem_size2,
-        data->CP, data->ID, data->IEN,
+        data->CP, data->ID, data->ghostID, data->IEN,
         data->NURBSExtraction1, data->NURBSExtraction2);
     
     data->elem = elemmf;
     data->locassem = locassemmf;
     data->globalassem = new GlobalAssemblyMF(nLocBas, nlocalfunc,
-        nlocalelemx, nlocalelemy);
+        nlocalelemx, nlocalelemy, data->ghostID);
 
     data->globalassem->AssemLoad(data->locassem, data->IEN,
         data->ID, data->CP,

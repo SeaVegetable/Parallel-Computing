@@ -11,7 +11,7 @@ class GlobalAssembly
         Vec F;
 
         GlobalAssembly(const std::vector<int> &IEN, const std::vector<int> &ID,
-            LocalAssembly * const &locassem, const int &nLocBas,
+            const std::vector<int> &Dir, LocalAssembly * const &locassem, const int &nLocBas,
             const int &nlocalfunc, const int &nlocalelemx, const int &nlocalelemy);
 
         ~GlobalAssembly();
@@ -20,11 +20,13 @@ class GlobalAssembly
 
         void AssemNonZeroEstimate(LocalAssembly * const &locassem,
             const std::vector<int> &IEN,
-            const std::vector<int> &ID);
+            const std::vector<int> &ID,
+            const std::vector<int> &Dir);
 
         void AssemStiffnessLoad(LocalAssembly * const &locassem,
             const std::vector<int> &IEN,
             const std::vector<int> &ID,
+            const std::vector<int> &Dir,
             const std::vector<double> &CP,
             const std::vector<double> &NURBSExtraction1,
             const std::vector<double> &NURBSExtraction2,
@@ -35,6 +37,7 @@ class GlobalAssembly
         void AssemStiffnessLoad(LocalAssembly * const &locassem,
             const std::vector<int> &IEN,
             const std::vector<int> &ID,
+            const std::vector<int> &Dir,
             const std::vector<double> &CP,
             ElementFEM * const &elem);
     
@@ -43,6 +46,10 @@ class GlobalAssembly
         const int nlocalfunc;
         const int nlocalelemx;
         const int nlocalelemy;
+
+        void DirichletBCK(const std::vector<int> &Dir);
+
+        void DirichletBC(const std::vector<int> &Dir);
 };
 
 #endif
