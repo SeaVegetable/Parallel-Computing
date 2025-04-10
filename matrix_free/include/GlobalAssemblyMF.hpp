@@ -21,6 +21,7 @@ class GlobalAssemblyMF
         void AssemLoad(LocalAssemblyMF * const &locassem,
             const std::vector<int> &IEN,
             const std::vector<int> &ID,
+            const std::vector<int> &Dir,
             const std::vector<double> &CP,
             const std::vector<double> &NURBSExtraction1,
             const std::vector<double> &NURBSExtraction2,
@@ -31,6 +32,8 @@ class GlobalAssemblyMF
         void MatMulMF(LocalAssemblyMF * const &locassem,
             const std::vector<int> &IEN,
             const std::vector<int> &ID,
+            const std::vector<int> &Dir,
+            const std::vector<int> &EQ,
             const std::vector<double> &CP,
             const std::vector<double> &NURBSExtraction1,
             const std::vector<double> &NURBSExtraction2,
@@ -44,6 +47,10 @@ class GlobalAssemblyMF
         const int nlocalfunc;
         const int nlocalelemx;
         const int nlocalelemy;
+
+        void DirichletBC(const std::vector<int> &Dir);
+
+        void DirichletBCFout(const std::vector<int> &Dir);
 };
 
 #endif
