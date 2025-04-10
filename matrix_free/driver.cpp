@@ -208,6 +208,9 @@ int main(int argc, char *argv[])
 
     std::vector<double> CP;
     std::vector<int> ID;
+    std::vector<int> ghostID;
+    std::vector<int> Dir;
+    std::vector<int> EQ;
     std::vector<int> IEN;
     std::vector<double> elem_size1;
     std::vector<double> elem_size2;
@@ -221,24 +224,26 @@ int main(int argc, char *argv[])
     fm->ReadPartition(filename, nlocalfunc,
         nlocalelemx, nlocalelemy,
         elem_size1, elem_size2,
-        CP, ID, IEN, NURBSExtraction1, NURBSExtraction2);
+        CP, ID, ghostID, Dir, EQ,
+        IEN, NURBSExtraction1, NURBSExtraction2);
     
     Element * elem = new Element(p, q);
     const int nLocBas = elem->GetNumLocalBasis();
     LocalAssembly * locassem = new LocalAssembly(p, q);
-    GlobalAssembly * globalassem = new GlobalAssembly(IEN, ID, locassem,
+    GlobalAssembly * globalassem = new GlobalAssembly(IEN, ID, Dir, locassem,
         nLocBas, nlocalfunc, nlocalelemx, nlocalelemy);
     
     MatSetOption(globalassem->K, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_TRUE);
 
-    globalassem->AssemStiffnessLoad(locassem, IEN, ID, CP,
-        NURBSExtraction1, NURBSExtraction2,
+    globalassem->AssemStiffnessLoad(locassem, IEN, ID, Dir,
+        CP, NURBSExtraction1, NURBSExtraction2,
         elem_size1, elem_size2, elem);
 
     MPI_Barrier(PETSC_COMM_WORLD);
 
     std::vector<double> CP_fem;
     std::vector<int> ID_fem;
+    std::vector<int> Dir_fem;
     std::vector<int> IEN_fem;
     int nlocalfunc_fem;
     int nlocalelemx_fem;
@@ -248,16 +253,16 @@ int main(int argc, char *argv[])
     std::string filename_fem = fm->GetPartitionFilename(base_name_fem, rank);
     fm->ReadPartition(filename_fem, nlocalfunc_fem,
         nlocalelemx_fem, nlocalelemy_fem,
-        CP_fem, ID_fem, IEN_fem);
+        CP_fem, ID_fem, Dir_fem, IEN_fem);
 
     ElementFEM * elem_fem = new ElementFEM(1, 1);
     LocalAssembly * locassem_fem = new LocalAssembly(1, 1);
-    GlobalAssembly * globalassem_fem = new GlobalAssembly(IEN_fem, ID_fem, locassem_fem,
+    GlobalAssembly * globalassem_fem = new GlobalAssembly(IEN_fem, ID_fem, Dir_fem, locassem_fem,
         4, nlocalfunc_fem, nlocalelemx_fem, nlocalelemy_fem);
     
     MatSetOption(globalassem_fem->K, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_TRUE);
     
-    globalassem_fem->AssemStiffnessLoad(locassem_fem, IEN_fem, ID_fem, CP_fem, elem_fem);
+    globalassem_fem->AssemStiffnessLoad(locassem_fem, IEN_fem, ID_fem, Dir_fem, CP_fem, elem_fem);
 
     MPI_Barrier(PETSC_COMM_WORLD);
     PetscPrintf(PETSC_COMM_WORLD, "Assembling stiffness matrix and load vector...done\n");
