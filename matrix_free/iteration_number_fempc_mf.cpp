@@ -28,7 +28,8 @@ PetscErrorCode MyPCDestroy(PC pc)
 typedef struct {
     std::vector<double> CP;
     std::vector<int> ID;
-    std::vector<int> ghostID;
+    std::vector<int> Dir;
+    std::vector<int> EQ;
     std::vector<int> IEN;
     std::vector<double> elem_size1;
     std::vector<double> elem_size2;
@@ -45,7 +46,7 @@ PetscErrorCode MyMatMult(Mat A, Vec x, Vec y)
     MatShellGetContext(A, (void**)&data);
     
     data->globalassem->MatMulMF(data->locassem,
-        data->IEN, data->ID, data->CP,
+        data->IEN, data->ID, data->Dir, data->EQ, data->CP,
         data->NURBSExtraction1, data->NURBSExtraction2,
         data->elem_size1, data->elem_size2,
         data->elem, x, y);
@@ -86,6 +87,7 @@ int main(int argc, char *argv[])
     int nlocalfunc;
     int nlocalelemx;
     int nlocalelemy;
+    std::vector<int> ghostID;
     ElementMF * elemmf = new ElementMF(p, q);
     const int nLocBas = elemmf->GetNumLocalBasis();
     LocalAssemblyMF * locassemmf = new LocalAssemblyMF(p, q);
@@ -97,23 +99,24 @@ int main(int argc, char *argv[])
     fm->ReadPartition(filename, nlocalfunc,
         nlocalelemx, nlocalelemy,
         data->elem_size1, data->elem_size2,
-        data->CP, data->ID, data->ghostID, data->IEN,
+        data->CP, data->ID, ghostID, data->Dir, data->EQ, data->IEN,
         data->NURBSExtraction1, data->NURBSExtraction2);
     
     data->elem = elemmf;
     data->locassem = locassemmf;
     data->globalassem = new GlobalAssemblyMF(nLocBas, nlocalfunc,
-        nlocalelemx, nlocalelemy, data->ghostID);
+        nlocalelemx, nlocalelemy, ghostID);
 
     data->globalassem->AssemLoad(data->locassem, data->IEN,
-        data->ID, data->CP,
+        data->ID, data->Dir, data->CP,
         data->NURBSExtraction1, data->NURBSExtraction2,
-        data->elem_size1, data->elem_size2, elemmf);
+        data->elem_size1, data->elem_size2, data->elem);
 
     MPI_Barrier(PETSC_COMM_WORLD);
 
     std::vector<double> CP_fem;
     std::vector<int> ID_fem;
+    std::vector<int> Dir_fem;
     std::vector<int> IEN_fem;
     int nlocalfunc_fem;
     int nlocalelemx_fem;
@@ -123,16 +126,16 @@ int main(int argc, char *argv[])
     std::string filename_fem = fm->GetPartitionFilename(base_name_fem, rank);
     fm->ReadPartition(filename_fem, nlocalfunc_fem,
         nlocalelemx_fem, nlocalelemy_fem,
-        CP_fem, ID_fem, IEN_fem);
+        CP_fem, ID_fem, Dir_fem, IEN_fem);
 
     ElementFEM * elem_fem = new ElementFEM(1, 1);
     LocalAssembly * locassem_fem = new LocalAssembly(1, 1);
-    GlobalAssembly * globalassem_fem = new GlobalAssembly(IEN_fem, ID_fem, locassem_fem,
+    GlobalAssembly * globalassem_fem = new GlobalAssembly(IEN_fem, ID_fem, Dir_fem, locassem_fem,
         4, nlocalfunc_fem, nlocalelemx_fem, nlocalelemy_fem);
     
     MatSetOption(globalassem_fem->K, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_TRUE);
     
-    globalassem_fem->AssemStiffnessLoad(locassem_fem, IEN_fem, ID_fem, CP_fem, elem_fem);
+    globalassem_fem->AssemStiffnessLoad(locassem_fem, IEN_fem, ID_fem, Dir_fem, CP_fem, elem_fem);
 
     MPI_Barrier(PETSC_COMM_WORLD);
     PetscPrintf(PETSC_COMM_WORLD, "Assembling stiffness matrix and load vector...done\n");
@@ -181,29 +184,29 @@ int main(int argc, char *argv[])
     KSPSetFromOptions(ksp);
     KSPSolve(ksp, data->globalassem->F, u);
 
-    // PetscTime(&tend);
-    // PetscLogDouble time = tend - tstart;
-    // PetscPrintf(PETSC_COMM_WORLD, "Time: %f\n", time);
+    PetscTime(&tend);
+    PetscLogDouble time = tend - tstart;
+    PetscPrintf(PETSC_COMM_WORLD, "Time: %f\n", time);
 
-    // PetscInt num_iterations;
-    // KSPGetIterationNumber(ksp, &num_iterations);
+    PetscInt num_iterations;
+    KSPGetIterationNumber(ksp, &num_iterations);
 
-    // if (rank == 0)
-    // {
-    //     std::cout << "Number of KSP iterations: " << num_iterations << std::endl;
-    // }
+    if (rank == 0)
+    {
+        std::cout << "Number of KSP iterations: " << num_iterations << std::endl;
+    }
 
-    // delete fm; fm = nullptr;
-    // delete data->elem; data->elem = nullptr;
-    // delete data->locassem; data->locassem = nullptr;
-    // delete data->globalassem; data->globalassem = nullptr;
-    // delete data; data = nullptr;
-    // delete elem_fem; elem_fem = nullptr;
-    // delete locassem_fem; locassem_fem = nullptr;
-    // delete globalassem_fem; globalassem_fem = nullptr;
+    delete fm; fm = nullptr;
+    delete data->elem; data->elem = nullptr;
+    delete data->locassem; data->locassem = nullptr;
+    delete data->globalassem; data->globalassem = nullptr;
+    delete data; data = nullptr;
+    delete elem_fem; elem_fem = nullptr;
+    delete locassem_fem; locassem_fem = nullptr;
+    delete globalassem_fem; globalassem_fem = nullptr;
 
-    // VecDestroy(&u);
-    // KSPDestroy(&ksp);
+    VecDestroy(&u);
+    KSPDestroy(&ksp);
     
     PetscFinalize();
     return 0;
