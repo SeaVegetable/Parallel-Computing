@@ -68,6 +68,9 @@ void GlobalAssemblyMF::AssemLoad(LocalAssemblyMF * const &locassem,
         }
     }
 
+    VecAssemblyBegin(F);
+    VecAssemblyEnd(F);
+
     delete[] eID; eID = nullptr;
 
     DirichletBC(Dir);
@@ -126,6 +129,8 @@ void GlobalAssemblyMF::MatMulMF(LocalAssemblyMF * const &locassem,
             VecSetValues(y, nLocBas, eID, locassem->Floc_out, ADD_VALUES);
         }
     }
+    VecAssemblyBegin(y);
+    VecAssemblyEnd(y);
 
     delete[] eID; eID = nullptr;
     delete[] eEQ; eEQ = nullptr;
