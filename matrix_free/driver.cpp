@@ -224,7 +224,7 @@ int main(int argc, char *argv[])
     fm->ReadPartition(filename, nlocalfunc,
         nlocalelemx, nlocalelemy,
         elem_size1, elem_size2,
-        CP, ID, ghostID, Dir, EQ,
+        CP, ID, ghostID, Dir,
         IEN, NURBSExtraction1, NURBSExtraction2);
     
     Element * elem = new Element(p, q);

@@ -48,7 +48,7 @@ PetscErrorCode MyMatMult(Mat A, Vec x, Vec y)
     VecSet(y, 0.0);
     
     data->globalassem->MatMulMF(data->locassem,
-        data->IEN, data->ID, data->Dir, data->EQ, data->CP,
+        data->IEN, data->ID, data->Dir, data->CP,
         data->NURBSExtraction1, data->NURBSExtraction2,
         data->elem_size1, data->elem_size2,
         data->elem, x, y);
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
     fm->ReadPartition(filename, nlocalfunc,
         nlocalelemx, nlocalelemy,
         data->elem_size1, data->elem_size2,
-        data->CP, data->ID, ghostID, data->Dir, data->EQ, data->IEN,
+        data->CP, data->ID, ghostID, data->Dir, data->IEN,
         data->NURBSExtraction1, data->NURBSExtraction2);
     
     data->elem = elemmf;
@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
     VecDuplicate(data->globalassem->F, &u);
     VecSet(u, 0.0);
     data->globalassem->MatMulMF(data->locassem,
-        data->IEN, data->ID, data->Dir, data->EQ, data->CP,
+        data->IEN, data->ID, data->Dir, data->CP,
         data->NURBSExtraction1, data->NURBSExtraction2,
         data->elem_size1, data->elem_size2,
         data->elem, data->globalassem->F, u);
