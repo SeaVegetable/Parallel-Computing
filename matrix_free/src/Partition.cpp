@@ -70,6 +70,51 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
     }
     elem_end_idx_y[part_num_y - 1] = nElemY - 1;
 
+    std::vector<int> old_to_new{};
+    std::vector<int> new_to_old{};
+    int old_to_new_count = 0;
+    for (int jj = 0; jj < part_num_y; ++jj)
+    {
+        for (int ii = 0; ii < part_num_x; ++ii)
+        {
+            for (int localj = 0; localj < num_local_funcs_y[jj]; ++localj)
+            {
+                for (int locali = 0; locali < num_local_funcs_x[ii]; ++locali)
+                {
+                    old_to_new.push_back(old_to_new_count);
+                    old_to_new_count++;
+                }
+            }
+        }
+    }
+
+    for (int ii = 0; ii < static_cast<int>(old_to_new.size()); ++ii)
+    {
+        new_to_old.push_back(std::distance(old_to_new.begin(),
+            std::find(old_to_new.begin(), old_to_new.end(), ii)));
+    }
+
+    std::vector<double> newCP = CP;
+    for (int ii = 0; ii < CP.size() / dim; ++ii)
+    {
+        for (int jj = 0; jj <  dim; ++jj)
+        {
+            newCP[old_to_new[ii] * dim + jj] = CP[ii * dim + jj];
+        }
+    }
+
+    std::vector<int> newID = ID;
+    for (int ii = 0; ii < ID.size(); ++ii)
+    {
+        newID[old_to_new[ii]] = ID[ii];
+    }
+
+    std::vector<int> newIEN = IEN;
+    for (int ii = 0; ii < IEN.size(); ++ii)
+    {
+        newIEN[ii] = old_to_new[IEN[ii]];
+    }
+
     int i,j;
     #pragma omp parallel for collapse(2) private(i, j)
     for (j = 0; j < part_num_y; ++j)
@@ -90,7 +135,7 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
                     int index = localj * nElemX + locali;
                     for (int ii = 0; ii < nLocBas; ++ii)
                     {
-                        local_to_global_total.push_back(IEN[index * nLocBas + ii]);
+                        local_to_global_total.push_back(newIEN[index * nLocBas + ii]);
                     }
                 }
             }
@@ -106,25 +151,40 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
                     const int globali = i * part_size_x + locali;
                     const int globalj = j * part_size_y + localj;
                     const int global = globalj * m + globali;
-                    local_to_global.push_back(global);
+                    local_to_global.push_back(old_to_new[global]);
                 }
             }
 
-            std::vector<int> tempID{};
+            std::vector<int> local_to_global_ghost{};
+            for (int ii = 0; ii < local_to_global_total.size(); ++ii)
+            {
+                if (std::find(local_to_global.begin(), local_to_global.end(), local_to_global_total[ii]) == local_to_global.end())
+                {
+                    local_to_global_ghost.push_back(local_to_global_total[ii]);
+                }
+            }
+
+            local_to_global_total.clear();
+            local_to_global_total.insert(local_to_global_total.end(), local_to_global.begin(), local_to_global.end());
+            local_to_global_total.insert(local_to_global_total.end(), local_to_global_ghost.begin(), local_to_global_ghost.end());
+
             std::vector<double> localCP{};
             std::vector<int> localID{};
             for (int ii = 0; ii < local_to_global_total.size(); ++ii)
             {
                 for (int jj = 0; jj < dim; ++jj)
                 {
-                    localCP.push_back(CP[local_to_global_total[ii] * dim + jj]);
+                    localCP.push_back(newCP[local_to_global_total[ii] * dim + jj]);
                 }
-                if (std::find(local_to_global.begin(), local_to_global.end(), local_to_global_total[ii]) != local_to_global.end())
-                    tempID.push_back(ID[local_to_global_total[ii]]);
-                else
-                    tempID.push_back(-1);
-                localID.push_back(ID[local_to_global_total[ii]]);
-            }           
+                localID.push_back(newID[local_to_global_total[ii]]);
+            }
+
+            std::vector<int> localDir{};
+            for (int ii = 0; ii < local_to_global.size(); ++ii)
+            {
+                if (local_to_global[ii] == -1)
+                    localDir.push_back(local_to_global[ii]);
+            }
 
             std::vector<int> localIEN{};
             for (int localj = elem_start_idx_y[j]; localj <= elem_end_idx_y[j]; ++localj)
@@ -135,7 +195,7 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
                     for (int ii = 0; ii < nLocBas; ++ii)
                     {
                         localIEN.push_back(std::distance(local_to_global_total.begin(),
-                            std::find(local_to_global_total.begin(), local_to_global_total.end(), IEN[index * nLocBas + ii])));
+                            std::find(local_to_global_total.begin(), local_to_global_total.end(), newIEN[index * nLocBas + ii])));
                     }
                 }
             }
@@ -160,15 +220,15 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
                     std::back_inserter(localNURBSExtraction2));
             }
 
-            const int nlocalfunc = std::count_if(tempID.begin(), tempID.end(), [](int id) { return id != -1; });
+            const int nlocalfunc = local_to_global.size();
             const int nlocalelemx = elem_end_idx_x[i] - elem_start_idx_x[i] + 1;
             const int nlocalelemy = elem_end_idx_y[j] - elem_start_idx_y[j] + 1;
 
             std::string filename = fm->GetPartitionFilename(base_name, count);
             fm->WritePartition(filename, nlocalfunc,
                 nlocalelemx, nlocalelemy,
-                elem_size1, elem_size2, localCP, localID,
-                localIEN, localNURBSExtraction1, localNURBSExtraction2);
+                elem_size1, elem_size2, localCP, localID, local_to_global_ghost,
+                localDir, localIEN, localNURBSExtraction1, localNURBSExtraction2);
 
             std::cout << "Partition " << count << " generated." << std::endl;
         }
@@ -234,6 +294,51 @@ void Partition::GeneratePartition(const int &nElemX, const int &nElemY,
     }
     elem_end_idx_y[part_num_y - 1] = nElemY - 1;
 
+    std::vector<int> old_to_new{};
+    std::vector<int> new_to_old{};
+    int old_to_new_count = 0;
+    for (int jj = 0; jj < part_num_y; ++jj)
+    {
+        for (int ii = 0; ii < part_num_x; ++ii)
+        {
+            for (int localj = 0; localj < num_local_funcs_y[jj]; ++localj)
+            {
+                for (int locali = 0; locali < num_local_funcs_x[ii]; ++locali)
+                {
+                    old_to_new.push_back(old_to_new_count);
+                    old_to_new_count++;
+                }
+            }
+        }
+    }
+
+    for (int ii = 0; ii < static_cast<int>(old_to_new.size()); ++ii)
+    {
+        new_to_old.push_back(std::distance(old_to_new.begin(),
+            std::find(old_to_new.begin(), old_to_new.end(), ii)));
+    }
+
+    std::vector<double> newCP = CP;
+    for (int ii = 0; ii < CP.size() / dim; ++ii)
+    {
+        for (int jj = 0; jj <  dim; ++jj)
+        {
+            newCP[old_to_new[ii] * dim + jj] = CP[ii * dim + jj];
+        }
+    }
+
+    std::vector<int> newID = ID;
+    for (int ii = 0; ii < ID.size(); ++ii)
+    {
+        newID[old_to_new[ii]] = ID[ii];
+    }
+
+    std::vector<int> newIEN = IEN;
+    for (int ii = 0; ii < IEN.size(); ++ii)
+    {
+        newIEN[ii] = old_to_new[IEN[ii]];
+    }
+
     int i,j;
     #pragma omp parallel for collapse(2) private(i, j)
     for (j = 0; j < part_num_y; ++j)
@@ -251,7 +356,7 @@ void Partition::GeneratePartition(const int &nElemX, const int &nElemY,
                     int index = localj * nElemX + locali;
                     for (int ii = 0; ii < nLocBas; ++ii)
                     {
-                        local_to_global_total.push_back(IEN[index * nLocBas + ii]);
+                        local_to_global_total.push_back(newIEN[index * nLocBas + ii]);
                     }
                 }
             }
@@ -267,24 +372,39 @@ void Partition::GeneratePartition(const int &nElemX, const int &nElemY,
                     const int globali = i * part_size_x + locali;
                     const int globalj = j * part_size_y + localj;
                     const int global = globalj * m + globali;
-                    local_to_global.push_back(global);
+                    local_to_global.push_back(old_to_new[global]);
                 }
             }
 
-            std::vector<int> tempID{};
+            std::vector<int> local_to_global_ghost{};
+            for (int ii = 0; ii < local_to_global_total.size(); ++ii)
+            {
+                if (std::find(local_to_global.begin(), local_to_global.end(), local_to_global_total[ii]) == local_to_global.end())
+                {
+                    local_to_global_ghost.push_back(local_to_global_total[ii]);
+                }
+            }
+
+            local_to_global_total.clear();
+            local_to_global_total.insert(local_to_global_total.end(), local_to_global.begin(), local_to_global.end());
+            local_to_global_total.insert(local_to_global_total.end(), local_to_global_ghost.begin(), local_to_global_ghost.end());
+
             std::vector<double> localCP{};
             std::vector<int> localID{};
             for (int ii = 0; ii < local_to_global_total.size(); ++ii)
             {
                 for (int jj = 0; jj < dim; ++jj)
                 {
-                    localCP.push_back(CP[local_to_global_total[ii] * dim + jj]);
+                    localCP.push_back(newCP[local_to_global_total[ii] * dim + jj]);
                 }
-                if (std::find(local_to_global.begin(), local_to_global.end(), local_to_global_total[ii]) != local_to_global.end())
-                    tempID.push_back(ID[local_to_global_total[ii]]);
-                else
-                    tempID.push_back(-1);
-                localID.push_back(ID[local_to_global_total[ii]]);
+                localID.push_back(newID[local_to_global_total[ii]]);
+            }
+
+            std::vector<int> localDir{};
+            for (int ii = 0; ii < local_to_global.size(); ++ii)
+            {
+                if (local_to_global[ii] == -1)
+                    localDir.push_back(local_to_global[ii]);
             }
 
             std::vector<int> localIEN{};
@@ -296,18 +416,18 @@ void Partition::GeneratePartition(const int &nElemX, const int &nElemY,
                     for (int ii = 0; ii < nLocBas; ++ii)
                     {
                         localIEN.push_back(std::distance(local_to_global_total.begin(),
-                            std::find(local_to_global_total.begin(), local_to_global_total.end(), IEN[index * nLocBas + ii])));
+                            std::find(local_to_global_total.begin(), local_to_global_total.end(), newIEN[index * nLocBas + ii])));
                     }
                 }
             }
 
-            const int nlocalfunc = std::count_if(tempID.begin(), tempID.end(), [](int id) { return id != -1; });
+            const int nlocalfunc = local_to_global.size();
             const int nlocalelemx = elem_end_idx_x[i] - elem_start_idx_x[i] + 1;
             const int nlocalelemy = elem_end_idx_y[j] - elem_start_idx_y[j] + 1;
 
             std::string filename = fm->GetPartitionFilename(base_name, count);
             fm->WritePartition(filename, nlocalfunc,
-                nlocalelemx, nlocalelemy, localCP, localID, localIEN);
+                nlocalelemx, nlocalelemy, localCP, localID, localDir, localIEN);
 
             std::cout << "Partition " << count << " generated." << std::endl;
         }

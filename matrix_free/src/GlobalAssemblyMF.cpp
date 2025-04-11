@@ -83,7 +83,6 @@ void GlobalAssemblyMF::MatMulMF(LocalAssemblyMF * const &locassem,
     const std::vector<int> &IEN,
     const std::vector<int> &ID,
     const std::vector<int> &Dir,
-    const std::vector<int> &EQ,
     const std::vector<double> &CP,
     const std::vector<double> &NURBSExtraction1,
     const std::vector<double> &NURBSExtraction2,
@@ -108,7 +107,6 @@ void GlobalAssemblyMF::MatMulMF(LocalAssemblyMF * const &locassem,
             for (int j = 0; j < nLocBas; ++j)
             {
                 eID[j] = ID[IEN[elemIndex*nLocBas+j]];
-                eEQ[j] = EQ[IEN[elemIndex*nLocBas+j]];
                 eCP[2*j] = CP[2*IEN[elemIndex*nLocBas+j]];
                 eCP[2*j+1] = CP[2*IEN[elemIndex*nLocBas+j]+1];
             }
@@ -122,7 +120,7 @@ void GlobalAssemblyMF::MatMulMF(LocalAssemblyMF * const &locassem,
         
             elemmf->SetElement(eNURBSExtraction1, eNURBSExtraction2, elem_size1[ii], elem_size2[jj]);
 
-            VecGetValues(x, nLocBas, eEQ, locassem->Floc_in);
+            VecGetValues(x, nLocBas, eID, locassem->Floc_in);
 
             locassem->LocalMatMulMF(elemmf, eCP);
 
