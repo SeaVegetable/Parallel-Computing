@@ -17,6 +17,8 @@ class LocalAssemblyMF
             quad1 = new QuadraturePoint(p+1, 0, 1);
             quad2 = new QuadraturePoint(q+1, 0, 1);
             Floc = new PetscScalar[n];
+            Floc_in = new PetscScalar[n];
+            Floc_out = new PetscScalar[n];
         }
 
         ~LocalAssemblyMF()
@@ -24,6 +26,8 @@ class LocalAssemblyMF
             delete quad1; quad1 = nullptr;
             delete quad2; quad2 = nullptr;
             delete[] Floc; Floc = nullptr;
+            delete[] Floc_in; Floc_in = nullptr;
+            delete[] Floc_out; Floc_out = nullptr;
         }
 
         void AssemLocalLoad(ElementMF * const &elem,
