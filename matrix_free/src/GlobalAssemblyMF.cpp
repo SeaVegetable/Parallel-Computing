@@ -41,9 +41,9 @@ void GlobalAssemblyMF::AssemLoad(LocalAssemblyMF * const &locassem,
     std::vector<double> eNURBSExtraction1(pp*pp, 0.0);
     std::vector<double> eNURBSExtraction2(qq*qq, 0.0);
 
-    for (int jj = 0; jj < nlocalelemy; ++jj)
+    for (int jj = 0; jj < 1; ++jj)
     {
-        for (int ii = 0; ii < nlocalelemx; ++ii)
+        for (int ii = 0; ii < 1; ++ii)
         {
             int elemIndex = jj*nlocalelemx + ii;
             for (int j = 0; j < nLocBas; ++j)
@@ -102,9 +102,9 @@ void GlobalAssemblyMF::MatMulMF(LocalAssemblyMF * const &locassem,
     Vec localx;
     VecGhostGetLocalForm(x, &localx);
 
-    for (int jj = 0; jj < nlocalelemy; ++jj)
+    for (int jj = 0; jj < 1; ++jj)
     {
-        for (int ii = 0; ii < nlocalelemx; ++ii)
+        for (int ii = 0; ii < 1; ++ii)
         {
             int elemIndex = jj*nlocalelemx + ii;
             for (int j = 0; j < nLocBas; ++j)

@@ -120,9 +120,9 @@ void ElementMF::GenerateElement(const QuadraturePoint * const &quad1,
 
     JxW.clear();
 
-    for (int ii = 0; ii < nqp1; ++ii)
+    for (int jj = 0; jj < nqp2; ++jj)
     {
-        for (int jj = 0; jj < nqp1; ++jj)
+        for (int ii = 0; ii < nqp1; ++ii)
         {
             double jacobian;
             std::vector<double> R{};

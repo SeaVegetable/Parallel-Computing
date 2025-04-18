@@ -51,16 +51,16 @@ void LocalAssemblyMF::LocalMatMulMF(ElementMF * const &elem,
 
     for (int ii = 0; ii < nqp; ++ii)
     {
-        temp_x[ii] *= elem->get_JxW(ii);
-        temp_y[ii] *= elem->get_JxW(ii);
+        temp_x[ii] *= -elem->get_JxW(ii);
+        temp_y[ii] *= -elem->get_JxW(ii);
     }
 
     for (int ii = 0; ii < n; ++ii)
     {
         for (int jj = 0; jj < nqp; ++jj)
         {
-            Floc_out[ii] += elem->get_R(jj, ii) * temp_x[ii];
-            Floc_out[ii] += elem->get_R(jj, ii) * temp_y[ii]; 
+            Floc_out[ii] += elem->get_dR_dx(jj, ii) * temp_x[jj];
+            Floc_out[ii] += elem->get_dR_dy(jj, ii) * temp_y[jj]; 
         }
     }
 }
