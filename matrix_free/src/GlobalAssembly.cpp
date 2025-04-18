@@ -204,14 +204,14 @@ void GlobalAssembly::AssemStiffnessLoad(LocalAssembly * const &locassem,
 void GlobalAssembly::DirichletBCK(const std::vector<int> &Dir)
 {
     for (int i = 0; i < static_cast<int>(Dir.size()); ++i)
-        MatSetValue(K, i, i, 1.0, ADD_VALUES);
+        MatSetValue(K, Dir[i], Dir[i], 1.0, ADD_VALUES);
 }
 
 void GlobalAssembly::DirichletBC(const std::vector<int> &Dir)
 {
     for (int i = 0; i < static_cast<int>(Dir.size()); ++i)
     {
-        MatSetValue(K, i, i, 1.0, ADD_VALUES);
-        VecSetValue(F, i, 0.0, INSERT_VALUES);
+        MatSetValue(K, Dir[i], Dir[i], 1.0, ADD_VALUES);
+        VecSetValue(F, Dir[i], 0.0, INSERT_VALUES);
     }
 }
