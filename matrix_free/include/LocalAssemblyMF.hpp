@@ -51,6 +51,12 @@ class LocalAssemblyMF
             for (int i = 0; i < n; ++i)
                 Floc[i] = 0.0;
         }
+
+        void ResetLocalLoad()
+        {
+            for (int i = 0; i < n; ++i)
+                Floc_out[i] = 0.0;
+        }
 };
 
 #endif

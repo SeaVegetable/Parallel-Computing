@@ -40,6 +40,8 @@ void LocalAssemblyMF::LocalMatMulMF(ElementMF * const &elem,
     std::vector<double> temp_x(nqp, 0.0);
     std::vector<double> temp_y(nqp, 0.0);
 
+    ResetLocalLoad();
+
     for (int ii = 0; ii < nqp; ++ii)
     {
         for (int jj = 0; jj < n; ++jj)
