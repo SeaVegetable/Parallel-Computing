@@ -118,8 +118,14 @@ int main(int argc, char *argv[])
     VecSet(u, 0.0);
     MatMult(globalassem->K, globalassem->F, u);
 
+    Vec u1;
+    VecDuplicate(u, &u1);
+    VecSet(u1, 0.0);
+    MatMult(globalassem->K, u, u1);
+
     VecView(globalassem->F, PETSC_VIEWER_STDOUT_WORLD);
     VecView(u, PETSC_VIEWER_STDOUT_WORLD);
+    VecView(u1, PETSC_VIEWER_STDOUT_WORLD);
 
     // PetscLogDouble tstart, tend;
     // PetscTime(&tstart);

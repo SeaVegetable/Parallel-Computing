@@ -64,6 +64,9 @@ void GlobalAssemblyMF::AssemLoad(LocalAssemblyMF * const &locassem,
 
             locassem->AssemLocalLoad(elemmf, eCP);
 
+            // PetscMPIInt rank;
+            // MPI_Comm_rank(PETSC_COMM_WORLD, &rank);
+            // if (rank == 1)
             VecSetValues(F, nLocBas, eID, locassem->Floc, ADD_VALUES);
         }
     }
@@ -99,6 +102,8 @@ void GlobalAssemblyMF::MatMulMF(LocalAssemblyMF * const &locassem,
     std::vector<double> eNURBSExtraction1(pp*pp, 0.0);
     std::vector<double> eNURBSExtraction2(qq*qq, 0.0);
 
+    VecGhostUpdateBegin(x, INSERT_VALUES, SCATTER_FORWARD);
+    VecGhostUpdateEnd(x, INSERT_VALUES, SCATTER_FORWARD);
     Vec localx;
     VecGhostGetLocalForm(x, &localx);
 

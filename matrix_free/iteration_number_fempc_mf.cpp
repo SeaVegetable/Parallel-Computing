@@ -151,8 +151,18 @@ int main(int argc, char *argv[])
         data->elem_size1, data->elem_size2,
         data->elem, data->globalassem->F, u);
 
+    Vec u1;
+    VecDuplicate(u, &u1);
+    VecSet(u1, 0.0);
+    data->globalassem->MatMulMF(data->locassem,
+        data->IEN, data->ID, data->Dir, data->CP,
+        data->NURBSExtraction1, data->NURBSExtraction2,
+        data->elem_size1, data->elem_size2,
+        data->elem, u, u1);
+
     VecView(data->globalassem->F, PETSC_VIEWER_STDOUT_WORLD);
     VecView(u, PETSC_VIEWER_STDOUT_WORLD);
+    VecView(u1, PETSC_VIEWER_STDOUT_WORLD);
 
     // PetscLogDouble tstart, tend;
     // PetscTime(&tstart);
