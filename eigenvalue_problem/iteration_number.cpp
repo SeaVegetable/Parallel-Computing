@@ -64,7 +64,6 @@ int main(int argc, char *argv[])
     MPI_Barrier(PETSC_COMM_WORLD);
 
     PetscLogDouble tstart, tend;
-    PetscTime(&tstart);
 
     KSP ksp;
     KSPCreate(PETSC_COMM_WORLD, &ksp);
@@ -73,15 +72,20 @@ int main(int argc, char *argv[])
     PetscReal divtol = 1e4;
     PetscInt maxits = 10000;
     KSPSetTolerances(ksp, rtol, abstol, divtol, maxits);
+    KSPSetType(ksp, KSPCG);
     KSPSetFromOptions(ksp);
 
     PC ksp_pc;
     KSPGetPC(ksp, &ksp_pc);
+    PCSetType(ksp_pc, PCBJACOBI);
     PCSetFromOptions(ksp_pc);
 
     KSPSetOperators(ksp, globalassem->K, globalassem->K);
     Vec u;
     VecDuplicate(globalassem->F, &u);
+
+    PetscTime(&tstart);
+
     KSPSolve(ksp, globalassem->F, u);
 
     PetscTime(&tend);
@@ -95,6 +99,8 @@ int main(int argc, char *argv[])
     {
         std::cout << "Number of KSP iterations: " << num_iterations << std::endl;
     }
+
+    KSPView(ksp, PETSC_VIEWER_STDOUT_WORLD);
 
     delete fm; fm = nullptr;
     delete elem; elem = nullptr;

@@ -13,7 +13,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 
 # OpenMP
-set(OpenMP_ROOT "/opt/homebrew/Cellar/libomp/17.0.3/")
 find_package(OpenMP REQUIRED)
 
 # Add your source files here
@@ -57,8 +56,8 @@ message(STATUS "PETSC_LIB: ${PETSC_LIB}")
 set(SLEPC_DIR $ENV{HOME}/lib/slepc-3.18.3-opt)
 find_package(SLEPc REQUIRED)
 
-set(CMAKE_C_COMPILER  /opt/homebrew/opt/mpich/bin/mpicc)
-set(CMAKE_CXX_COMPILER /opt/homebrew/opt/mpich/bin/mpicxx)
+set(CMAKE_C_COMPILER  /home/yxh/lib/mpich-4.3.0/bin/mpicc)
+set(CMAKE_CXX_COMPILER /home/yxh/lib/mpich-4.3.0/bin/mpicxx)
 
 include_directories(${PETSC_INC})
 include_directories(${SLEPC_INC})
