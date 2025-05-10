@@ -101,7 +101,11 @@ void ElementMFSF::GenerateElementSingleQP(const std::vector<double> &eCP,
 
 void ElementMFSF::GenerateElement(const QuadraturePoint * const &quad1,
     const QuadraturePoint * const &quad2,
-    const std::vector<double> &eCP)
+    const std::vector<double> &eCP,
+    std::vector<double> &B1, std::vector<double> &B2,
+    std::vector<double> &dB1, std::vector<double> &dB2,
+    std::vector<double> &W, std::vector<double> &J,
+    std::vector<double> &dW_dx, std::vector<double> &dW_dy) const
 {
     const int nqp1 = quad1->GetNumQuadraturePoint();
     const int nqp2 = quad2->GetNumQuadraturePoint();

@@ -40,62 +40,16 @@ class ElementMFSF
         
         void GenerateElement(const QuadraturePoint * const &quad1,
             const QuadraturePoint * const &quad2,
-            const std::vector<double> &eCP);
-        
-        double get_B1(const int &qpIdx, const int &basIdx)
-        {
-            return RR[qpIdx*(p+1)+basIdx];
-        }
-
-        double get_B2(const int &qpIdx, const int &basIdx)
-        {
-            return RR[qpIdx*(q+1)+basIdx];
-        }
-
-        double get_dB1(const int &qpIdx, const int &basIdx)
-        {
-            return dRR_dx[qpIdx*(p+1)+basIdx];
-        }
-
-        double get_dB2(const int &qpIdx, const int &basIdx)
-        {
-            return dRR_dy[qpIdx*(q+1)+basIdx];
-        }
-
-        double get_W(const int &qpIdx)
-        {
-            return W[qpIdx];
-        }
-
-        double get_JxW(const int &qpIdx)
-        {
-            return JxW[qpIdx];
-        }
-
-        double get_dW_dx(const int &qpIdx)
-        {
-            return dW_dx[qpIdx];
-        }
-
-        double get_dW_dy(const int &qpIdx)
-        {
-            return dW_dy[qpIdx];
-        }
+            const std::vector<double> &eCP,
+            std::vector<double> &B1, std::vector<double> &B2,
+            std::vector<double> &dB1, std::vector<double> &dB2,
+            std::vector<double> &W, std::vector<double> &J,
+            std::vector<double> &dW_dx, std::vector<double> &dW_dy);
     
     private:
         const double p;
         const double q;
         const int nLocBas;
-
-        std::vector<double> B1{};
-        std::vector<double> dB1{};
-        std::vector<double> B2{};
-        std::vector<double> dB2{};
-
-        std::vector<double> W{};
-        std::vector<double> J{};
-        std::vector<double> dW_dx{};
-        std::vector<double> dW_dy{};
 
         std::vector<double> extraction1{};
         std::vector<double> extraction2{};

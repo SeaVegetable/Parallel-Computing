@@ -31,7 +31,8 @@ void LocalAssemblyMFSF::AssemLocalLoad(ElementMF * const &elem,
 void LocalAssemblyMFSF::LocalMatMulMF(ElementMF * const &elem,
     const std::vector<double> &eCP)
 {
-    elem->GenerateElement(quad1, quad2, eCP);
+    std::vector<double> B1, B2, dB1, dB2, W, J, dW_dx, dW_dy;
+    elem->GenerateElement(quad1, quad2, eCP, B1, B2, dB1, dB2, W, J, dW_dx, dW_dy);
     const int nqp1 = quad1->GetNumQuadraturePoint();
     const int nqp2 = quad2->GetNumQuadraturePoint();
     const double qw1 = quad1->GetWeight();
@@ -46,11 +47,41 @@ void LocalAssemblyMFSF::LocalMatMulMF(ElementMF * const &elem,
         {
             for (int ii = 0; ii < nqp1; ++ii)
             {
+                double temp1 = 0.0;
+                double temp2 = 0.0;
+                double temp3 = 0.0;
+                double temp4 = 0.0;
+                double temp5 = 0.0;
+                double temp6 = 0.0;
+                double temp7 = 0.0;
+
                 for (int jj = 0; jj < nqp2; ++jj)
                 {
-
+                    temp1 += qw2[nqp2] * B2[n*jj+i] * B2[n+jj+j] * J[ii*nqp2+jj] / (W[ii*nqp2+jj] * W[ii*nqp2+jj]);
+                    temp2 += qw2[nqp2] * dB2[n*jj+i] * dB2[n+jj+j] * J[ii*nqp2+jj] / (W[ii*nqp2+jj] * W[ii*nqp2+jj]);
+                    temp3 += qw2[nqp2] * B2[n*jj+i] * B2[n+jj+j] * J[ii*nqp2+jj] / (W[ii*nqp2+jj] * W[ii*nqp2+jj] * W[ii*nqp2+jj]) * dW_dx[ii*nqp2+jj];
+                    temp4 += qw2[nqp2] * B2[n*jj+i] * B2[n+jj+j] * J[ii*nqp2+jj] / (W[ii*nqp2+jj] * W[ii*nqp2+jj] * W[ii*nqp2+jj]) * dW_dx[ii*nqp2+jj];
+                    temp5 += qw2[nqp2] * B2[n*jj+i] * dB2[n+jj+j] * J[ii*nqp2+jj] / (W[ii*nqp2+jj] * W[ii*nqp2+jj] * W[ii*nqp2+jj]) * dW_dy[ii*nqp2+jj];
+                    temp6 += qw2[nqp2] * dB2[n*jj+i] * B2[n+jj+j] * J[ii*nqp2+jj] / (W[ii*nqp2+jj] * W[ii*nqp2+jj] * W[ii*nqp2+jj]) * dW_dy[ii*nqp2+jj];
+                    temp7 += qw2[nqp2] * B2[n*jj+i] * B2[n+jj+j] * (dW_dx[ii*nqp2+jj] * dW_dx[ii*nqp2+jj] + dW_dy[ii*nqp2+jj] 
+                            * dW_dy[ii*nqp2+jj]) * J[ii*nqp2+jj] / (W[ii*nqp2+jj] * W[ii*nqp2+jj]);
                 }
+                K[i*n+j] += qw1[nqp1] * dB1[n*ii+i] * dB1[n+ii+j] * temp1;
+                    + qw1[nqp1] * B1[n*ii+i] * B1[n+ii+j] * temp2;
+                    - qw1[nqp1] * B1[n*ii+i] * dB1[n+ii+j] * temp3;
+                    - qw1[nqp1] * dB1[n*ii+i] * B1[n+ii+j] * temp4;
+                    - qw1[nqp1] * B1[n*ii+i] * B1[n+ii+j] * temp5;
+                    - qw1[nqp1] * B1[n*ii+i] * B1[n+ii+j] * temp6;
+                    - qw1[nqp1] * B1[n*ii+i] * B1[n+ii+j] * temp7;
             }
+        }
+    }
+
+    for (int i = 0; i < n; ++i)
+    {
+        for (int j = 0; j < n; ++j)
+        {
+            Floc_out[i] += Kloc[i*n+j] * Floc_in[j];
         }
     }
 }
