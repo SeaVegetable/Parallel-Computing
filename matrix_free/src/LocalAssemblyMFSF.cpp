@@ -66,13 +66,13 @@ void LocalAssemblyMFSF::LocalMatMulMF(ElementMF * const &elem,
                     temp7 += qw2[nqp2] * B2[n*jj+i] * B2[n+jj+j] * (dW_dx[ii*nqp2+jj] * dW_dx[ii*nqp2+jj] + dW_dy[ii*nqp2+jj] 
                             * dW_dy[ii*nqp2+jj]) * J[ii*nqp2+jj] / (W[ii*nqp2+jj] * W[ii*nqp2+jj]);
                 }
-                K[i*n+j] += qw1[nqp1] * dB1[n*ii+i] * dB1[n+ii+j] * temp1;
-                    + qw1[nqp1] * B1[n*ii+i] * B1[n+ii+j] * temp2;
-                    - qw1[nqp1] * B1[n*ii+i] * dB1[n+ii+j] * temp3;
-                    - qw1[nqp1] * dB1[n*ii+i] * B1[n+ii+j] * temp4;
-                    - qw1[nqp1] * B1[n*ii+i] * B1[n+ii+j] * temp5;
-                    - qw1[nqp1] * B1[n*ii+i] * B1[n+ii+j] * temp6;
-                    - qw1[nqp1] * B1[n*ii+i] * B1[n+ii+j] * temp7;
+                K[i*n+j] += qw1[nqp1] * (dB1[n*ii+i] * dB1[n+ii+j] * temp1;
+                    + B1[n*ii+i] * B1[n+ii+j] * temp2;
+                    - B1[n*ii+i] * dB1[n+ii+j] * temp3;
+                    - dB1[n*ii+i] * B1[n+ii+j] * temp4;
+                    - B1[n*ii+i] * B1[n+ii+j] * temp5;
+                    - B1[n*ii+i] * B1[n+ii+j] * temp6;
+                    - B1[n*ii+i] * B1[n+ii+j] * temp7);
             }
         }
     }

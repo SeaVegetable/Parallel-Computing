@@ -3,6 +3,7 @@
 
 #include <petscmat.h>
 #include "LocalAssemblyMF.hpp"
+#include "LocalAssemblyMFSF.hpp"
 
 class GlobalAssemblyMF
 {
@@ -29,6 +30,17 @@ class GlobalAssemblyMF
             const std::vector<double> &elem_size2,
             ElementMF * const &elemmf);
         
+        void AssemLoad(LocalAssemblyMF * const &locassem,
+            const std::vector<int> &IEN,
+            const std::vector<int> &ID,
+            const std::vector<int> &Dir,
+            const std::vector<double> &CP,
+            const std::vector<double> &NURBSExtraction1,
+            const std::vector<double> &NURBSExtraction2,
+            const std::vector<double> &elem_size1,
+            const std::vector<double> &elem_size2,
+            ElementMFSF * const &elemmf);
+        
         void MatMulMF(LocalAssemblyMF * const &locassem,
             const std::vector<int> &IEN,
             const std::vector<int> &ID,
@@ -39,6 +51,18 @@ class GlobalAssemblyMF
             const std::vector<double> &elem_size1,
             const std::vector<double> &elem_size2,
             ElementMF * const &elemmf,
+            Vec x, Vec y);
+        
+        void MatMulMF(LocalAssemblyMF * const &locassem,
+            const std::vector<int> &IEN,
+            const std::vector<int> &ID,
+            const std::vector<int> &Dir,
+            const std::vector<double> &CP,
+            const std::vector<double> &NURBSExtraction1,
+            const std::vector<double> &NURBSExtraction2,
+            const std::vector<double> &elem_size1,
+            const std::vector<double> &elem_size2,
+            ElementMFSF * const &elemmf,
             Vec x, Vec y);
     
     private:
