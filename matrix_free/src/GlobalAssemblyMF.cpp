@@ -82,7 +82,7 @@ void GlobalAssemblyMF::AssemLoad(LocalAssemblyMF * const &locassem,
     VecAssemblyEnd(F);
 }
 
-void GlobalAssemblyMF::AssemLoad(LocalAssemblyMF * const &locassem,
+void GlobalAssemblyMF::AssemLoad(LocalAssemblyMFSF * const &locassem,
     const std::vector<int> &IEN,
     const std::vector<int> &ID,
     const std::vector<int> &Dir,
@@ -212,7 +212,7 @@ void GlobalAssemblyMF::MatMulMF(LocalAssemblyMF * const &locassem,
     VecGhostRestoreLocalForm(x, &localx);
 }
 
-void GlobalAssemblyMF::MatMulMF(LocalAssemblyMF * const &locassem,
+void GlobalAssemblyMF::MatMulMF(LocalAssemblyMFSF * const &locassem,
     const std::vector<int> &IEN,
     const std::vector<int> &ID,
     const std::vector<int> &Dir,

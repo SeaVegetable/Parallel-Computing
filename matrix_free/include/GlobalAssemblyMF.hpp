@@ -30,7 +30,7 @@ class GlobalAssemblyMF
             const std::vector<double> &elem_size2,
             ElementMF * const &elemmf);
         
-        void AssemLoad(LocalAssemblyMF * const &locassem,
+        void AssemLoad(LocalAssemblyMFSF * const &locassem,
             const std::vector<int> &IEN,
             const std::vector<int> &ID,
             const std::vector<int> &Dir,
@@ -53,7 +53,7 @@ class GlobalAssemblyMF
             ElementMF * const &elemmf,
             Vec x, Vec y);
         
-        void MatMulMF(LocalAssemblyMF * const &locassem,
+        void MatMulMF(LocalAssemblyMFSF * const &locassem,
             const std::vector<int> &IEN,
             const std::vector<int> &ID,
             const std::vector<int> &Dir,
