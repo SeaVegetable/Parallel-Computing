@@ -1,6 +1,22 @@
 #include "ElementMFSF.hpp"
 
 void ElementMFSF::GenerateBSplineBasis1D(const double &xi,
+    std::vector<double> &N1, std::vector<double> &N2) const
+{
+    BernsteinBasis * bern1 = new BernsteinBasis(p);
+    BernsteinBasis * bern2 = new BernsteinBasis(q);
+
+    RefElement * ref = new RefElement();
+
+    N1 = ref->GenerateBasis1DSingleQP(bern1, extraction1, xi);
+    N2 = ref->GenerateBasis1DSingleQP(bern2, extraction2, xi);
+
+    delete bern1;
+    delete bern2;
+    delete ref;
+}
+
+void ElementMFSF::GenerateBSplineBasis1D(const double &xi,
     std::vector<double> &N1, std::vector<double> &N2,
     std::vector<double> &dN1, std::vector<double> &dN2) const
 {
@@ -17,6 +33,31 @@ void ElementMFSF::GenerateBSplineBasis1D(const double &xi,
     delete bern1;
     delete bern2;
     delete ref;
+}
+
+void ElementMFSF::GenerateElementSingleQP(const std::vector<double> &eCP,
+    const std::vector<double> &N1, const std::vector<double> &N2,
+    std::vector<double> &R) const
+{
+    std::vector<double> N{};
+    double w = 0.0;
+
+    for (int j = 0; j < q+1; ++j)
+    {
+        for (int i = 0; i < p+1; ++i)
+        {
+            N.push_back(N1[i] * N2[j]);
+            w += N.back();
+        }
+    }
+
+    for (int j = 0; j < q+1; ++j)
+    {
+        for (int i = 0; i < p+1; ++i)
+        {
+            R.push_back(N[j*(p+1)+i]/w);
+        }
+    }
 }
 
 void ElementMFSF::GenerateElementSingleQP(const std::vector<double> &eCP,
@@ -102,6 +143,48 @@ void ElementMFSF::GenerateElementSingleQP(const std::vector<double> &eCP,
 void ElementMFSF::GenerateElement(const QuadraturePoint * const &quad1,
     const QuadraturePoint * const &quad2,
     const std::vector<double> &eCP,
+    std::vector<double> &R) const
+{
+    const int nqp1 = quad1->GetNumQuadraturePoint();
+    const int nqp2 = quad2->GetNumQuadraturePoint();
+    const std::vector<double> qp1 = quad1->GetQuadraturePoint();
+    const std::vector<double> qp2 = quad2->GetQuadraturePoint();
+
+    std::vector<double> B1{};
+    std::vector<double> B2{};
+
+    R.clear();
+
+    for (int ii = 0; ii < nqp1; ++ii)
+    {
+        std::vector<double> N1{};
+        std::vector<double> N2{};
+        GenerateBSplineBasis1D(qp1[ii], N1, N2);
+
+        B1.insert(B1.end(), N1.begin(), N1.end());
+        B2.insert(B2.end(), N2.begin(), N2.end());
+    }
+
+    for (int jj = 0; jj < nqp2; ++jj)
+    {
+        std::vector<double> N2{};
+        N2.assign(B2.begin() + jj*(q+1), B2.begin() + (jj+1)*(q+1));
+        for (int ii = 0; ii < nqp1; ++ii)
+        {
+            std::vector<double> N1{};
+            N1.assign(B1.begin() + ii*(p+1), B1.begin() + (ii+1)*(p+1));
+
+            std::vector<double> Rtemp{};
+            GenerateElementSingleQP(eCP, N1, N2, Rtemp);
+            
+            R.insert(R.end(), Rtemp.begin(), Rtemp.end());
+        }
+    }
+}
+
+void ElementMFSF::GenerateElement(const QuadraturePoint * const &quad1,
+    const QuadraturePoint * const &quad2,
+    const std::vector<double> &eCP,
     std::vector<double> &B1, std::vector<double> &B2,
     std::vector<double> &dB1, std::vector<double> &dB2,
     std::vector<double> &W, std::vector<double> &J,
@@ -117,7 +200,7 @@ void ElementMFSF::GenerateElement(const QuadraturePoint * const &quad1,
     dB1.clear();
     dB2.clear();
     W.clear();
-    JxW.clear();
+    J.clear();
     dW_dx.clear();
     dW_dy.clear();
 
@@ -149,7 +232,7 @@ void ElementMFSF::GenerateElement(const QuadraturePoint * const &quad1,
             dN1.assign(dB1.begin() + ii*(p+1), dB1.begin() + (ii+1)*(p+1));
 
             double w, jacobian, dw_dx, dw_dy;
-            GenerateElementSingleQP(qp1[ii], qp2[jj], eCP,
+            GenerateElementSingleQP(eCP,
                 N1, N2, dN1, dN2,
                 w, jacobian, dw_dx, dw_dy);
 

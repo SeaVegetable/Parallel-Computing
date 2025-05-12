@@ -29,8 +29,15 @@ class ElementMFSF
         }
 
         void GenerateBSplineBasis1D(const double &xi,
+            std::vector<double> &N1, std::vector<double> &N2) const;
+
+        void GenerateBSplineBasis1D(const double &xi,
             std::vector<double> &N1, std::vector<double> &N2,
             std::vector<double> &dN1, std::vector<double> &dN2) const;
+        
+        void GenerateElementSingleQP(const std::vector<double> &eCP,
+            const std::vector<double> &N1, const std::vector<double> &N2,
+            std::vector<double> &R) const;
 
         void GenerateElementSingleQP(const std::vector<double> &eCP, 
             const std::vector<double> &N1, const std::vector<double> &N2,
@@ -41,10 +48,15 @@ class ElementMFSF
         void GenerateElement(const QuadraturePoint * const &quad1,
             const QuadraturePoint * const &quad2,
             const std::vector<double> &eCP,
+            std::vector<double> &R);
+        
+        void GenerateElement(const QuadraturePoint * const &quad1,
+            const QuadraturePoint * const &quad2,
+            const std::vector<double> &eCP,
             std::vector<double> &B1, std::vector<double> &B2,
             std::vector<double> &dB1, std::vector<double> &dB2,
             std::vector<double> &W, std::vector<double> &J,
-            std::vector<double> &dW_dx, std::vector<double> &dW_dy);
+            std::vector<double> &dW_dx, std::vector<double> &dW_dy) const;
     
     private:
         const double p;

@@ -1,6 +1,6 @@
 #include "LocalAssemblyMFSF.hpp"
 
-void LocalAssemblyMFSF::AssemLocalLoad(ElementMF * const &elem,
+void LocalAssemblyMFSF::AssemLocalLoad(ElementMFSF * const &elem,
     const std::vector<double> &eCP)
 {
     elem->GenerateElement(quad1, quad2, eCP);
@@ -28,15 +28,15 @@ void LocalAssemblyMFSF::AssemLocalLoad(ElementMF * const &elem,
     }
 }
 
-void LocalAssemblyMFSF::LocalMatMulMF(ElementMF * const &elem,
+void LocalAssemblyMFSF::LocalMatMulMF(ElementMFSF * const &elem,
     const std::vector<double> &eCP)
 {
     std::vector<double> B1, B2, dB1, dB2, W, J, dW_dx, dW_dy;
     elem->GenerateElement(quad1, quad2, eCP, B1, B2, dB1, dB2, W, J, dW_dx, dW_dy);
     const int nqp1 = quad1->GetNumQuadraturePoint();
     const int nqp2 = quad2->GetNumQuadraturePoint();
-    const double qw1 = quad1->GetWeight();
-    const double qw2 = quad2->GetWeight();
+    const std::vector<double> qw1 = quad1->GetWeight();
+    const std::vector<double> qw2 = quad2->GetWeight();
     const int n = elem->GetNumLocalBasis();
 
     ResetStiffnessLoadOut();
