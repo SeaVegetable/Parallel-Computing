@@ -37,7 +37,9 @@ class ElementMFSF
         
         void GenerateElementSingleQP(const std::vector<double> &eCP,
             const std::vector<double> &N1, const std::vector<double> &N2,
-            std::vector<double> &R) const;
+            const std::vector<double> &dN1, const std::vector<double> &dN2,
+            std::vector<double> &R,
+            double &jacobian) const;
 
         void GenerateElementSingleQP(const std::vector<double> &eCP, 
             const std::vector<double> &N1, const std::vector<double> &N2,
@@ -48,7 +50,8 @@ class ElementMFSF
         void GenerateElement(const QuadraturePoint * const &quad1,
             const QuadraturePoint * const &quad2,
             const std::vector<double> &eCP,
-            std::vector<double> &R);
+            std::vector<double> &R,
+            std::vector<double> &J);
         
         void GenerateElement(const QuadraturePoint * const &quad1,
             const QuadraturePoint * const &quad2,

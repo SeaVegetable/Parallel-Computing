@@ -3,9 +3,21 @@
 void LocalAssemblyMFSF::AssemLocalLoad(ElementMFSF * const &elem,
     const std::vector<double> &eCP)
 {
-    elem->GenerateElement(quad1, quad2, eCP);
+    std::vector<double> R{};
+    std::vector<double> J{};
+    elem->GenerateElement(quad1, quad2, eCP, R, J);
     const int nqp1 = quad1->GetNumQuadraturePoint();
     const int nqp2 = quad2->GetNumQuadraturePoint();
+    const std::vector<double> qw1 = quad1->GetWeight();
+    const std::vector<double> qw2 = quad2->GetWeight();
+    std::vector<double> qw{};
+    for (int i = 0; i < nqp1; ++i)
+    {
+        for (int j = 0; j < nqp2; ++j)
+        {
+            qw.push_back(qw1[j] * qw2[i]);
+        }
+    }
     const int nqp = nqp1 * nqp2;
     const int n = elem->GetNumLocalBasis();
 
@@ -17,13 +29,13 @@ void LocalAssemblyMFSF::AssemLocalLoad(ElementMFSF * const &elem,
         double y = 0.0;
         for (int jj = 0; jj < n; ++jj)
         {
-            x += elem->get_R(ii, jj) * eCP[2*jj];
-            y += elem->get_R(ii, jj) * eCP[2*jj+1];
+            x += R[ii*n+jj] * eCP[2*jj];
+            y += R[ii*n+jj] * eCP[2*jj+1];
         }
 
         for (int jj = 0; jj < n; ++jj)
         {
-            Floc[jj] += elem->get_R(ii, jj) * Getf(x, y) * elem->get_JxW(ii);
+            Floc[jj] += R[ii*n+jj] * Getf(x, y) * qw[ii] * J[ii];
         }
     }
 }
@@ -66,12 +78,12 @@ void LocalAssemblyMFSF::LocalMatMulMF(ElementMFSF * const &elem,
                     temp7 += qw2[nqp2] * B2[n*jj+i] * B2[n+jj+j] * (dW_dx[ii*nqp2+jj] * dW_dx[ii*nqp2+jj] + dW_dy[ii*nqp2+jj] 
                             * dW_dy[ii*nqp2+jj]) * J[ii*nqp2+jj] / (W[ii*nqp2+jj] * W[ii*nqp2+jj]);
                 }
-                K[i*n+j] += qw1[nqp1] * (dB1[n*ii+i] * dB1[n+ii+j] * temp1;
-                    + B1[n*ii+i] * B1[n+ii+j] * temp2;
-                    - B1[n*ii+i] * dB1[n+ii+j] * temp3;
-                    - dB1[n*ii+i] * B1[n+ii+j] * temp4;
-                    - B1[n*ii+i] * B1[n+ii+j] * temp5;
-                    - B1[n*ii+i] * B1[n+ii+j] * temp6;
+                Kloc[i*n+j] += qw1[nqp1] * (dB1[n*ii+i] * dB1[n+ii+j] * temp1
+                    + B1[n*ii+i] * B1[n+ii+j] * temp2
+                    - B1[n*ii+i] * dB1[n+ii+j] * temp3
+                    - dB1[n*ii+i] * B1[n+ii+j] * temp4
+                    - B1[n*ii+i] * B1[n+ii+j] * temp5
+                    - B1[n*ii+i] * B1[n+ii+j] * temp6
                     - B1[n*ii+i] * B1[n+ii+j] * temp7);
             }
         }

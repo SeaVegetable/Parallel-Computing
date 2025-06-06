@@ -37,10 +37,17 @@ void ElementMFSF::GenerateBSplineBasis1D(const double &xi,
 
 void ElementMFSF::GenerateElementSingleQP(const std::vector<double> &eCP,
     const std::vector<double> &N1, const std::vector<double> &N2,
-    std::vector<double> &R) const
+    const std::vector<double> &dN1, const std::vector<double> &dN2,
+    std::vector<double> &R,
+    double &jacobian) const
 {
     std::vector<double> N{};
+    std::vector<double> dN_dxi{};
+    std::vector<double> dN_deta{};
+
     double w = 0.0;
+    double dw_dxi = 0.0;
+    double dw_deta = 0.0;
 
     for (int j = 0; j < q+1; ++j)
     {
@@ -48,16 +55,46 @@ void ElementMFSF::GenerateElementSingleQP(const std::vector<double> &eCP,
         {
             N.push_back(N1[i] * N2[j]);
             w += N.back();
+            dN_dxi.push_back(dN1[i] * N2[j]);
+            dw_dxi += dN_dxi.back();
+            dN_deta.push_back(N1[i] * dN2[j]);
+            dw_deta += dN_deta.back();
         }
     }
+
+    R.clear();
+    std::vector<double> dR_dxi{};
+    std::vector<double> dR_deta{};
 
     for (int j = 0; j < q+1; ++j)
     {
         for (int i = 0; i < p+1; ++i)
         {
             R.push_back(N[j*(p+1)+i]/w);
+            dR_dxi.push_back((dN_dxi[j*(p+1)+i]-dw_dxi*R.back())/w);
+            dR_deta.push_back((dN_deta[j*(p+1)+i]-dw_deta*R.back())/w);
         }
     }
+
+    double dx_dxi = 0.0;
+    double dx_deta = 0.0;
+    double dy_dxi = 0.0;
+    double dy_deta = 0.0;
+
+    jacobian = 0.0;
+
+    for (int j = 0; j < q + 1; ++j)
+    {
+        for (int i = 0; i < p + 1; ++i)
+        {
+            dx_dxi += eCP[2*(j*(p+1)+i)] * dR_dxi[j*(p+1)+i];
+            dx_deta += eCP[2*(j*(p+1)+i)] * dR_deta[j*(p+1)+i];
+            dy_dxi += eCP[2*(j*(p+1)+i)+1] * dR_dxi[j*(p+1)+i];
+            dy_deta += eCP[2*(j*(p+1)+i)+1] * dR_deta[j*(p+1)+i];
+        }
+    }
+
+    jacobian = dx_dxi * dy_deta - dx_deta * dy_dxi;
 }
 
 void ElementMFSF::GenerateElementSingleQP(const std::vector<double> &eCP,
@@ -143,7 +180,8 @@ void ElementMFSF::GenerateElementSingleQP(const std::vector<double> &eCP,
 void ElementMFSF::GenerateElement(const QuadraturePoint * const &quad1,
     const QuadraturePoint * const &quad2,
     const std::vector<double> &eCP,
-    std::vector<double> &R) const
+    std::vector<double> &R,
+    std::vector<double> &J)
 {
     const int nqp1 = quad1->GetNumQuadraturePoint();
     const int nqp2 = quad2->GetNumQuadraturePoint();
@@ -152,32 +190,45 @@ void ElementMFSF::GenerateElement(const QuadraturePoint * const &quad1,
 
     std::vector<double> B1{};
     std::vector<double> B2{};
+    std::vector<double> dB1{};
+    std::vector<double> dB2{};
 
     R.clear();
+    J.clear();
 
     for (int ii = 0; ii < nqp1; ++ii)
     {
         std::vector<double> N1{};
+        std::vector<double> dN1{};
         std::vector<double> N2{};
-        GenerateBSplineBasis1D(qp1[ii], N1, N2);
+        std::vector<double> dN2{};
+        GenerateBSplineBasis1D(qp1[ii], N1, N2, dN1, dN2);
 
         B1.insert(B1.end(), N1.begin(), N1.end());
         B2.insert(B2.end(), N2.begin(), N2.end());
+        dB1.insert(dB1.end(), dN1.begin(), dN1.end());
+        dB2.insert(dB2.end(), dN2.begin(), dN2.end());
     }
 
     for (int jj = 0; jj < nqp2; ++jj)
     {
         std::vector<double> N2{};
+        std::vector<double> dN2{};
         N2.assign(B2.begin() + jj*(q+1), B2.begin() + (jj+1)*(q+1));
+        dN2.assign(dB2.begin() + jj*(q+1), dB2.begin() + (jj+1)*(q+1));
         for (int ii = 0; ii < nqp1; ++ii)
         {
             std::vector<double> N1{};
+            std::vector<double> dN1{};
             N1.assign(B1.begin() + ii*(p+1), B1.begin() + (ii+1)*(p+1));
+            dN1.assign(dB1.begin() + ii*(p+1), dB1.begin() + (ii+1)*(p+1));
 
             std::vector<double> Rtemp{};
-            GenerateElementSingleQP(eCP, N1, N2, Rtemp);
+            double Jtemp = 0.0;
+            GenerateElementSingleQP(eCP, N1, N2, dN1, dN2, Rtemp, Jtemp);
             
             R.insert(R.end(), Rtemp.begin(), Rtemp.end());
+            J.push_back(Jtemp);
         }
     }
 }
