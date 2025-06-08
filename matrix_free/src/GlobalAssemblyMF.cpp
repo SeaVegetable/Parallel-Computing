@@ -64,9 +64,6 @@ void GlobalAssemblyMF::AssemLoad(LocalAssemblyMF * const &locassem,
 
             locassem->AssemLocalLoad(elemmf, eCP);
 
-            // PetscMPIInt rank;
-            // MPI_Comm_rank(PETSC_COMM_WORLD, &rank);
-            // if (rank == 1)
             VecSetValues(F, nLocBas, eID, locassem->Floc, ADD_VALUES);
         }
     }

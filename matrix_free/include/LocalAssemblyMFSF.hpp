@@ -12,7 +12,7 @@ class LocalAssemblyMFSF
         PetscScalar *Floc;
         PetscScalar *Kloc;
 
-        LocalAssemblyMFSF(const double &p, const double &q)
+        LocalAssemblyMFSF(const int &p, const int &q)
             : n((p+1)*(q+1))
         {
             quad1 = new QuadraturePoint(p+1, 0, 1);
@@ -21,6 +21,14 @@ class LocalAssemblyMFSF
             Kloc = new PetscScalar[n*n];
             Floc_in = new PetscScalar[n];
             Floc_out = new PetscScalar[n];
+            for (int i = 0; i < p+1; ++i)
+            {
+                for (int j = 0; j < q+1; ++j)
+                {
+                    map.push_back(j);
+                    map.push_back(i);
+                }
+            }
         }
 
         ~LocalAssemblyMFSF()
@@ -41,6 +49,7 @@ class LocalAssemblyMFSF
 
     private:
         const int n;
+        std::vector<int> map{};
         QuadraturePoint * quad1;
         QuadraturePoint * quad2;
 

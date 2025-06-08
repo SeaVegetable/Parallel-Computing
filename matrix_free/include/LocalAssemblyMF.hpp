@@ -11,7 +11,7 @@ class LocalAssemblyMF
         PetscScalar *Floc_out;
         PetscScalar *Floc;
 
-        LocalAssemblyMF(const double &p, const double &q)
+        LocalAssemblyMF(const int &p, const int &q)
             : n((p+1)*(q+1))
         {
             quad1 = new QuadraturePoint(p+1, 0, 1);

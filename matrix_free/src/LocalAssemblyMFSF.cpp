@@ -55,8 +55,12 @@ void LocalAssemblyMFSF::LocalMatMulMF(ElementMFSF * const &elem,
 
     for (int i = 0; i < n; ++i)
     {
+        int i1 = map[i*2];
+        int i2 = map[i*2+1];
         for (int j = 0; j < n; ++j)
         {
+            int j1 = map[j*2];
+            int j2 = map[j*2+1];
             for (int ii = 0; ii < nqp1; ++ii)
             {
                 double temp1 = 0.0;
@@ -69,22 +73,22 @@ void LocalAssemblyMFSF::LocalMatMulMF(ElementMFSF * const &elem,
 
                 for (int jj = 0; jj < nqp2; ++jj)
                 {
-                    temp1 += qw2[nqp2] * B2[n*jj+i] * B2[n+jj+j] * J[ii*nqp2+jj] / (W[ii*nqp2+jj] * W[ii*nqp2+jj]);
-                    temp2 += qw2[nqp2] * dB2[n*jj+i] * dB2[n+jj+j] * J[ii*nqp2+jj] / (W[ii*nqp2+jj] * W[ii*nqp2+jj]);
-                    temp3 += qw2[nqp2] * B2[n*jj+i] * B2[n+jj+j] * J[ii*nqp2+jj] / (W[ii*nqp2+jj] * W[ii*nqp2+jj] * W[ii*nqp2+jj]) * dW_dx[ii*nqp2+jj];
-                    temp4 += qw2[nqp2] * B2[n*jj+i] * B2[n+jj+j] * J[ii*nqp2+jj] / (W[ii*nqp2+jj] * W[ii*nqp2+jj] * W[ii*nqp2+jj]) * dW_dx[ii*nqp2+jj];
-                    temp5 += qw2[nqp2] * B2[n*jj+i] * dB2[n+jj+j] * J[ii*nqp2+jj] / (W[ii*nqp2+jj] * W[ii*nqp2+jj] * W[ii*nqp2+jj]) * dW_dy[ii*nqp2+jj];
-                    temp6 += qw2[nqp2] * dB2[n*jj+i] * B2[n+jj+j] * J[ii*nqp2+jj] / (W[ii*nqp2+jj] * W[ii*nqp2+jj] * W[ii*nqp2+jj]) * dW_dy[ii*nqp2+jj];
-                    temp7 += qw2[nqp2] * B2[n*jj+i] * B2[n+jj+j] * (dW_dx[ii*nqp2+jj] * dW_dx[ii*nqp2+jj] + dW_dy[ii*nqp2+jj] 
+                    temp1 += qw2[jj] * B2[nqp2*jj+i2] * B2[nqp2*jj+j2] * J[ii*nqp2+jj] / (W[ii*nqp2+jj] * W[ii*nqp2+jj]);
+                    temp2 += qw2[jj] * dB2[nqp2*jj+i2] * dB2[nqp2*jj+j2] * J[ii*nqp2+jj] / (W[ii*nqp2+jj] * W[ii*nqp2+jj]);
+                    temp3 += qw2[jj] * B2[nqp2*jj+i2] * B2[nqp2*jj+j2] * J[ii*nqp2+jj] / (W[ii*nqp2+jj] * W[ii*nqp2+jj] * W[ii*nqp2+jj]) * dW_dx[ii*nqp2+jj];
+                    temp4 += qw2[jj] * B2[nqp2*jj+i2] * B2[nqp2*jj+j2] * J[ii*nqp2+jj] / (W[ii*nqp2+jj] * W[ii*nqp2+jj] * W[ii*nqp2+jj]) * dW_dx[ii*nqp2+jj];
+                    temp5 += qw2[jj] * B2[nqp2*jj+i2] * dB2[nqp2*jj+j2] * J[ii*nqp2+jj] / (W[ii*nqp2+jj] * W[ii*nqp2+jj] * W[ii*nqp2+jj]) * dW_dy[ii*nqp2+jj];
+                    temp6 += qw2[jj] * dB2[nqp2*jj+i2] * B2[nqp2*jj+j2] * J[ii*nqp2+jj] / (W[ii*nqp2+jj] * W[ii*nqp2+jj] * W[ii*nqp2+jj]) * dW_dy[ii*nqp2+jj];
+                    temp7 += qw2[jj] * B2[nqp2*jj+i2] * B2[nqp2*jj+j2] * (dW_dx[ii*nqp2+jj] * dW_dx[ii*nqp2+jj] + dW_dy[ii*nqp2+jj] 
                             * dW_dy[ii*nqp2+jj]) * J[ii*nqp2+jj] / (W[ii*nqp2+jj] * W[ii*nqp2+jj]);
                 }
-                Kloc[i*n+j] += qw1[nqp1] * (dB1[n*ii+i] * dB1[n+ii+j] * temp1
-                    + B1[n*ii+i] * B1[n+ii+j] * temp2
-                    - B1[n*ii+i] * dB1[n+ii+j] * temp3
-                    - dB1[n*ii+i] * B1[n+ii+j] * temp4
-                    - B1[n*ii+i] * B1[n+ii+j] * temp5
-                    - B1[n*ii+i] * B1[n+ii+j] * temp6
-                    - B1[n*ii+i] * B1[n+ii+j] * temp7);
+                Kloc[i*n+j] -= qw1[ii] * (dB1[nqp1*ii+i1] * dB1[nqp1*ii+j1] * temp1
+                    + B1[nqp1*ii+i1] * B1[nqp1*ii+j1] * temp2
+                    - B1[nqp1*ii+i1] * dB1[nqp1*ii+j1] * temp3
+                    - dB1[nqp1*ii+i1] * B1[nqp1*ii+j1] * temp4
+                    - B1[nqp1*ii+i1] * B1[nqp1*ii+j1] * temp5
+                    - B1[nqp1*ii+i1] * B1[nqp1*ii+j1] * temp6
+                    - B1[nqp1*ii+i1] * B1[nqp1*ii+j1] * temp7);
             }
         }
     }

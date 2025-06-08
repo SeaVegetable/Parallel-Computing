@@ -12,7 +12,7 @@ class LocalAssembly
         PetscScalar *Kloc;
         PetscScalar *Floc;
 
-        LocalAssembly(const double &p, const double &q)
+        LocalAssembly(const int &p, const int &q)
             : n((p+1)*(q+1))
         {
             quad1 = new QuadraturePoint(p+1, 0, 1);
