@@ -95,6 +95,7 @@ void ElementMFSF::GenerateElementSingleQP(const std::vector<double> &eCP,
     }
 
     jacobian = dx_dxi * dy_deta - dx_deta * dy_dxi;
+    jacobian *= hx*hy;
 }
 
 void ElementMFSF::GenerateElementSingleQP(const std::vector<double> &eCP,
