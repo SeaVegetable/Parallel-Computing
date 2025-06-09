@@ -113,82 +113,82 @@ int main(int argc, char *argv[])
     MPI_Barrier(PETSC_COMM_WORLD);
     PetscPrintf(PETSC_COMM_WORLD, "Assembling stiffness matrix and load vector...done\n");
 
-    Vec u;
-    VecDuplicate(globalassem->F, &u);
-    VecSet(u, 0.0);
-    MatMult(globalassem->K, globalassem->F, u);
-
-    Vec u1;
-    VecDuplicate(u, &u1);
-    VecSet(u1, 0.0);
-    MatMult(globalassem->K, u, u1);
-
-    VecView(globalassem->F, PETSC_VIEWER_STDOUT_WORLD);
-    VecView(u, PETSC_VIEWER_STDOUT_WORLD);
-    VecView(u1, PETSC_VIEWER_STDOUT_WORLD);
-
-    // PetscLogDouble tstart, tend;
-    // PetscTime(&tstart);
-
-    // KSP ksp;
-    // KSPCreate(PETSC_COMM_WORLD, &ksp);
-    // KSPSetOperators(ksp, globalassem->K, globalassem->K);
-
-    // PC pc;
-    // KSPGetPC(ksp, &pc);
-    // PCSetType(pc, PCSHELL);
-
-    // MyPCCtx *ctx;
-    // PetscNew(&ctx);
-    // KSPCreate(PETSC_COMM_WORLD, &ctx->innerksp);
-    // KSPSetOperators(ctx->innerksp, globalassem_fem->K, globalassem_fem->K);
-    // KSPSetType(ctx->innerksp, KSPCG);
-
-    // PC innerpc;
-    // KSPGetPC(ctx->innerksp, &innerpc);
-    // PCSetType(innerpc, PCJACOBI);
-    // PCSetFromOptions(innerpc);
-
-    // PetscReal rtol = 1e-10;
-    // PetscReal abstol = 1e-10;
-    // PetscReal divtol = 1e4;
-    // PetscInt maxits = 10000;
-    // KSPSetTolerances(ctx->innerksp, rtol, abstol, divtol, maxits);
-    // KSPSetTolerances(ksp, rtol, abstol, divtol, maxits);
-
-    // PCShellSetContext(pc, ctx);
-    // PCShellSetApply(pc, MyPCApply);
-    // PCShellSetDestroy(pc, MyPCDestroy);
-
     // Vec u;
     // VecDuplicate(globalassem->F, &u);
-    // KSPSetFromOptions(ksp);
-    // KSPSolve(ksp, globalassem->F, u);
+    // VecSet(u, 0.0);
+    // MatMult(globalassem->K, globalassem->F, u);
 
-    // PetscTime(&tend);
-    // PetscLogDouble time = tend - tstart;
-    // PetscPrintf(PETSC_COMM_WORLD, "Time: %f\n", time);
+    // Vec u1;
+    // VecDuplicate(u, &u1);
+    // VecSet(u1, 0.0);
+    // MatMult(globalassem->K, u, u1);
 
-    // PetscInt num_iterations;
-    // KSPGetIterationNumber(ksp, &num_iterations);
-
-    // if (rank == 0)
-    // {
-    //     std::cout << "Number of KSP iterations: " << num_iterations << std::endl;
-    // }
-
+    // VecView(globalassem->F, PETSC_VIEWER_STDOUT_WORLD);
     // VecView(u, PETSC_VIEWER_STDOUT_WORLD);
+    // VecView(u1, PETSC_VIEWER_STDOUT_WORLD);
 
-    // delete fm; fm = nullptr;
-    // delete elem; elem = nullptr;
-    // delete locassem; locassem = nullptr;
-    // delete globalassem; globalassem = nullptr;
-    // delete elem_fem; elem_fem = nullptr;
-    // delete locassem_fem; locassem_fem = nullptr;
-    // delete globalassem_fem; globalassem_fem = nullptr;
+    PetscLogDouble tstart, tend;
+    PetscTime(&tstart);
 
-    // VecDestroy(&u);
-    // KSPDestroy(&ksp);
+    KSP ksp;
+    KSPCreate(PETSC_COMM_WORLD, &ksp);
+    KSPSetOperators(ksp, globalassem->K, globalassem->K);
+
+    PC pc;
+    KSPGetPC(ksp, &pc);
+    PCSetType(pc, PCSHELL);
+
+    MyPCCtx *ctx;
+    PetscNew(&ctx);
+    KSPCreate(PETSC_COMM_WORLD, &ctx->innerksp);
+    KSPSetOperators(ctx->innerksp, globalassem_fem->K, globalassem_fem->K);
+    KSPSetType(ctx->innerksp, KSPCG);
+
+    PC innerpc;
+    KSPGetPC(ctx->innerksp, &innerpc);
+    PCSetType(innerpc, PCJACOBI);
+    PCSetFromOptions(innerpc);
+
+    PetscReal rtol = 1e-10;
+    PetscReal abstol = 1e-10;
+    PetscReal divtol = 1e4;
+    PetscInt maxits = 10000;
+    KSPSetTolerances(ctx->innerksp, rtol, abstol, divtol, maxits);
+    KSPSetTolerances(ksp, rtol, abstol, divtol, maxits);
+
+    PCShellSetContext(pc, ctx);
+    PCShellSetApply(pc, MyPCApply);
+    PCShellSetDestroy(pc, MyPCDestroy);
+
+    Vec u;
+    VecDuplicate(globalassem->F, &u);
+    KSPSetFromOptions(ksp);
+    KSPSolve(ksp, globalassem->F, u);
+
+    PetscTime(&tend);
+    PetscLogDouble time = tend - tstart;
+    PetscPrintf(PETSC_COMM_WORLD, "Time: %f\n", time);
+
+    PetscInt num_iterations;
+    KSPGetIterationNumber(ksp, &num_iterations);
+
+    if (rank == 0)
+    {
+        std::cout << "Number of KSP iterations: " << num_iterations << std::endl;
+    }
+
+    VecView(u, PETSC_VIEWER_STDOUT_WORLD);
+
+    delete fm; fm = nullptr;
+    delete elem; elem = nullptr;
+    delete locassem; locassem = nullptr;
+    delete globalassem; globalassem = nullptr;
+    delete elem_fem; elem_fem = nullptr;
+    delete locassem_fem; locassem_fem = nullptr;
+    delete globalassem_fem; globalassem_fem = nullptr;
+
+    VecDestroy(&u);
+    KSPDestroy(&ksp);
     
     PetscFinalize();
     return 0;

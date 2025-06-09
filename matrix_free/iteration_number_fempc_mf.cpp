@@ -26,6 +26,9 @@ PetscErrorCode MyPCDestroy(PC pc)
 }
 
 typedef struct {
+    int nlocalfunc;
+    int nghost;
+    PetscInt * ghostIdx;
     std::vector<double> CP;
     std::vector<int> ID;
     std::vector<int> Dir;
@@ -53,6 +56,18 @@ PetscErrorCode MyMatMult(Mat A, Vec x, Vec y)
         data->elem_size1, data->elem_size2,
         data->elem, x, y);
 
+    return 0;
+}
+
+PetscErrorCode MyMatCreateVecs(Mat A, Vec *x, Vec *y)
+{
+    MyMeshData *data;
+    MatShellGetContext(A, (void**)&data);
+
+    VecCreateGhost(PETSC_COMM_WORLD, data->nlocalfunc, PETSC_DETERMINE,
+        data->nghost, data->ghostIdx, x);
+    VecSetOption(*x, VEC_IGNORE_NEGATIVE_INDICES, PETSC_TRUE);
+    if (y) VecDuplicate(*x,y);
     return 0;
 }
 
@@ -104,6 +119,14 @@ int main(int argc, char *argv[])
         data->CP, data->ID, ghostID, data->Dir, data->IEN,
         data->NURBSExtraction1, data->NURBSExtraction2);
     
+    data->nlocalfunc = nlocalfunc;
+    data->nghost = static_cast<int>(ghostID.size());
+    data->ghostIdx = new PetscInt[data->nghost];
+    for (int ii = 0; ii < data->nghost; ++ii)
+    {
+        data->ghostIdx[ii] = ghostID[ii];
+    }
+    
     data->elem = elemmf;
     data->locassem = locassemmf;
     data->globalassem = new GlobalAssemblyMF(nLocBas, nlocalfunc,
@@ -142,97 +165,99 @@ int main(int argc, char *argv[])
     MPI_Barrier(PETSC_COMM_WORLD);
     PetscPrintf(PETSC_COMM_WORLD, "Assembling stiffness matrix and load vector...done\n");
 
+    // Vec u;
+    // VecDuplicate(data->globalassem->F, &u);
+    // VecSet(u, 0.0);
+    // data->globalassem->MatMulMF(data->locassem,
+    //     data->IEN, data->ID, data->Dir, data->CP,
+    //     data->NURBSExtraction1, data->NURBSExtraction2,
+    //     data->elem_size1, data->elem_size2,
+    //     data->elem, data->globalassem->F, u);
+
+    // Vec u1;
+    // VecDuplicate(u, &u1);
+    // VecSet(u1, 0.0);
+    // data->globalassem->MatMulMF(data->locassem,
+    //     data->IEN, data->ID, data->Dir, data->CP,
+    //     data->NURBSExtraction1, data->NURBSExtraction2,
+    //     data->elem_size1, data->elem_size2,
+    //     data->elem, u, u1);
+
+    // VecView(data->globalassem->F, PETSC_VIEWER_STDOUT_WORLD);
+    // VecView(u, PETSC_VIEWER_STDOUT_WORLD);
+    // VecView(u1, PETSC_VIEWER_STDOUT_WORLD);
+
+    PetscLogDouble tstart, tend;
+    PetscTime(&tstart);
+
+    Mat K;
+    MatCreateShell(PETSC_COMM_WORLD, nlocalfunc, nlocalfunc,
+        PETSC_DECIDE, PETSC_DECIDE, data, &K);
+    MatShellSetOperation(K, MATOP_MULT, (void(*)(void))MyMatMult);
+    MatShellSetOperation(K, MATOP_CREATE_VECS, (void(*)(void))MyMatCreateVecs);
+
+    KSP ksp;
+    KSPCreate(PETSC_COMM_WORLD, &ksp);
+    KSPSetOperators(ksp, K, K);
+    KSPSetFromOptions(ksp);
+
+    PC pc;
+    KSPGetPC(ksp, &pc);
+    PCSetType(pc, PCSHELL);
+
+    MyPCCtx *ctx;
+    PetscNew(&ctx);
+    KSPCreate(PETSC_COMM_WORLD, &ctx->innerksp);
+    KSPSetOperators(ctx->innerksp, globalassem_fem->K, globalassem_fem->K);
+    KSPSetType(ctx->innerksp, KSPCG);
+
+    PC innerpc;
+    KSPGetPC(ctx->innerksp, &innerpc);
+    PCSetType(innerpc, PCJACOBI);
+    PCSetFromOptions(innerpc);
+
+    PetscReal rtol = 1e-10;
+    PetscReal abstol = 1e-10;
+    PetscReal divtol = 1e4;
+    PetscInt maxits = 10000;
+    KSPSetTolerances(ctx->innerksp, rtol, abstol, divtol, maxits);
+    KSPSetTolerances(ksp, rtol, abstol, divtol, maxits);
+
+    PCShellSetContext(pc, ctx);
+    PCShellSetApply(pc, MyPCApply);
+    PCShellSetDestroy(pc, MyPCDestroy);
+
     Vec u;
     VecDuplicate(data->globalassem->F, &u);
     VecSet(u, 0.0);
-    data->globalassem->MatMulMF(data->locassem,
-        data->IEN, data->ID, data->Dir, data->CP,
-        data->NURBSExtraction1, data->NURBSExtraction2,
-        data->elem_size1, data->elem_size2,
-        data->elem, data->globalassem->F, u);
+    KSPSetFromOptions(ksp);
+    KSPSolve(ksp, data->globalassem->F, u);
 
-    Vec u1;
-    VecDuplicate(u, &u1);
-    VecSet(u1, 0.0);
-    data->globalassem->MatMulMF(data->locassem,
-        data->IEN, data->ID, data->Dir, data->CP,
-        data->NURBSExtraction1, data->NURBSExtraction2,
-        data->elem_size1, data->elem_size2,
-        data->elem, u, u1);
+    PetscTime(&tend);
+    PetscLogDouble time = tend - tstart;
+    PetscPrintf(PETSC_COMM_WORLD, "Time: %f\n", time);
 
-    VecView(data->globalassem->F, PETSC_VIEWER_STDOUT_WORLD);
+    PetscInt num_iterations;
+    KSPGetIterationNumber(ksp, &num_iterations);
+
+    if (rank == 0)
+    {
+        std::cout << "Number of KSP iterations: " << num_iterations << std::endl;
+    }
+
     VecView(u, PETSC_VIEWER_STDOUT_WORLD);
-    VecView(u1, PETSC_VIEWER_STDOUT_WORLD);
 
-    // PetscLogDouble tstart, tend;
-    // PetscTime(&tstart);
+    delete fm; fm = nullptr;
+    delete data->elem; data->elem = nullptr;
+    delete data->locassem; data->locassem = nullptr;
+    delete data->globalassem; data->globalassem = nullptr;
+    delete data; data = nullptr;
+    delete elem_fem; elem_fem = nullptr;
+    delete locassem_fem; locassem_fem = nullptr;
+    delete globalassem_fem; globalassem_fem = nullptr;
 
-    // Mat K;
-    // MatCreateShell(PETSC_COMM_WORLD, nlocalfunc, nlocalfunc,
-    //     PETSC_DECIDE, PETSC_DECIDE, data, &K);
-    // MatShellSetOperation(K, MATOP_MULT, (void(*)(void))MyMatMult);
-
-    // KSP ksp;
-    // KSPCreate(PETSC_COMM_WORLD, &ksp);
-    // KSPSetOperators(ksp, K, K);
-    // KSPSetFromOptions(ksp);
-
-    // PC pc;
-    // KSPGetPC(ksp, &pc);
-    // PCSetType(pc, PCSHELL);
-
-    // MyPCCtx *ctx;
-    // PetscNew(&ctx);
-    // KSPCreate(PETSC_COMM_WORLD, &ctx->innerksp);
-    // KSPSetOperators(ctx->innerksp, globalassem_fem->K, globalassem_fem->K);
-    // KSPSetType(ctx->innerksp, KSPCG);
-
-    // PC innerpc;
-    // KSPGetPC(ctx->innerksp, &innerpc);
-    // PCSetType(innerpc, PCJACOBI);
-    // PCSetFromOptions(innerpc);
-
-    // PetscReal rtol = 1e-10;
-    // PetscReal abstol = 1e-10;
-    // PetscReal divtol = 1e4;
-    // PetscInt maxits = 10000;
-    // KSPSetTolerances(ctx->innerksp, rtol, abstol, divtol, maxits);
-    // KSPSetTolerances(ksp, rtol, abstol, divtol, maxits);
-
-    // PCShellSetContext(pc, ctx);
-    // PCShellSetApply(pc, MyPCApply);
-    // PCShellSetDestroy(pc, MyPCDestroy);
-
-    // Vec u;
-    // VecDuplicate(data->globalassem->F, &u);
-    // KSPSetFromOptions(ksp);
-    // KSPSolve(ksp, data->globalassem->F, u);
-
-    // PetscTime(&tend);
-    // PetscLogDouble time = tend - tstart;
-    // PetscPrintf(PETSC_COMM_WORLD, "Time: %f\n", time);
-
-    // PetscInt num_iterations;
-    // KSPGetIterationNumber(ksp, &num_iterations);
-
-    // if (rank == 0)
-    // {
-    //     std::cout << "Number of KSP iterations: " << num_iterations << std::endl;
-    // }
-
-    // VecView(u, PETSC_VIEWER_STDOUT_WORLD);
-
-    // delete fm; fm = nullptr;
-    // delete data->elem; data->elem = nullptr;
-    // delete data->locassem; data->locassem = nullptr;
-    // delete data->globalassem; data->globalassem = nullptr;
-    // delete data; data = nullptr;
-    // delete elem_fem; elem_fem = nullptr;
-    // delete locassem_fem; locassem_fem = nullptr;
-    // delete globalassem_fem; globalassem_fem = nullptr;
-
-    // VecDestroy(&u);
-    // KSPDestroy(&ksp);
+    VecDestroy(&u);
+    KSPDestroy(&ksp);
     
     PetscFinalize();
     return 0;
