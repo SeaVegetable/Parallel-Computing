@@ -133,6 +133,8 @@ int main(int argc, char *argv[])
     KSP ksp;
     KSPCreate(PETSC_COMM_WORLD, &ksp);
     KSPSetOperators(ksp, globalassem->K, globalassem->K);
+    // KSPSetComputeSingularValues(ksp, PETSC_TRUE);
+    KSPSetFromOptions(ksp);
 
     PC pc;
     KSPGetPC(ksp, &pc);
@@ -162,7 +164,7 @@ int main(int argc, char *argv[])
 
     Vec u;
     VecDuplicate(globalassem->F, &u);
-    KSPSetFromOptions(ksp);
+    VecSet(u, 0.0);
     KSPSolve(ksp, globalassem->F, u);
 
     PetscTime(&tend);

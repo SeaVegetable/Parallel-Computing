@@ -230,7 +230,6 @@ int main(int argc, char *argv[])
     Vec u;
     VecDuplicate(data->globalassem->F, &u);
     VecSet(u, 0.0);
-    KSPSetFromOptions(ksp);
     KSPSolve(ksp, data->globalassem->F, u);
 
     PetscTime(&tend);
