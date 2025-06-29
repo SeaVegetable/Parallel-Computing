@@ -1,0 +1,699 @@
+p: 3
+q: 3
+Lx: 1
+Ly: 1
+nElemX: 16
+nElemY: 16
+part_num_1d: 1
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.24751779486345
+Convergence reason: 1
+Minimum singular value of Kfull: 0.0206200054078631
+Condition number of Kfull: 60.5003621574092
+Convergence reason: 1
+Maximum singular value of K: 0.00380089848753922
+Convergence reason: 1
+Minimum singular value of K: 8.94199188419342e-06
+Condition number of K: 425.061724139785p: 3
+q: 3
+Lx: 1
+Ly: 1
+nElemX: 32
+nElemY: 32
+part_num_1d: 1
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.12507595945526
+Convergence reason: 1
+Minimum singular value of Kfull: 0.0186278763219096
+Condition number of Kfull: 60.3974355429869
+Convergence reason: 1
+Maximum singular value of K: 0.000970113044365647
+Convergence reason: 1
+Minimum singular value of K: 2.30771059577879e-06
+Condition number of K: 420.378987789958
+p: 3
+q: 3
+Lx: 1
+Ly: 1
+nElemX: 64
+nElemY: 64
+part_num_1d: 1
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.0625985930365
+Convergence reason: 1
+Minimum singular value of Kfull: 0.0175500312468081
+Condition number of Kfull: 60.54682057787
+Convergence reason: 1
+Maximum singular value of K: 0.000243742714852287
+Convergence reason: 1
+Minimum singular value of K: 5.77926045090317e-07
+Condition number of K: 421.754162012538
+p: 3
+q: 3
+Lx: 1
+Ly: 1
+nElemX: 128
+nElemY: 128
+part_num_1d: 1
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.03128414431788
+Convergence reason: 1
+Minimum singular value of Kfull: 0.017022241153428
+Condition number of Kfull: 60.5845102899507
+Convergence reason: 1
+Maximum singular value of K: 6.10104618464186e-05
+Convergence reason: 1
+Minimum singular value of K: 1.44482039704274e-07
+Condition number of K: 422.270214147689
+p: 3
+q: 3
+Lx: 1
+Ly: 1
+nElemX: 256
+nElemY: 256
+part_num_1d: 2
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.01563469513979
+Convergence reason: 1
+Minimum singular value of Kfull: 0.0167613677534958
+Condition number of Kfull: 60.5937838770921
+Convergence reason: 1
+Maximum singular value of K: 1.52572513199031e-05
+Convergence reason: 1
+Minimum singular value of K: 3.61205099256094e-08
+Condition number of K: 422.398558362703
+p: 3
+q: 3
+Lx: 1
+Ly: 1
+nElemX: 512
+nElemY: 512
+part_num_1d: 3
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.00781506693575
+Convergence reason: 1
+Minimum singular value of Kfull: 0.0166316864784069
+Condition number of Kfull: 60.5960837612112
+Convergence reason: 1
+Maximum singular value of K: 3.81460133635959e-06
+Convergence reason: 1
+Minimum singular value of K: 9.030127481402e-09
+Condition number of K: 422.430507677323
+p: 3
+q: 3
+Lx: 1
+Ly: 1
+nElemX: 1024
+nElemY: 1024
+part_num_1d: 8
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.00390690951984
+Convergence reason: 1
+Minimum singular value of Kfull: 0.0165670346971211
+Condition number of Kfull: 60.5966564248395
+Convergence reason: 1
+Maximum singular value of K: 9.53668326484737e-07
+Convergence reason: 1
+Minimum singular value of K: 2.25753187034816e-09
+Condition number of K: 422.43847761833
+p: 4
+q: 4
+Lx: 1
+Ly: 1
+nElemX: 16
+nElemY: 16
+part_num_1d: 1
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.23649167966895
+Convergence reason: 1
+Minimum singular value of Kfull: 0.00299337662330276
+Condition number of Kfull: 413.075878939904
+Convergence reason: 1
+Maximum singular value of K: 0.00376527086567251
+Convergence reason: 1
+Minimum singular value of K: 1.12027732198596e-06
+Condition number of K: 3361.01676948853
+p: 4
+q: 4
+Lx: 1
+Ly: 1
+nElemX: 32
+nElemY: 32
+part_num_1d: 1
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.12295538386659
+Convergence reason: 1
+Minimum singular value of Kfull: 0.00277516391188868
+Condition number of Kfull: 404.64470550943
+Convergence reason: 1
+Maximum singular value of K: 0.000968214888235926
+Convergence reason: 1
+Minimum singular value of K: 2.94547110993141e-07
+Condition number of K: 3287.13082593593
+p: 4
+q: 4
+Lx: 1
+Ly: 1
+nElemX: 64
+nElemY: 64
+part_num_1d: 1
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.06213634279846
+Convergence reason: 1
+Minimum singular value of Kfull: 0.0026163207055138
+Condition number of Kfull: 405.965652666373
+Convergence reason: 1
+Maximum singular value of K: 0.000243634457459804
+Convergence reason: 1
+Minimum singular value of K: 7.37642233626125e-08
+Condition number of K: 3302.88107640121
+p: 4
+q: 4
+Lx: 1
+Ly: 1
+nElemX: 128
+nElemY: 128
+part_num_1d: 2
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.03117638259459
+Convergence reason: 1
+Minimum singular value of Kfull: 0.00253763951762535
+Condition number of Kfull: 406.352586895217
+Convergence reason: 1
+Maximum singular value of K: 6.10040167405234e-05
+Convergence reason: 1
+Minimum singular value of K: 1.84410847820019e-08
+Condition number of K: 3308.04925315793
+p: 4
+q: 4
+Lx: 1
+Ly: 1
+nElemX: 256
+nElemY: 256
+part_num_1d: 3
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.01560868851744
+Convergence reason: 1
+Minimum singular value of Kfull: 0.00249874906582996
+Condition number of Kfull: 406.446850708519
+Convergence reason: 1
+Maximum singular value of K: 1.52568584479741e-05
+Convergence reason: 1
+Minimum singular value of K: 4.61027119548335e-09
+Condition number of K: 3309.31908364114
+p: 4
+q: 4
+Lx: 1
+Ly: 1
+nElemX: 512
+nElemY: 512
+part_num_1d: 6
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.00780867947774
+Convergence reason: 1
+Minimum singular value of Kfull: 0.00247941645709493
+Condition number of Kfull: 406.470109768718
+Convergence reason: 1
+Maximum singular value of K: 3.8145770911888e-06
+Convergence reason: 1
+Minimum singular value of K: 1.15256779887489e-09
+Condition number of K: 3309.6335806991
+p: 4
+q: 4
+Lx: 1
+Ly: 1
+nElemX: 1024
+nElemY: 1024
+part_num_1d: 8
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.00390532677367
+Convergence reason: 1
+Minimum singular value of Kfull: 0.00246977830700534
+Condition number of Kfull: 406.475886489961
+Convergence reason: 1
+Maximum singular value of K: 9.53666820802429e-07
+Convergence reason: 1
+Minimum singular value of K: 2.88141949719037e-10
+Condition number of K: 3309.71183381086
+p: 5
+q: 5
+Lx: 1
+Ly: 1
+nElemX: 16
+nElemY: 16
+part_num_1d: 1
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.22389128131542
+Convergence reason: 1
+Minimum singular value of Kfull: 0.000407881964327097
+Condition number of Kfull: 3000.60161604481
+Convergence reason: 1
+Maximum singular value of K: 0.00372421245506044
+Convergence reason: 1
+Minimum singular value of K: 1.41664975011059e-07
+Condition number of K: 26288.8724243216
+p: 5
+q: 5
+Lx: 1
+Ly: 1
+nElemX: 32
+nElemY: 32
+part_num_1d: 1
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.12068381674412
+Convergence reason: 1
+Minimum singular value of Kfull: 0.00039268812677221
+Condition number of Kfull: 2853.87751841605
+Convergence reason: 1
+Maximum singular value of K: 0.000966167417496607
+Convergence reason: 1
+Minimum singular value of K: 3.84670817050205e-08
+Condition number of K: 25116.7329225941
+p: 5
+q: 5
+Lx: 1
+Ly: 1
+nElemX: 64
+nElemY: 64
+part_num_1d: 1
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.06165780059123
+Convergence reason: 1
+Minimum singular value of Kfull: 0.000370798822216949
+Condition number of Kfull: 2863.16389637847
+Convergence reason: 1
+Maximum singular value of K: 0.000243521912525347
+Convergence reason: 1
+Minimum singular value of K: 9.64549755422105e-09
+Condition number of K: 25247.2110595038
+p: 5
+q: 5
+Lx: 1
+Ly: 1
+nElemX: 128
+nElemY: 128
+part_num_1d: 2
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.03106673419537
+Convergence reason: 1
+Minimum singular value of Kfull: 0.000359648256591928
+Condition number of Kfull: 2866.87538531643
+Convergence reason: 1
+Maximum singular value of K: 6.09974437285826e-05
+Convergence reason: 1
+Minimum singular value of K: 2.41138170922003e-09
+Condition number of K: 25295.6400454378
+p: 5
+q: 5
+Lx: 1
+Ly: 1
+nElemX: 256
+nElemY: 256
+part_num_1d: 3
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.01558245504628
+Convergence reason: 1
+Minimum singular value of Kfull: 0.000354136487454072
+Condition number of Kfull: 2867.77130012052
+Convergence reason: 1
+Maximum singular value of K: 1.52564616743634e-05
+Convergence reason: 1
+Minimum singular value of K: 6.02845427310547e-10
+Condition number of K: 25307.4187564571
+p: 5
+q: 5
+Lx: 1
+Ly: 1
+nElemX: 512
+nElemY: 512
+part_num_1d: 6
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.00780226421334
+Convergence reason: 1
+Minimum singular value of Kfull: 0.000351396563606267
+Condition number of Kfull: 2867.99123437804
+Convergence reason: 1
+Maximum singular value of K: 3.81455272558104e-06
+Convergence reason: 1
+Minimum singular value of K: 1.50711356827527e-10
+Condition number of K: 25310.320375832
+p: 5
+q: 5
+Lx: 1
+Ly: 1
+nElemX: 1024
+nElemY: 1024
+part_num_1d: 8
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.0039037405858
+Convergence reason: 1
+Minimum singular value of Kfull: 0.000350030591864501
+Condition number of Kfull: 2868.04571919937
+Convergence reason: 1
+Maximum singular value of K: 9.53665311379934e-07
+Convergence reason: 1
+Minimum singular value of K: 3.76778392071944e-11
+Condition number of K: 25311.0404271229
+p: 6
+q: 6
+Lx: 1
+Ly: 1
+nElemX: 16
+nElemY: 16
+part_num_1d: 1
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.20940964103152
+Convergence reason: 1
+Minimum singular value of Kfull: 5.40543283135888e-05
+Condition number of Kfull: 22373.9648380292
+Convergence reason: 1
+Maximum singular value of K: 0.00367672860497538
+Convergence reason: 1
+Minimum singular value of K: 1.78588941397046e-08
+Condition number of K: 205876.611183955
+p: 6
+q: 6
+Lx: 1
+Ly: 1
+nElemX: 32
+nElemY: 32
+part_num_1d: 1
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.11824198893812
+Convergence reason: 1
+Minimum singular value of Kfull: 5.48964214367456e-05
+Condition number of Kfull: 20370.0343241246
+Convergence reason: 1
+Maximum singular value of K: 0.000963954624373842
+Convergence reason: 1
+Minimum singular value of K: 5.08925474801134e-09
+Condition number of K: 189409.780430133
+p: 6
+q: 6
+Lx: 1
+Ly: 1
+nElemX: 64
+nElemY: 64
+part_num_1d: 1
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.06116154118942
+Convergence reason: 1
+Minimum singular value of Kfull: 5.19967553525545e-05
+Condition number of Kfull: 20408.2261286191
+Convergence reason: 1
+Maximum singular value of K: 0.000243404809889344
+Convergence reason: 1
+Minimum singular value of K: 1.2793814448558e-09
+Condition number of K: 190251.94625734
+p: 6
+q: 6
+Lx: 1
+Ly: 1
+nElemX: 128
+nElemY: 128
+part_num_1d: 2
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.03095507245353
+Convergence reason: 1
+Minimum singular value of Kfull: 5.04334113306983e-05
+Condition number of Kfull: 20441.9063722148
+Convergence reason: 1
+Maximum singular value of K: 6.09907376180046e-05
+Convergence reason: 1
+Minimum singular value of K: 3.19847857784489e-10
+Condition number of K: 190686.715992013
+p: 6
+q: 6
+Lx: 1
+Ly: 1
+nElemX: 256
+nElemY: 256
+part_num_1d: 3
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.01555598179787
+Convergence reason: 1
+Minimum singular value of Kfull: 4.96604969204831e-05
+Condition number of Kfull: 20449.9762341079
+Convergence reason: 1
+Maximum singular value of K: 1.52560608843422e-05
+Convergence reason: 1
+Minimum singular value of K: 7.99619644461114e-11
+Condition number of K: 190791.471795615
+p: 6
+q: 6
+Lx: 1
+Ly: 1
+nElemX: 512
+nElemY: 512
+part_num_1d: 6
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.00779581969856
+Convergence reason: 1
+Minimum singular value of Kfull: 4.92762778811956e-05
+Condition number of Kfull: 20451.9469211604
+Convergence reason: 1
+Maximum singular value of K: 3.81452823666746e-06
+Convergence reason: 1
+Minimum singular value of K: 1.99904911102439e-11
+Condition number of K: 190817.134788287
+p: 6
+q: 6
+Lx: 1
+Ly: 1
+nElemX: 1024
+nElemY: 1024
+part_num_1d: 8
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.00390215078613
+Convergence reason: 1
+Minimum singular value of Kfull: 4.90847279111864e-05
+Condition number of Kfull: 20452.4338527981
+Convergence reason: 1
+Maximum singular value of K: 9.53663798138402e-07
+Convergence reason: 1
+Minimum singular value of K: 4.99762277837941e-12
+Condition number of K: 190823.485570803
+p: 7
+q: 7
+Lx: 1
+Ly: 1
+nElemX: 16
+nElemY: 16
+part_num_1d: 1
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.19278434336515
+Convergence reason: 1
+Minimum singular value of Kfull: 6.95507133273784e-06
+Condition number of Kfull: 171498.506097366
+Convergence reason: 1
+Maximum singular value of K: 0.00362159608635382
+Convergence reason: 1
+Minimum singular value of K: 2.21662176971644e-09
+Condition number of K: 1633835.83786471
+p: 7
+q: 7
+Lx: 1
+Ly: 1
+nElemX: 32
+nElemY: 32
+part_num_1d: 1
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.11561561448427
+Convergence reason: 1
+Minimum singular value of Kfull: 7.5922842295858e-06
+Condition number of Kfull: 146940.707269218
+Convergence reason: 1
+Maximum singular value of K: 0.000961557496613483
+Convergence reason: 1
+Minimum singular value of K: 6.75557138002237e-10
+Condition number of K: 1423354.80231474
+p: 7
+q: 7
+Lx: 1
+Ly: 1
+nElemX: 64
+nElemY: 64
+part_num_1d: 2
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.06064678802039
+Convergence reason: 1
+Minimum singular value of Kfull: 7.22895507581652e-06
+Condition number of Kfull: 146722.005725092
+Convergence reason: 1
+Maximum singular value of K: 0.000243282833752065
+Convergence reason: 1
+Minimum singular value of K: 1.7057331339251e-10
+Condition number of K: 1426265.50961252
+p: 7
+q: 7
+Lx: 1
+Ly: 1
+nElemX: 128
+nElemY: 128
+part_num_1d: 3
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.03084135065455
+Convergence reason: 1
+Minimum singular value of Kfull: 7.01172052435787e-06
+Condition number of Kfull: 147016.890800701
+Convergence reason: 1
+Maximum singular value of K: 6.09838922472969e-05
+Convergence reason: 1
+Minimum singular value of K: 4.2644179168031e-11
+Condition number of K: 1430063.69068571
+p: 7
+q: 7
+Lx: 1
+Ly: 1
+nElemX: 256
+nElemY: 256
+part_num_1d: 4
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.01552926567947
+Convergence reason: 1
+Minimum singular value of Kfull: 6.90426280317194e-06
+Condition number of Kfull: 147087.284280796
+Convergence reason: 1
+Maximum singular value of K: 1.52556559377965e-05
+Convergence reason: 1
+Minimum singular value of K: 1.06610447869139e-11
+Condition number of K: 1430971.93968477
+p: 7
+q: 7
+Lx: 1
+Ly: 1
+nElemX: 512
+nElemY: 512
+part_num_1d: 6
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.00778934570586
+Convergence reason: 1
+Minimum singular value of Kfull: 6.85084511172832e-06
+Condition number of Kfull: 147104.383367327
+Convergence reason: 1
+Maximum singular value of K: 3.81450362084404e-06
+Convergence reason: 1
+Minimum singular value of K: 2.66526119840448e-12
+Condition number of K: 1431193.16903256
+p: 7
+q: 7
+Lx: 1
+Ly: 1
+nElemX: 1024
+nElemY: 1024
+part_num_1d: 8
+dim: 2
+base_name: part
+Assembling stiffness matrix and load vector...done
+Convergence reason: 1
+Maximum singular value of Kfull: 1.00390055735543
+Convergence reason: 1
+Minimum singular value of Kfull: 6.82421405046332e-06
+Condition number of Kfull: 147108.597405041
+Convergence reason: 1
+Maximum singular value of K: 9.53662280976728e-07
+Convergence reason: 1
+Minimum singular value of K: 6.66315299723715e-13
+Condition number of K: 1431247.76119078
