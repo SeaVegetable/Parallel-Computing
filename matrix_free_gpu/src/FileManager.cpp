@@ -447,6 +447,35 @@ void FileManager::ReadPreprocessInfo(const std::string &filename, int &p, int &q
     }
 }
 
+void FileManager::WriteNonZeroCoordinate(const std::string &filename, const int &nnz,
+    const std::vector<int> &rows, const std::vector<int> &cols) const
+{
+    std::ofstream file(filename.c_str());
+    if (!file.is_open())
+    {
+        std::cerr << "Error: Could not open file " << filename << std::endl;
+        exit(1);
+    }
+
+    file << "nnz: " << nnz << std::endl;
+
+    file << "rows: ";
+    for (const auto &row : rows)
+    {
+        file << row << " ";
+    }
+    file << std::endl;
+
+    file << "cols: ";
+    for (const auto &col : cols)
+    {
+        file << col << " ";
+    }
+    file << std::endl;
+
+    file.close();
+}
+
 std::string FileManager::GetPartitionFilename(const std::string &base_name, const int &rank) const
 {
     return base_name + "_" + std::to_string(rank) + ".txt";
