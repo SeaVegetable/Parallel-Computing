@@ -73,6 +73,9 @@ public:
     void WriteNonZeroCoordinate(const std::string &filename, const int &nnz,
         const std::vector<int> &rows, const std::vector<int> &cols) const;
 
+    void ReadNonZeroCoordinate(const std::string &filename, int &nnz,
+        std::vector<int> &rows, std::vector<int> &cols) const;
+
     std::string GetPartitionFilename(const std::string &base_name, const int &rank) const;
 };
 

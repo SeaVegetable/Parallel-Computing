@@ -476,6 +476,44 @@ void FileManager::WriteNonZeroCoordinate(const std::string &filename, const int 
     file.close();
 }
 
+void FileManager::ReadNonZeroCoordinate(const std::string &filename, int &nnz,
+    std::vector<int> &rows, std::vector<int> &cols) const
+{
+    std::ifstream file(filename.c_str());
+    if (!file.is_open())
+    {
+        std::cerr << "Error: Could not open file " << filename << std::endl;
+        exit(1);
+    }
+
+    std::string line;
+    while (std::getline(file, line))
+    {
+        if (line.find("nnz: ") != std::string::npos)
+        {
+            nnz = std::stoi(line.substr(5));
+        }
+        else if (line.find("rows: ") != std::string::npos)
+        {
+            std::istringstream iss(line.substr(6));
+            int row;
+            while (iss >> row)
+            {
+                rows.push_back(row);
+            }
+        }
+        else if (line.find("cols: ") != std::string::npos)
+        {
+            std::istringstream iss(line.substr(6));
+            int col;
+            while (iss >> col)
+            {
+                cols.push_back(col);
+            }
+        }
+    }
+}
+
 std::string FileManager::GetPartitionFilename(const std::string &base_name, const int &rank) const
 {
     return base_name + "_" + std::to_string(rank) + ".txt";
