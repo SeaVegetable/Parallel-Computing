@@ -1,103 +1,33 @@
 #include "GlobalAssembly.hpp"
 
-GlobalAssembly::GlobalAssembly(const std::vector<int> &IEN, const std::vector<int> &ID,
-    const std::vector<int> &Dir, LocalAssembly * const &locassem, const int &nLocBas,
-    const int &nlocalfunc, const int &nlocalelemx, const int &nlocalelemy)
-    : nLocBas(nLocBas), nlocalfunc(nlocalfunc),
-      nlocalelemx(nlocalelemx), nlocalelemy(nlocalelemy)
+__global__ void AssembleKernel(const int * d_IEN, const int * d_ID, const int * d_Dir,
+    const double * d_CP, const double * d_NURBSExtraction1, const double * d_NURBSExtraction2,
+    const double * d_elem_size1, const double * d_elem_size2)
 {
-    const int dnz = nlocalfunc;
-    const int onz = dnz;
-    MatCreateAIJ(PETSC_COMM_WORLD, nlocalfunc, nlocalfunc, PETSC_DETERMINE,
-        PETSC_DETERMINE, dnz, PETSC_NULL, dnz, PETSC_NULL, &K);
-    VecCreate(PETSC_COMM_WORLD, &F);
-    VecSetSizes(F, nlocalfunc, PETSC_DECIDE);
-    VecSetFromOptions(F);
-    VecSet(F, 0.0);
-    VecSetOption(F, VEC_IGNORE_NEGATIVE_INDICES, PETSC_TRUE);
+    
+}
 
-    MatSetOption(K, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
-    AssemNonZeroEstimate(locassem, IEN, ID, Dir);
-
-    std::vector<int> Dnz, Onz;
-    NonZeroCount(K, Dnz, Onz);
-
-    MatDestroy(&K);
-
-    MatCreateAIJ(PETSC_COMM_WORLD, nlocalfunc, nlocalfunc, PETSC_DETERMINE,
-        PETSC_DETERMINE, 0, &Dnz[0], 0, &Onz[0], &K);
-    MatSetOption(K, MAT_SYMMETRIC, PETSC_TRUE);
+GlobalAssembly::GlobalAssembly(const int &nlocalfunc,
+    const int &nnz, const std::vector<int> &rows,
+    const std::vector<int> &cols)
+: nLocBas(nlocalfunc), nnz(nnz)
+{
+    PetscInt * d_rows, * d_cols;
+    cudaMalloc((void**)&d_rows, nnz * sizeof(PetscInt));
+    cudaMalloc((void**)&d_cols, nnz * sizeof(PetscInt));
+    cudaMemcpy(d_rows, rows.data(), nnz * sizeof(PetscInt), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_cols, cols.data(), nnz * sizeof(PetscInt), cudaMemcpyHostToDevice);
+    MatCreate(PETSC_COMM_WORLD, &K);
+    MatSetSizes(K, nlocalfunc, nlocalfunc, PETSC_DETERMINE, PETSC_DETERMINE);
+    MatSetType(K, MATAIJCUSPARSE);
+    MatSetPreallocationCOO(A, nnz, d_rows, d_cols);
+    cudaFree(d_rows);
+    cudaFree(d_cols);
 }
 
 GlobalAssembly::~GlobalAssembly()
 {
     MatDestroy(&K);
-    VecDestroy(&F);
-}
-
-void GlobalAssembly::NonZeroCount(const Mat &K, std::vector<int> &dnz, std::vector<int> &onz)
-{
-    PetscInt rstart, rend;
-    PetscInt cstart, cend;
-    MatGetOwnershipRange(K, &rstart, &rend);
-    MatGetOwnershipRangeColumn(K, &cstart, &cend);
-
-    const PetscInt nlocalfunc = rend - rstart;
-    dnz.resize(nlocalfunc, 0);
-    onz.resize(nlocalfunc, 0);
-
-    for (PetscInt i = 0; i < nlocalfunc; ++i)
-    {
-        const PetscInt globalrow = rstart + i;
-
-        PetscInt ncols;
-        const PetscInt *cols;
-        MatGetRow(K, globalrow, &ncols, &cols, PETSC_NULL);
-
-        for (PetscInt j = 0; j < ncols; ++j)
-        {
-            const PetscInt globalcol = cols[j];
-            if (globalcol >= cstart && globalcol < cend)
-            {
-                ++dnz[i];
-            }
-            else
-            {
-                ++onz[i];
-            }
-        }
-
-        MatRestoreRow(K, globalrow, &ncols, &cols, nullptr);
-    }
-}
-
-void GlobalAssembly::AssemNonZeroEstimate(LocalAssembly * const &locassem,
-    const std::vector<int> &IEN,
-    const std::vector<int> &ID,
-    const std::vector<int> &Dir)
-{
-    PetscInt * eID = new PetscInt[nLocBas];
-
-    const int nlocalelem = nlocalelemx * nlocalelemy;
-
-    for (int i = 0; i < nlocalelem; ++i)
-    {
-        for (int j = 0; j < nLocBas; ++j)
-        {
-            eID[j] = ID[IEN[i*nLocBas+j]];
-        }
-
-        locassem->AssemNonZero();
-
-        MatSetValues(K, nLocBas, eID, nLocBas, eID, locassem->Kloc, ADD_VALUES);
-    }
-
-    delete[] eID; eID = nullptr;
-
-    DirichletBCK(Dir);
-
-    MatAssemblyBegin(K, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(K, MAT_FINAL_ASSEMBLY);
 }
 
 void GlobalAssembly::AssemStiffnessLoad(LocalAssembly * const &locassem,
@@ -117,6 +47,27 @@ void GlobalAssembly::AssemStiffnessLoad(LocalAssembly * const &locassem,
     const int qq = elem->GetNumLocalBasis1D(1);
     std::vector<double> eNURBSExtraction1(pp*pp, 0.0);
     std::vector<double> eNURBSExtraction2(qq*qq, 0.0);
+
+    int * d_IEN, * d_ID, * d_Dir;
+    double * d_CP, * d_NURBSExtraction1, * d_NURBSExtraction2;
+    double * d_elem_size1, * d_elem_size2;
+    cudaMalloc((void**)&d_IEN, IEN.size() * sizeof(int));
+    cudaMalloc((void**)&d_ID, ID.size() * sizeof(int));
+    cudaMalloc((void**)&d_Dir, Dir.size() * sizeof(int));
+    cudaMalloc((void**)&d_CP, CP.size() * sizeof(double));
+    cudaMalloc((void**)&d_NURBSExtraction1, NURBSExtraction1.size() * sizeof(double));
+    cudaMalloc((void**)&d_NURBSExtraction2, NURBSExtraction2.size() * sizeof(double));
+    cudaMalloc((void**)&d_elem_size1, elem_size1.size() * sizeof(double));
+    cudaMalloc((void**)&d_elem_size2, elem_size2.size() * sizeof(double));
+
+    cudaMemcpy(d_IEN, IEN.data(), IEN.size() * sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_ID, ID.data(), ID.size() * sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_Dir, Dir.data(), Dir.size() * sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_CP, CP.data(), CP.size() * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_NURBSExtraction1, NURBSExtraction1.data(), NURBSExtraction1.size() * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_NURBSExtraction2, NURBSExtraction2.data(), NURBSExtraction2.size() * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_elem_size1, elem_size1.data(), elem_size1.size() * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_elem_size2, elem_size2.data(), elem_size2.size() * sizeof(double), cudaMemcpyHostToDevice);
 
     for (int jj = 0; jj < nlocalelemy; ++jj)
     {
@@ -157,6 +108,15 @@ void GlobalAssembly::AssemStiffnessLoad(LocalAssembly * const &locassem,
     MatAssemblyEnd(K, MAT_FINAL_ASSEMBLY);
     VecAssemblyBegin(F);
     VecAssemblyEnd(F);
+
+    cudaFree(d_IEN);
+    cudaFree(d_ID);
+    cudaFree(d_Dir);
+    cudaFree(d_CP);
+    cudaFree(d_NURBSExtraction1);
+    cudaFree(d_NURBSExtraction2);
+    cudaFree(d_elem_size1);
+    cudaFree(d_elem_size2);
 }
 
 void GlobalAssembly::AssemStiffnessLoad(LocalAssembly * const &locassem,
