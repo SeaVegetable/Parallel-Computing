@@ -2,7 +2,7 @@
 #define GLOBALASSEMBLY_HPP
 
 #include <petscmat.h>
-#include "LocalAssembly.hpp"
+#include "QuadraturePoint.hpp"
 
 class GlobalAssembly
 {
@@ -26,7 +26,8 @@ class GlobalAssembly
             const std::vector<double> &elem_size2,
             Element * const &elem);
         
-        void AssemStiffnessLoad(LocalAssembly * const &locassem,
+        void AssemStiffnessLoad(QuadraturePoint * const &quad1,
+            QuadraturePoint * const &quad2,
             const std::vector<int> &IEN,
             const std::vector<int> &ID,
             const std::vector<int> &Dir,
