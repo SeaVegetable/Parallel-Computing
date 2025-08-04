@@ -3,8 +3,9 @@
 __global__ void AssembleKernel(const int nLocBas, const int nqp,
     const double * d_N, const double * d_dN_dxi, const double * d_dN_deta,
     const double * d_weight,
-    const int * d_IEN, const int * d_ID, const int * d_Dir,
-    const double * d_CP, double * d_val)
+    const int * d_IEN, const int * d_ID,
+    const double * d_CP, const int * elem2coo,
+    double * d_val)
 {
     extern __shared__ double shared_data[];
 
@@ -38,14 +39,36 @@ __global__ void AssembleKernel(const int nLocBas, const int nqp,
             dN_dxi_q[i] = d_dN_dxi[qp * nLocBas + i];
             dN_deta_q[i] = d_dN_deta[qp * nLocBas + i];
         }
+
+        double jacobian;
+        double dR_dx[nLocBas];
+        double dR_dy[nLocBas];
+        compute_jacobian_basis_derivative(nLocBas, dN_dxi_q, dN_deta_q, s_eCP, jacobian, dR_dx, dR_dy);
+
+        for (int i = 0; i < nLocBas; ++i)
+        {
+            for (int j = 0; j < nLocBas; ++j)
+            {
+                int elem2coo_index = elem2coo[elemIndex * nLocBas * nLocBas + i * nLocBas + j];
+                double val = (dR_dx[i] * dR_dx[j] + dR_dy[i] * dR_dy[j]) * jacobian * d_weight[qp];
+                atomicAdd(&d_val[elem2coo_index], val);
+            }
+        }
     }
+}
 
-    __syncthreads();
+__global__ void DirichletBCKernel(const int * dir2coo, const int dirsize, double * d_val)
+{
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
-    double jacobian;
-    double dR_dx[nLocBas];
-    double dR_dy[nLocBas];
-    compute_jacobian_basis_derivative(nLocBas, dN_dxi_q, dN_deta_q, s_eCP, jacobian, dR_dx, dR_dy);
+    if (idx < dirsize)
+    {
+        int coo_index = dir2coo[idx];
+        if (coo_index >= 0)
+        {
+            d_val[coo_index] = 1.0;
+        }
+    }
 }
 
 __device__ void compute_jacobian_basis_derivative(
@@ -86,8 +109,10 @@ __device__ void compute_jacobian_basis_derivative(
     }
 }
 
-GlobalAssembly::GlobalAssembly(const int &nlocalfunc,
-    const int &nnz, const std::vector<int> &rows,
+GlobalAssembly::GlobalAssembly(const int &nLocBas,
+    const int &nnz, const int &nlocalfunc,
+    const int &nlocalelemx, const int &nlocalelemy,
+    const std::vector<int> &rows,
     const std::vector<int> &cols)
 : nLocBas(nlocalfunc), nnz(nnz)
 {
@@ -109,106 +134,15 @@ GlobalAssembly::~GlobalAssembly()
     MatDestroy(&K);
 }
 
-void GlobalAssembly::AssemStiffnessLoad(LocalAssembly * const &locassem,
-    const std::vector<int> &IEN,
-    const std::vector<int> &ID,
-    const std::vector<int> &Dir,
-    const std::vector<double> &CP,
-    const std::vector<double> &NURBSExtraction1,
-    const std::vector<double> &NURBSExtraction2,
-    const std::vector<double> &elem_size1,
-    const std::vector<double> &elem_size2,
-    Element * const &elem)
-{
-    PetscInt * eID = new PetscInt[nLocBas];
-    std::vector<double> eCP(2*nLocBas, 0.0);
-    const int pp = elem->GetNumLocalBasis1D(0);
-    const int qq = elem->GetNumLocalBasis1D(1);
-    std::vector<double> eNURBSExtraction1(pp*pp, 0.0);
-    std::vector<double> eNURBSExtraction2(qq*qq, 0.0);
-
-    int * d_IEN, * d_ID, * d_Dir;
-    double * d_CP, * d_NURBSExtraction1, * d_NURBSExtraction2;
-    double * d_elem_size1, * d_elem_size2;
-    cudaMalloc((void**)&d_IEN, IEN.size() * sizeof(int));
-    cudaMalloc((void**)&d_ID, ID.size() * sizeof(int));
-    cudaMalloc((void**)&d_Dir, Dir.size() * sizeof(int));
-    cudaMalloc((void**)&d_CP, CP.size() * sizeof(double));
-    cudaMalloc((void**)&d_NURBSExtraction1, NURBSExtraction1.size() * sizeof(double));
-    cudaMalloc((void**)&d_NURBSExtraction2, NURBSExtraction2.size() * sizeof(double));
-    cudaMalloc((void**)&d_elem_size1, elem_size1.size() * sizeof(double));
-    cudaMalloc((void**)&d_elem_size2, elem_size2.size() * sizeof(double));
-
-    cudaMemcpy(d_IEN, IEN.data(), IEN.size() * sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_ID, ID.data(), ID.size() * sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_Dir, Dir.data(), Dir.size() * sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_CP, CP.data(), CP.size() * sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_NURBSExtraction1, NURBSExtraction1.data(), NURBSExtraction1.size() * sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_NURBSExtraction2, NURBSExtraction2.data(), NURBSExtraction2.size() * sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_elem_size1, elem_size1.data(), elem_size1.size() * sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_elem_size2, elem_size2.data(), elem_size2.size() * sizeof(double), cudaMemcpyHostToDevice);
-
-    for (int jj = 0; jj < nlocalelemy; ++jj)
-    {
-        for (int ii = 0; ii < nlocalelemx; ++ii)
-        {
-            int elemIndex = jj*nlocalelemx + ii;
-            for (int j = 0; j < nLocBas; ++j)
-            {
-                eID[j] = ID[IEN[elemIndex*nLocBas+j]];
-                eCP[2*j] = CP[2*IEN[elemIndex*nLocBas+j]];
-                eCP[2*j+1] = CP[2*IEN[elemIndex*nLocBas+j]+1];
-            }
-
-            std::copy(NURBSExtraction1.begin() + ii * pp * pp, 
-                NURBSExtraction1.begin() + (ii + 1) * pp * pp, 
-                eNURBSExtraction1.begin());
-            std::copy(NURBSExtraction2.begin() + jj * qq * qq,
-                NURBSExtraction2.begin() + (jj + 1) * qq * qq,
-                eNURBSExtraction2.begin());
-        
-            elem->SetElement(eNURBSExtraction1, eNURBSExtraction2, elem_size1[ii], elem_size2[jj]);
-
-            locassem->AssemLocalStiffnessLoad(elem, eCP);
-
-            MatSetValues(K, nLocBas, eID, nLocBas, eID, locassem->Kloc, ADD_VALUES);
-
-            VecSetValues(F, nLocBas, eID, locassem->Floc, ADD_VALUES);
-        }
-    }
-    VecAssemblyBegin(F);
-    VecAssemblyEnd(F);
-
-    delete[] eID; eID = nullptr;
-
-    DirichletBC(Dir);
-
-    MatAssemblyBegin(K, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(K, MAT_FINAL_ASSEMBLY);
-    VecAssemblyBegin(F);
-    VecAssemblyEnd(F);
-
-    cudaFree(d_IEN);
-    cudaFree(d_ID);
-    cudaFree(d_Dir);
-    cudaFree(d_CP);
-    cudaFree(d_NURBSExtraction1);
-    cudaFree(d_NURBSExtraction2);
-    cudaFree(d_elem_size1);
-    cudaFree(d_elem_size2);
-}
-
-void GlobalAssembly::AssemStiffnessLoad(QuadraturePoint * const &quad1,
+void GlobalAssembly::AssemStiffness(QuadraturePoint * const &quad1,
     QuadraturePoint * const &quad2,
     const std::vector<int> &IEN,
     const std::vector<int> &ID,
-    const std::vector<int> &Dir,
+    const std::vector<int> &dir2coo,
     const std::vector<double> &CP,
+    const std::vector<int> &elem2coo,
     ElementFEM * const &elem)
 {
-    PetscInt * eID = new PetscInt[nLocBas];
-    std::vector<double> eCP(2*nLocBas, 0.0);
-
     const int nqp1 = quad1->GetNumQuadraturePoint();
     const int nqp2 = quad2->GetNumQuadraturePoint();
     const std::vector<double> qp1 = quad1->GetQuadraturePoint();
@@ -248,47 +182,28 @@ void GlobalAssembly::AssemStiffnessLoad(QuadraturePoint * const &quad1,
     cudaMemcpy(d_dN_deta, dN_deta.data(), dN_deta.size() * sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(d_weight, weight.data(), weight.size() * sizeof(double), cudaMemcpyHostToDevice);
 
-    int * d_IEN, * d_ID, * d_Dir;
-    double * d_CP;
+    int * d_IEN, * d_ID, * d_dir2coo, * d_elem2coo;
+    double * d_CP, * d_val;
     cudaMalloc((void**)&d_IEN, IEN.size() * sizeof(int));
     cudaMalloc((void**)&d_ID, ID.size() * sizeof(int));
-    cudaMalloc((void**)&d_Dir, Dir.size() * sizeof(int));
+    cudaMalloc((void**)&d_dir2coo, dir2coo.size() * sizeof(int));
     cudaMalloc((void**)&d_CP, CP.size() * sizeof(double));
+    cudaMalloc((void**)&d_elem2coo, elem2coo.size() * sizeof(int));
+    cudaMalloc((void**)&d_val, nnz * sizeof(double));
     cudaMemcpy(d_IEN, IEN.data(), IEN.size() * sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_ID, ID.data(), ID.size() * sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_Dir, Dir.data(), Dir.size() * sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_Dir, dir2coo.data(), dir2coo.size() * sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_CP, CP.data(), CP.size() * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_elem2coo, elem2coo.data(), elem2coo.size() * sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemset(d_val, 0, nnz * sizeof(double));
 
-    for (int jj = 0; jj < nlocalelemy; ++jj)
-    {
-        for (int ii = 0; ii < nlocalelemx; ++ii)
-        {
-            int elemIndex = jj*nlocalelemx + ii;
-            for (int j = 0; j < nLocBas; ++j)
-            {
-                eID[j] = ID[IEN[elemIndex*nLocBas+j]];
-                eCP[2*j] = CP[2*IEN[elemIndex*nLocBas+j]];
-                eCP[2*j+1] = CP[2*IEN[elemIndex*nLocBas+j]+1];
-            }
+    AssembleKernel<<<dim3(nlocalelemx, nlocalelemy), dim3(nqp1, nqp2), nLocBas * sizeof(PetscInt) + 2 * nLocBas * sizeof(double)>>>(
+        nLocBas, nqp1 * nqp2, d_N, d_dN_dxi, d_dN_deta, d_weight,
+        d_IEN, d_ID, d_Dir, d_CP, d_elem2coo, d_val);
 
-            locassem->AssemLocalStiffnessLoad(elem, eCP);
+    DirichletBCKernel<<<(Dir.size() + 255) / 256, 256>>>(d_dir2coo, dir2coo.size(), d_val);
 
-            MatSetValues(K, nLocBas, eID, nLocBas, eID, locassem->Kloc, ADD_VALUES);
-
-            VecSetValues(F, nLocBas, eID, locassem->Floc, ADD_VALUES);
-        }
-    }
-    VecAssemblyBegin(F);
-    VecAssemblyEnd(F);
-
-    delete[] eID; eID = nullptr;
-
-    DirichletBC(Dir);
-
-    MatAssemblyBegin(K, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(K, MAT_FINAL_ASSEMBLY);
-    VecAssemblyBegin(F);
-    VecAssemblyEnd(F);
+    MarSetValuesCOO(K, d_val, INSERT_VALUES);
 
     cudaFree(d_N);
     cudaFree(d_dN_dxi);
@@ -299,6 +214,8 @@ void GlobalAssembly::AssemStiffnessLoad(QuadraturePoint * const &quad1,
     cudaFree(d_ID);
     cudaFree(d_Dir);
     cudaFree(d_CP);
+    cudaFree(d_elem2coo);
+    cudaFree(d_val);
 }
 
 void GlobalAssembly::DirichletBCK(const std::vector<int> &Dir)

@@ -3,6 +3,7 @@
 #include "FileManager.hpp"
 #include "GlobalAssemblyMF.hpp"
 #include "GlobalAssembly.hpp"
+#include "Elem2COOGenerator.hpp"
 
 typedef struct {
     KSP innerksp;
@@ -153,14 +154,41 @@ int main(int argc, char *argv[])
         nlocalelemx_fem, nlocalelemy_fem,
         CP_fem, ID_fem, Dir_fem, IEN_fem);
 
+    std::string filename_dr = "dryrun";
+
+    std::vector<int> rows{};
+    std::vector<int> cols{};
+    int nnz = 0;
+    for (int ii = 0; ii < part_num_1d * part_num_1d; ++ii)
+    {
+        std::vector<int> rows_temp{};
+        std::vector<int> cols_temp{};
+        std::string filename = fm->GetNonZeroCoordinateFilename(filename_dr, ii);
+        fm->ReadNonZeroCoordinate(filename, nnz, rows_temp, cols_temp);
+        rows.insert(rows.end(), rows_temp.begin(), rows_temp.end());
+        cols.insert(cols.end(), cols_temp.begin(), cols_temp.end());
+    }
+
+    Elem2COOGenerator * elem2coo_gen = new Elem2COOGenerator(rows, cols, 
+        nlocalfunc_fem, nlocalelemx_fem, nlocalelemy_fem);
+    
+    std::vector<int> elem2coo{};
+    elem2coo_gen->GenerateElem2COO(IEN, ID, rows, cols, elem2coo);
+
+    std::vector<int> dir2coo{};
+    elem2coo_gen->GenerateDir2COO(Dir, rows, cols, dir2coo);
+
     ElementFEM * elem_fem = new ElementFEM(1, 1);
-    LocalAssembly * locassem_fem = new LocalAssembly(1, 1);
-    GlobalAssembly * globalassem_fem = new GlobalAssembly(IEN_fem, ID_fem, Dir_fem, locassem_fem,
-        4, nlocalfunc_fem, nlocalelemx_fem, nlocalelemy_fem);
+    QuadraturePoint * quad_fem = new QuadraturePoint(2, 0, 1);
+    GlobalAssembly * globalassem_fem = new GlobalAssembly(
+        4, nlocalfunc_fem, nlocalelemx_fem, nlocalelemy_fem, rows, cols);
+
+    globalassem_fem->AssemStiffness(quad, quad, 
+        IEN_fem, ID_fem, Dir_fem, )
     
     MatSetOption(globalassem_fem->K, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_TRUE);
     
-    globalassem_fem->AssemStiffnessLoad(locassem_fem, IEN_fem, ID_fem, Dir_fem, CP_fem, elem_fem);
+    globalassem_fem->AssemStiffnessLoad(locassem_fem, IEN_fem, ID_fem, dir2coo, CP_fem, elem2coo, elem_fem);
 
     MPI_Barrier(PETSC_COMM_WORLD);
     PetscPrintf(PETSC_COMM_WORLD, "Assembling stiffness matrix and load vector...done\n");
