@@ -11,7 +11,7 @@ class BernsteinBasis {
 
         std::vector<double> GetBernsteinBasisSingleQP(const double &xi) const;
 
-        std::vector<double> GetBernsteinBasisDerivativeSingleQP(const double &xi, const double &h) const;
+        std::vector<double> GetBernsteinBasisDerivativeSingleQP(const double &xi) const;
 
         int GetDegree() const { return p; }
 
