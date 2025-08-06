@@ -101,6 +101,130 @@ __global__ void AssembleKernel(const int p, const int q,
     }
 }
 
+__global__ void MatrixFreeMatMultKernel(const int p, const int q,
+    double *d_B1, double *d_B2,
+    double *d_dB1, double *d_dB2,
+    double *d_nurbs_extraction1, double *d_nurbs_extraction2,
+    double *d_elem_size1, double *d_elem_size2,
+    int *d_IEN, int *d_ID,
+    double *d_CP,
+    double *qw1, double *qw2,
+    double *d_F_array_in,
+    double *d_F_array_out
+    )
+{
+    extern __shared__ double shared_data[];
+
+    int nLocBas = (p + 1) * (q + 1);
+
+    int offset = 0;
+    PetscInt *s_eID = (PetscInt*)(shared_data + offset);
+    offset += nLocBas * (sizeof(PetscInt) / sizeof(double));
+    double *s_eCP = shared_data + offset;
+    offset += (p + 1) * (p + 1);
+    double *s_eNURBSExtraction1 = shared_data + offset;
+    offset += (q + 1) * (q + 1);
+    double *s_eNURBSExtraction2 = shared_data + offset;
+    offset += nLocBas;
+    double *s_qw = shared_data + offset;
+    offset += nLocBas;
+    double *Floc_in = shared_data + offset;
+    offset += nLocBas;
+    double *Floc_out = shared_data + offset;
+    
+    int elemIndex = blockIdx.y * gridDim.x + blockIdx.x;
+
+    for (int j = 0; j < nLocBas; ++j)
+    {
+        s_eID[j] = d_ID[d_IEN[elemIndex * nLocBas + j]];
+        s_eCP[2 * j] = d_CP[2 * d_IEN[elemIndex * nLocBas + j]];
+        s_eCP[2 * j + 1] = d_CP[2 * d_IEN[elemIndex * nLocBas + j] + 1];
+    }
+
+    for (int j = 0; j < q + 1; ++j)
+    {
+        for (int i = 0; i < p + 1; ++i)
+        {
+            s_qw[j * (p + 1) + i] = qw1[i] * qw2[j];
+        }
+    }
+
+    for (int i = 0; i < (p + 1) * (p + 1); ++i)
+        s_eNURBSExtraction1[i] = d_nurbs_extraction1[elemIndex * (p + 1) * (p + 1) + i];
+    for (int i = 0; i < (q + 1) * (q + 1); ++i)
+        s_eNURBSExtraction2[i] = d_nurbs_extraction2[elemIndex * (q + 1) * (q + 1) + i];
+
+    for (int i = 0; i < nLocBas; ++i)
+    {
+        int coo_index = d_IEN[elemIndex * nLocBas + i];
+        Floc_in[i] = d_F_array_in[coo_index];
+        Floc_out[i] = 0.0;
+    }
+
+    double h1 = d_elem_size1[blockIdx.x];
+    double h2 = d_elem_size2[blockIdx.y];
+
+    __syncthreads();
+
+    int qpx = threadIdx.x;
+    int qpy = threadIdx.y;
+    int qp = threadIdx.y * blockDim.x + threadIdx.x;
+
+    double B1[p + 1];
+    double dB1[p + 1];
+    double B2[q + 1];
+    double dB2[q + 1];
+
+    if (qp < nqp)
+    {
+        for (int i = 0; i < p + 1; ++i)
+        {
+            B1[i] = d_B1[qpx * (p + 1) + i];
+            dB1[i] = d_dB1[qpx * (p + 1) + i];
+        }
+        for (int j = 0; j < q + 1; ++j)
+        {
+            B2[j] = d_B2[qpy * (q + 1) + j];
+            dB2[j] = d_dB2[qpy * (q + 1) + j];
+        }
+
+        double jacobian;
+        double dR_dx[nLocBas];
+        double dR_dy[nLocBas];
+
+        compute_jacobian_derivative(p, q, h1, h2, B1, B2, dB1, dB2,
+            s_eNURBSExtraction1, s_eNURBSExtraction2, s_eCP, jacobian, dR_dx, dR_dy);
+        
+        double temp_x = 0.0;
+        double temp_y = 0.0;
+
+        for (int jj = 0; jj < nLocBas; ++jj)
+        {
+            temp_x += dR_dx(jj) * Floc_in[jj];
+            temp_y += dR_dy(jj) * Floc_in[jj];
+        }
+
+        temp_x *= -s_qw(qp) * jacobian;
+        temp_y *= -s_qw(qp) * jacobian;
+
+        for (int ii = 0; ii < nLocBas; ++ii)
+        {
+            Floc_out[ii] += (dR_dx[ii] * temp_x + dR_dy[ii] * temp_y);
+        }
+
+        __syncthreads();
+
+        for (int ii = 0; ii < nLocBas; ++ii)
+        {
+            int coo_index = s_eID[ii];
+            if (coo_index >= 0)
+            {
+                atomicAdd(&d_F_array_out[coo_index], Floc_out[ii]);
+            }
+        }
+    }
+}
+
 __global__ void DirichletBCKernel(int * d_Dir, const int dirsize, double * d_val)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -208,14 +332,13 @@ __device__ void compute_jacobian_basis(
     jacobian = dx_dxi * dy_deta - dx_deta * dy_dxi;
 }
 
-__device__ void compute_jacobian_basis_derivative(
+__device__ void compute_jacobian_derivative(
     const int p, const int q, const double h1, const double h2,
     const double *d_B1, const double *d_B2,
     const double *d_dB1, const double *d_dB2,
     const double *s_nurbs_extraction1, const double *s_nurbs_extraction2,
     const double *eCP, 
     double &jacobian,
-    double *R, 
     double *dR_dx, 
     double *dR_dy)
 {
@@ -413,13 +536,6 @@ void GlobalAssemblyMF::AssemLoad(QuadraturePoint * const &quad1,
     cudaMemcpy(qw1, w1.data(), nqp1 * sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(qw2, w2.data(), nqp2 * sizeof(double), cudaMemcpyHostToDevice);
 
-    PetscInt * eID = new PetscInt[nLocBas];
-    std::vector<double> eCP(2*nLocBas, 0.0);
-    const int pp = elemmf->GetNumLocalBasis1D(0);
-    const int qq = elemmf->GetNumLocalBasis1D(1);
-    std::vector<double> eNURBSExtraction1(pp*pp, 0.0);
-    std::vector<double> eNURBSExtraction2(qq*qq, 0.0);
-
     double *d_F_array;
     VecCUDAGetArray(F, &d_F_array);
 
@@ -513,7 +629,8 @@ void GlobalAssemblyMF::AssemLoad(LocalAssemblyMFSF * const &locassem,
     VecAssemblyEnd(F);
 }
 
-void GlobalAssemblyMF::MatMulMF(LocalAssemblyMF * const &locassem,
+void GlobalAssemblyMF::MatMulMF(QuadraturePoint * const &quad1,
+    QuadraturePoint * const &quad2,
     const std::vector<int> &IEN,
     const std::vector<int> &ID,
     const std::vector<int> &Dir,
@@ -523,15 +640,71 @@ void GlobalAssemblyMF::MatMulMF(LocalAssemblyMF * const &locassem,
     const std::vector<double> &elem_size1,
     const std::vector<double> &elem_size2,
     ElementMF * const &elemmf,
+    BernsteinBasis * const &bernstein,
     Vec x, Vec y)
 {
-    PetscInt * eID = new PetscInt[nLocBas];
-    PetscInt * eIEN = new PetscInt[nLocBas];
-    std::vector<double> eCP(2*nLocBas, 0.0);
-    const int pp = elemmf->GetNumLocalBasis1D(0);
-    const int qq = elemmf->GetNumLocalBasis1D(1);
-    std::vector<double> eNURBSExtraction1(pp*pp, 0.0);
-    std::vector<double> eNURBSExtraction2(qq*qq, 0.0);
+    const int nqp1 = quad1->GetNumQuadraturePoint();
+    const int nqp2 = quad2->GetNumQuadraturePoint();
+    const std::vector<double> qp1 = quad1->GetQuadraturePoint();
+    const std::vector<double> qp2 = quad2->GetQuadraturePoint();
+    const std::vector<double> w1 = quad1->GetWeight();
+    const std::vector<double> w2 = quad2->GetWeight();
+    const int nLocBas = elemmf->GetNumLocalBasis();
+
+    std::vector<double> B1{};
+    std::vector<double> B2{};
+    std::vector<double> dB1{};
+    std::vector<double> dB2{};
+
+    for (int i = 0; i < nqp1; ++i)
+    {
+        B1.push_back(bernstein->GetBernsteinBasisSingleQP(qp1[i]));
+        dB1.push_back(bernstein->GetBernsteinBasisDerivativeSingleQP(qp1[i]));
+    }
+    for (int j = 0; j < nqp2; ++j)
+    {
+        B2.push_back(bernstein->GetBernsteinBasisSingleQP(qp2[j]));
+        dB2.push_back(bernstein->GetBernsteinBasisDerivativeSingleQP(qp2[j]));
+    }
+
+    double * d_B1, * d_B2, * d_dB1, * d_dB2;
+    cudaMalloc((void**)&d_B1, B1.size() * sizeof(double));
+    cudaMalloc((void**)&d_B2, B2.size() * sizeof(double));
+    cudaMalloc((void**)&d_dB1, dB1.size() * sizeof(double));
+    cudaMalloc((void**)&d_dB2, dB2.size() * sizeof(double));
+    cudaMemcpy(d_B1, B1.data(), B1.size() * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_B2, B2.data(), B2.size() * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_dB1, dB1.data(), dB1.size() * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_dB2, dB2.data(), dB2.size() * sizeof(double), cudaMemcpyHostToDevice);
+
+    double * d_NURBSExtraction1, * d_NURBSExtraction2;
+    cudaMalloc((void**)&d_NURBSExtraction1, NURBSExtraction1.size() * sizeof(double));
+    cudaMalloc((void**)&d_NURBSExtraction2, NURBSExtraction2.size() * sizeof(double));
+    cudaMemcpy(d_NURBSExtraction1, NURBSExtraction1.data(),
+        NURBSExtraction1.size() * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_NURBSExtraction2, NURBSExtraction2.data(),
+        NURBSExtraction2.size() * sizeof(double), cudaMemcpyHostToDevice);
+    
+    int * d_IEN, * d_ID;
+    double * d_CP;
+    cudaMalloc((void**)&d_IEN, IEN.size() * sizeof(int));
+    cudaMalloc((void**)&d_ID, ID.size() * sizeof(int));
+    cudaMalloc((void**)&d_CP, CP.size() * sizeof(double));
+    cudaMemcpy(d_IEN, IEN.data(), IEN.size() * sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_ID, ID.data(), ID.size() * sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_CP, CP.data(), CP.size() * sizeof(double), cudaMemcpyHostToDevice);
+
+    double * d_elem_size1, * d_elem_size2;
+    cudaMalloc((void**)&d_elem_size1, elem_size1.size() * sizeof(double));
+    cudaMalloc((void**)&d_elem_size2, elem_size2.size() * sizeof(double));
+    cudaMemcpy(d_elem_size1, elem_size1.data(), elem_size1.size() * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_elem_size2, elem_size2.data(), elem_size2.size() * sizeof(double), cudaMemcpyHostToDevice);
+
+    double * qw1, * qw2;
+    cudaMalloc((void**)&qw1, nqp1 * sizeof(double));
+    cudaMalloc((void**)&qw2, nqp2 * sizeof(double));
+    cudaMemcpy(qw1, w1.data(), nqp1 * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(qw2, w2.data(), nqp2 * sizeof(double), cudaMemcpyHostToDevice);
 
     VecGhostUpdateBegin(x, INSERT_VALUES, SCATTER_FORWARD);
     VecGhostUpdateEnd(x, INSERT_VALUES, SCATTER_FORWARD);
@@ -582,6 +755,24 @@ void GlobalAssemblyMF::MatMulMF(LocalAssemblyMF * const &locassem,
     VecAssemblyBegin(y);
     VecAssemblyEnd(y);
     VecGhostRestoreLocalForm(x, &localx);
+
+    cudaFree(d_B1);
+    cudaFree(d_B2);
+    cudaFree(d_dB1);
+    cudaFree(d_dB2);
+
+    cudaFree(d_NURBSExtraction1);
+    cudaFree(d_NURBSExtraction2);
+
+    cudaFree(d_IEN);
+    cudaFree(d_ID);
+    cudaFree(d_CP);
+
+    cudaFree(d_elem_size1);
+    cudaFree(d_elem_size2);
+
+    cudaFree(qw1);
+    cudaFree(qw2);
 }
 
 void GlobalAssemblyMF::MatMulMF(LocalAssemblyMFSF * const &locassem,
