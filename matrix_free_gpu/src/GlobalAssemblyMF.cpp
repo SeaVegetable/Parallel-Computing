@@ -101,6 +101,20 @@ __global__ void AssembleKernel(const int p, const int q,
     }
 }
 
+__global__ void DirichletBCKernel(int * d_Dir, const int dirsize, double * d_val)
+{
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (idx < dirsize)
+    {
+        int coo_index = d_Dir[idx];
+        if (coo_index >= 0)
+        {
+            d_val[coo_index] = 0.0;
+        }
+    }
+}
+
 __device__ void compute_jacobian_basis(
     const int p, const int q, const double h1, const double h2,
     const double *d_B1, const double *d_B2,
@@ -406,42 +420,20 @@ void GlobalAssemblyMF::AssemLoad(QuadraturePoint * const &quad1,
     std::vector<double> eNURBSExtraction1(pp*pp, 0.0);
     std::vector<double> eNURBSExtraction2(qq*qq, 0.0);
 
-    for (int jj = 0; jj < nlocalelemy; ++jj)
-    {
-        for (int ii = 0; ii < nlocalelemx; ++ii)
-        {
-            int elemIndex = jj*nlocalelemx + ii;
-            for (int j = 0; j < nLocBas; ++j)
-            {
-                eID[j] = ID[IEN[elemIndex*nLocBas+j]];
-                eCP[2*j] = CP[2*IEN[elemIndex*nLocBas+j]];
-                eCP[2*j+1] = CP[2*IEN[elemIndex*nLocBas+j]+1];
-            }
+    double *d_F_array;
+    VecCUDAGetArray(F, &d_F_array);
 
-            std::copy(NURBSExtraction1.begin() + ii * pp * pp, 
-                NURBSExtraction1.begin() + (ii + 1) * pp * pp, 
-                eNURBSExtraction1.begin());
-            std::copy(NURBSExtraction2.begin() + jj * qq * qq,
-                NURBSExtraction2.begin() + (jj + 1) * qq * qq,
-                eNURBSExtraction2.begin());
-        
-            elemmf->SetElement(eNURBSExtraction1, eNURBSExtraction2, elem_size1[ii], elem_size2[jj]);
+    AssembleKernel<<<dim3(nlocalelemx, nlocalelemy), dim3(nqp1, nqp2), 
+        (nLocBas + 1) * sizeof(double)>>>(pp, qq,
+        d_B1, d_B2, d_dB1, d_dB2,
+        d_NURBSExtraction1, d_NURBSExtraction2,
+        d_elem_size1, d_elem_size2,
+        d_IEN, d_ID, d_CP,
+        qw1, qw2, d_F_array);
+    
+    DirichletBCKernel<<<(Dir.size() + 255) / 256, 256>>>(Dir.data(), Dir.size(), d_F_array);
 
-            locassem->AssemLocalLoad(elemmf, eCP);
-
-            VecSetValues(F, nLocBas, eID, locassem->Floc, ADD_VALUES);
-        }
-    }
-
-    VecAssemblyBegin(F);
-    VecAssemblyEnd(F);
-
-    delete[] eID; eID = nullptr;
-
-    DirichletBC(Dir);
-
-    VecAssemblyBegin(F);
-    VecAssemblyEnd(F);
+    VecCUDARestoreArray(F, &d_F_array);
 
     cudaFree(d_B1);
     cudaFree(d_B2);
