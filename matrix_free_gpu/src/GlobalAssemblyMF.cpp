@@ -706,55 +706,19 @@ void GlobalAssemblyMF::MatMulMF(QuadraturePoint * const &quad1,
     cudaMemcpy(qw1, w1.data(), nqp1 * sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(qw2, w2.data(), nqp2 * sizeof(double), cudaMemcpyHostToDevice);
 
-    VecGhostUpdateBegin(x, INSERT_VALUES, SCATTER_FORWARD);
-    VecGhostUpdateEnd(x, INSERT_VALUES, SCATTER_FORWARD);
-    Vec localx;
-    VecGhostGetLocalForm(x, &localx);
+    VecCUDAGetArray(x, &d_x_array);
+    VecCUDAGetArray(y, &d_y_array);
 
-    for (int jj = 0; jj < nlocalelemy; ++jj)
-    {
-        for (int ii = 0; ii < nlocalelemx; ++ii)
-        {
-            int elemIndex = jj*nlocalelemx + ii;
-            for (int j = 0; j < nLocBas; ++j)
-            {
-                eID[j] = ID[IEN[elemIndex*nLocBas+j]];
-                eIEN[j] = IEN[elemIndex*nLocBas+j];
-                eCP[2*j] = CP[2*IEN[elemIndex*nLocBas+j]];
-                eCP[2*j+1] = CP[2*IEN[elemIndex*nLocBas+j]+1];
-            }
-
-            std::copy(NURBSExtraction1.begin() + ii * pp * pp, 
-                NURBSExtraction1.begin() + (ii + 1) * pp * pp, 
-                eNURBSExtraction1.begin());
-            std::copy(NURBSExtraction2.begin() + jj * qq * qq,
-                NURBSExtraction2.begin() + (jj + 1) * qq * qq,
-                eNURBSExtraction2.begin());
-        
-            elemmf->SetElement(eNURBSExtraction1, eNURBSExtraction2, elem_size1[ii], elem_size2[jj]);
-
-            VecGetValues(localx, nLocBas, eIEN, locassem->Floc_in);
-
-            locassem->LocalMatMulMF(elemmf, eCP);
-
-            VecSetValues(y, nLocBas, eID, locassem->Floc_out, ADD_VALUES);
-        }
-    }
-    VecAssemblyBegin(y);
-    VecAssemblyEnd(y);
-
-    delete[] eID; eID = nullptr;
-    delete[] eIEN; eIEN = nullptr;
-
-    const int nDir = static_cast<int>(Dir.size());
-    for (int ii = 0; ii < nDir; ++ii)
-    {
-        VecSetValue(y, Dir[ii], 0.0, INSERT_VALUES);
-    }
-
-    VecAssemblyBegin(y);
-    VecAssemblyEnd(y);
-    VecGhostRestoreLocalForm(x, &localx);
+    MatMulKernel<<<dim3(nlocalelemx, nlocalelemy), dim3(nqp1, nqp2), 
+        (nLocBas + 1) * sizeof(double)>>>(pp, qq,
+        d_B1, d_B2, d_dB1, d_dB2,
+        d_NURBSExtraction1, d_NURBSExtraction2,
+        d_elem_size1, d_elem_size2,
+        d_IEN, d_ID, d_CP,
+        qw1, qw2, d_x_array, d_y_array);
+    
+    VecCUDARestoreArray(x, &d_x_array);
+    VecCUDARestoreArray(y, &d_y_array);
 
     cudaFree(d_B1);
     cudaFree(d_B2);
