@@ -53,7 +53,7 @@ void GlobalAssemblyDR::AssemNonZeroEstimate(LocalAssembly * const &locassem,
 
     delete[] eID; eID = nullptr;
 
-    DirichletBC(Dir);
+    DirichletBCK(Dir);
 
     MatAssemblyBegin(K, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(K, MAT_FINAL_ASSEMBLY);
@@ -81,5 +81,14 @@ void GlobalAssemblyDR::NonZeroCoordinate(const Mat &K, int &nnz, std::vector<int
             rows.push_back(rstart + i);
             cols.push_back(ja[j]);
         }
+    }
+}
+
+void GlobalAssemblyDR::DirichletBCK(const std::vector<int> &Dir)
+{
+    for (int ii = 0; ii < Dir.size(); ++ii)
+    {
+        int row = Dir[ii];
+        MatSetValue(K, row, row, 1.0, INSERT_VALUES);
     }
 }
