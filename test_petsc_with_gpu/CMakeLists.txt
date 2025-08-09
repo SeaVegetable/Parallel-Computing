@@ -62,7 +62,7 @@ add_executable(preprocess_fem preprocess_fem.cpp)
 target_link_libraries(preprocess_fem eigenvalue_problem_lib)
 
 add_executable(dry_run dry_run.cpp)
-target_link_libraries(dry_run eigenvalue_problem_lib)
+target_link_libraries(dry_run eigenvalue_problem_lib ${PETSC_LIB})
 
 if(OPENMP_CXX_FOUND)
   set_target_properties( eigenvalue_problem_lib PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )
