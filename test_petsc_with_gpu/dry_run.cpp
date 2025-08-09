@@ -1,7 +1,7 @@
 #include <petscksp.h>
 #include <petscpc.h>
 #include "FileManager.hpp"
-#include "GlobalAssembly.hpp"
+#include "GlobalAssemblyDR.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -49,7 +49,8 @@ int main(int argc, char *argv[])
 
     ElementFEM * elem_fem = new ElementFEM(1, 1);
     LocalAssembly * locassem_fem = new LocalAssembly(1, 1);
-    GlobalAssemblyDR * globalassem_fem = new GlobalAssemblyDR(IEN_fem, ID_fem, Dir_fem, locassem_fem,
+    GlobalAssemblyDR * globalassem_fem = new GlobalAssemblyDR(fm,
+        IEN_fem, ID_fem, Dir_fem, locassem_fem,
         4, nlocalfunc_fem, nlocalelemx_fem, nlocalelemy_fem);
     
     MatSetOption(globalassem_fem->K, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_TRUE);

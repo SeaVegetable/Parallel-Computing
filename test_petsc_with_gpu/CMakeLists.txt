@@ -55,7 +55,6 @@ set(CMAKE_C_COMPILER $ENV{HOME}/lib/openmpi-5.0.8/bin/mpicc)
 set(CMAKE_CXX_COMPILER $ENV{HOME}/lib/openmpi-5.0.8/bin/mpicxx)
 
 include_directories(${PETSC_INC})
-include_directories(${CUDA_INC})
 
 add_library(eigenvalue_problem_lib ${SOURCES})
 
