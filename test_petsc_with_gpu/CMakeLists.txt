@@ -51,8 +51,6 @@ find_package(PETSc REQUIRED)
 message(STATUS "PETSC_INC: ${PETSC_INC}")
 message(STATUS "PETSC_LIB: ${PETSC_LIB}")
 
-set(CUDA_INC "/usr/local/cuda/include")
-
 set(CMAKE_C_COMPILER $ENV{HOME}/lib/openmpi-5.0.8/bin/mpicc)
 set(CMAKE_CXX_COMPILER $ENV{HOME}/lib/openmpi-5.0.8/bin/mpicxx)
 
@@ -69,11 +67,8 @@ target_link_libraries(dry_run eigenvalue_problem_lib)
 
 if(OPENMP_CXX_FOUND)
   set_target_properties( eigenvalue_problem_lib PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )
-  set_target_properties( preprocess PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )
   set_target_properties( preprocess_fem PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )
   target_include_directories( eigenvalue_problem_lib PRIVATE ${OpenMP_CXX_INCLUDE_DIR} )
-  target_include_directories( preprocess PRIVATE ${OpenMP_CXX_INCLUDE_DIR} )
   target_include_directories( preprocess_fem PRIVATE ${OpenMP_CXX_INCLUDE_DIR} )
-  target_link_libraries( preprocess ${OpenMP_CXX_LIBRARIES} )
   target_link_libraries( preprocess_fem ${OpenMP_CXX_LIBRARIES} )
 endif()

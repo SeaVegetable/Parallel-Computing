@@ -10,7 +10,7 @@ GlobalAssemblyDR::GlobalAssemblyDR(FileManager * const &fm, const std::vector<in
     const int dnz = nlocalfunc;
     const int onz = dnz;
     MatCreateAIJ(PETSC_COMM_WORLD, nlocalfunc, nlocalfunc, PETSC_DETERMINE,
-        PETSC_DETERMINE, dnz, PETSC_NULL, dnz, PETSC_NULL, &K);
+        PETSC_DETERMINE, dnz, PETSC_NULLPTR, dnz, PETSC_NULLPTR, &K);
     MatSetOption(K, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
     AssemNonZeroEstimate(locassem, IEN, ID, Dir);
 
@@ -22,7 +22,7 @@ GlobalAssemblyDR::GlobalAssemblyDR(FileManager * const &fm, const std::vector<in
     MPI_Comm_rank(PETSC_COMM_WORLD, &rank);
 
     std::string filename = fm->GetPartitionFilename("non_zero_coordinate", rank);
-    fm->WriteNonZeroCoordinate(fm, filename, nnz, rows, cols);
+    fm->WriteNonZeroCoordinate(filename, nnz, rows, cols);
 }
 
 GlobalAssemblyDR::~GlobalAssemblyDR()
@@ -53,7 +53,7 @@ void GlobalAssemblyDR::AssemNonZeroEstimate(LocalAssembly * const &locassem,
 
     delete[] eID; eID = nullptr;
 
-    DirichletBCK(Dir);
+    DirichletBC(Dir);
 
     MatAssemblyBegin(K, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(K, MAT_FINAL_ASSEMBLY);

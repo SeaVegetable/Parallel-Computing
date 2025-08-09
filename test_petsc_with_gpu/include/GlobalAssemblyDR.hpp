@@ -23,6 +23,12 @@ class GlobalAssemblyDR
             const std::vector<int> &IEN,
             const std::vector<int> &ID,
             const std::vector<int> &Dir);
+    
+    private:
+        const int nLocBas;
+        const int nlocalfunc;
+        const int nlocalelemx;
+        const int nlocalelemy;
 };
 
 #endif
