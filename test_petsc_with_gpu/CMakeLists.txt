@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.18)
 
-project(EigenvalueProblem)
+project(EigenvalueProblem LANGUAGES CXX C CUDA)
+
+enable_language(CUDA)
 
 IF(COMMAND cmake_policy)
   cmake_policy(SET CMP0003 NEW)
@@ -16,6 +18,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 find_package(OpenMP REQUIRED)
 
 # Add your source files here
+set(CUDA_INC "/usr/local/cuda/include")
 set(EIGEN3_INCLUDE_DIR "$ENV{HOME}/lib/eigen-3.4.0")
 set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
@@ -66,6 +69,7 @@ target_link_libraries(dry_run eigenvalue_problem_lib ${PETSC_LIB})
 
 add_executable(coo2aij coo2aij.cu)
 target_link_libraries(coo2aij eigenvalue_problem_lib ${PETSC_LIB})
+target_include_directories(coo2aij PRIVATE ${CUDA_INC})
 
 if(OPENMP_CXX_FOUND)
   set_target_properties( eigenvalue_problem_lib PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )
@@ -74,3 +78,10 @@ if(OPENMP_CXX_FOUND)
   target_include_directories( preprocess_fem PRIVATE ${OpenMP_CXX_INCLUDE_DIR} )
   target_link_libraries( preprocess_fem ${OpenMP_CXX_LIBRARIES} )
 endif()
+
+set_target_properties(coo2aij PROPERTIES
+  CUDA_STANDARD 11
+  CUDA_STANDARD_REQUIRED YES
+  CUDA_SEPARABLE_COMPILATION ON
+  CUDA_ARCHITECTURES 75
+)
