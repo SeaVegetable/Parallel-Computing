@@ -315,7 +315,7 @@ void Partition::GeneratePartition(const int &nElemX, const int &nElemY,
         }
     }
 
-    string map_name = "new_to_old_mapping.txt";
+    std::string map_name = "new_to_old_mapping.txt";
     fm->WriteNewToOldMapping(map_name, new_to_old);
 
     std::vector<double> newCP = CP;
