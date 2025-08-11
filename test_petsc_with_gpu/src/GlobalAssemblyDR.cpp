@@ -21,7 +21,7 @@ GlobalAssemblyDR::GlobalAssemblyDR(FileManager * const &fm, const std::vector<in
     PetscInt rank;
     MPI_Comm_rank(PETSC_COMM_WORLD, &rank);
 
-    std::string filename = fm->GetPartitionFilename("non_zero_coordinate", rank);
+    std::string filename = fm->GetNonZeroCoordinateFilename("coordinate", rank);
     fm->WriteNonZeroCoordinate(filename, nnz, rows, cols);
 }
 

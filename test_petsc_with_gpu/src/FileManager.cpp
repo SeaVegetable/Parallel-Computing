@@ -518,3 +518,8 @@ std::string FileManager::GetPartitionFilename(const std::string &base_name, cons
 {
     return base_name + "_" + std::to_string(rank) + ".txt";
 }
+
+std::string FileManager::GetNonZeroCoordinateFilename(const std::string &base_name, const int &rank) const
+{
+    return base_name + "_nonzero_" + std::to_string(rank) + ".txt";
+}

@@ -77,6 +77,8 @@ public:
         std::vector<int> &rows, std::vector<int> &cols) const;
 
     std::string GetPartitionFilename(const std::string &base_name, const int &rank) const;
+
+    std::string GetNonZeroCoordinateFilename(const std::string &base_name, const int &rank) const;
 };
 
 #endif
