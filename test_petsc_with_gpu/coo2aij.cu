@@ -50,6 +50,16 @@ int main (int argc, char *argv[])
         cols.insert(cols.end(), cols_temp.begin(), cols_temp.end());
     }
 
+    std::string map_name = "new_to_old_mapping.txt";
+    std::vector<int> new_to_old;
+    fm->ReadNewToOldMapping(map_name, new_to_old);
+
+    for (int i = 0; i < rows.size(); ++i)
+    {
+        rows[i] = new_to_old[rows[i]];
+        cols[i] = new_to_old[cols[i]];
+    }
+
     Mat K;
     PetscInt * d_rows, * d_cols;
     cudaMalloc((void**)&d_rows, nnz * sizeof(PetscInt));

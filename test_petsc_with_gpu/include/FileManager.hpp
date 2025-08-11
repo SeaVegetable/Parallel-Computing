@@ -79,6 +79,10 @@ public:
     void ReadNonZeroCoordinate(const std::string &filename, int &nnz,
         std::vector<int> &rows, std::vector<int> &cols) const;
 
+    void WriteNewToOldMapping(const std::string &filename, const std::vector<int> &new_to_old) const;
+
+    void ReadNewToOldMapping(const std::string &filename, std::vector<int> &new_to_old) const;
+
     std::string GetPartitionFilename(const std::string &base_name, const int &rank) const;
 
     std::string GetNonZeroCoordinateFilename(const std::string &base_name, const int &rank) const;

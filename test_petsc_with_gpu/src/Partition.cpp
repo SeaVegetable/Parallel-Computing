@@ -294,6 +294,7 @@ void Partition::GeneratePartition(const int &nElemX, const int &nElemY,
     elem_end_idx_y[part_num_y - 1] = nElemY - 1;
 
     std::vector<int> old_to_new(m*n, 0);
+    std::vector<int> new_to_old(m*n, 0);
     int old_to_new_count = 0;
     for (int jj = 0; jj < part_num_y; ++jj)
     {
@@ -307,11 +308,15 @@ void Partition::GeneratePartition(const int &nElemX, const int &nElemY,
                     const int globalj = jj * part_size_y + localj;
                     const int global = globalj * m + globali;
                     old_to_new[global] = old_to_new_count;
+                    new_to_old[old_to_new_count] = global;
                     old_to_new_count++;
                 }
             }
         }
     }
+
+    string map_name = "new_to_old_mapping.txt";
+    fm->WriteNewToOldMapping(map_name, new_to_old);
 
     std::vector<double> newCP = CP;
     for (int ii = 0; ii < CP.size() / dim; ++ii)

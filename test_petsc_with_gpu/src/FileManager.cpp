@@ -532,6 +532,43 @@ void FileManager::ReadNonZeroCoordinate(const std::string &filename, int &nnz,
     }
 }
 
+void FileManager::WriteNewToOldMapping(const std::string &filename, const std::vector<int> &new_to_old) const
+{
+    std::ofstream file(filename.c_str());
+    if (!file.is_open())
+    {
+        std::cerr << "Error: Could not open file " << filename << std::endl;
+        exit(1);
+    }
+
+    for (const auto &value : new_to_old)
+    {
+        file << value << " ";
+    }
+    file << std::endl;
+
+    file.close();
+}
+
+void FileManager::ReadNewToOldMapping(const std::string &filename, std::vector<int> &new_to_old) const
+{
+    std::ifstream file(filename.c_str());
+    if (!file.is_open())
+    {
+        std::cerr << "Error: Could not open file " << filename << std::endl;
+        exit(1);
+    }
+    std::string line;
+    std::getline(file, line);
+    std::istringstream iss(line);
+    int value;
+    while (iss >> value)
+    {
+        new_to_old.push_back(value);
+    }
+    file.close();
+}
+
 std::string FileManager::GetPartitionFilename(const std::string &base_name, const int &rank) const
 {
     return base_name + "_" + std::to_string(rank) + ".txt";
