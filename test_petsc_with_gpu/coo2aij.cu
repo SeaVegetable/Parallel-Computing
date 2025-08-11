@@ -13,27 +13,26 @@ int main (int argc, char *argv[])
     fm->ReadPreprocessInfo(file_info, p, q, Lx, Ly, nElemX, nElemY, part_num_1d, dim, base_name);
 
     PetscInitialize(&argc, &argv, NULL, NULL);
-    PetscMPIInt rank, size;
-    MPI_Comm_rank(PETSC_COMM_WORLD, &rank);
-    MPI_Comm_size(PETSC_COMM_WORLD, &size);
 
-    if (rank == 0)
+    std::cout << "p: " << p << std::endl;
+    std::cout << "q: " << q << std::endl;
+    std::cout << "Lx: " << Lx << std::endl;
+    std::cout << "Ly: " << Ly << std::endl;
+    std::cout << "nElemX: " << nElemX << std::endl;
+    std::cout << "nElemY: " << nElemY << std::endl;
+    std::cout << "part_num_1d: " << part_num_1d << std::endl;
+    std::cout << "dim: " << dim << std::endl;
+    std::cout << "base_name: " << base_name << std::endl;
+
+    int nfunc = 0;
+    for (int ii = 0; ii < part_num_1d * part_num_1d; ++ii)
     {
-        std::cout << "p: " << p << std::endl;
-        std::cout << "q: " << q << std::endl;
-        std::cout << "Lx: " << Lx << std::endl;
-        std::cout << "Ly: " << Ly << std::endl;
-        std::cout << "nElemX: " << nElemX << std::endl;
-        std::cout << "nElemY: " << nElemY << std::endl;
-        std::cout << "part_num_1d: " << part_num_1d << std::endl;
-        std::cout << "dim: " << dim << std::endl;
-        std::cout << "base_name: " << base_name << std::endl;
+        int nlocalfunc = 0;
+        std::string base_name_fem = "part_fem";
+        std::string filename_fem = fm->GetPartitionFilename(base_name_fem, ii);
+        fm->ReadPartition(filename_fem, nlocalfunc);
+        nfunc += nlocalfunc;
     }
-
-    int nlocalfunc;
-    std::string base_name_fem = "part_fem";
-    std::string filename_fem = fm->GetPartitionFilename(base_name_fem, rank);
-    fm->ReadPartition(filename_fem, nlocalfunc);
 
     std::string filename_dr = "coordinate";
 
@@ -44,10 +43,12 @@ int main (int argc, char *argv[])
     {
         std::vector<int> rows_temp{};
         std::vector<int> cols_temp{};
+        int temp_nnz = 0;
         std::string filename = fm->GetNonZeroCoordinateFilename(filename_dr, ii);
-        fm->ReadNonZeroCoordinate(filename, nnz, rows_temp, cols_temp);
+        fm->ReadNonZeroCoordinate(filename, temp_nnz, rows_temp, cols_temp);
         rows.insert(rows.end(), rows_temp.begin(), rows_temp.end());
         cols.insert(cols.end(), cols_temp.begin(), cols_temp.end());
+        nnz += temp_nnz;
     }
 
     std::string map_name = "new_to_old_mapping.txt";
@@ -68,7 +69,7 @@ int main (int argc, char *argv[])
     cudaMemcpy(d_cols, cols.data(), nnz * sizeof(PetscInt), cudaMemcpyHostToDevice);
     MatCreate(PETSC_COMM_WORLD, &K);
     MatSetType(K, MATAIJCUSPARSE);
-    MatSetSizes(K, nlocalfunc, nlocalfunc, PETSC_DETERMINE, PETSC_DETERMINE);
+    MatSetSizes(K, nfunc, nfunc, PETSC_DETERMINE, PETSC_DETERMINE);
     MatSetPreallocationCOO(K, nnz, d_rows, d_cols);
     cudaFree(d_rows);
     cudaFree(d_cols);
