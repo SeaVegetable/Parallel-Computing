@@ -30,21 +30,12 @@ int main (int argc, char *argv[])
         std::cout << "base_name: " << base_name << std::endl;
     }
 
-    std::vector<double> CP_fem;
-    std::vector<int> ID_fem;
-    std::vector<int> Dir_fem;
-    std::vector<int> IEN_fem;
-    int nlocalfunc_fem;
-    int nlocalelemx_fem;
-    int nlocalelemy_fem;
-
+    int nlocalfunc;
     std::string base_name_fem = "part_fem";
     std::string filename_fem = fm->GetPartitionFilename(base_name_fem, rank);
-    fm->ReadPartition(filename_fem, nlocalfunc_fem,
-        nlocalelemx_fem, nlocalelemy_fem,
-        CP_fem, ID_fem, Dir_fem, IEN_fem);
+    fm->ReadPartition(filename_fem, nlocalfunc);
 
-    std::string filename_dr = "dryrun";
+    std::string filename_dr = "coordinate";
 
     std::vector<int> rows{};
     std::vector<int> cols{};
@@ -67,6 +58,7 @@ int main (int argc, char *argv[])
     cudaMemcpy(d_cols, cols.data(), nnz * sizeof(PetscInt), cudaMemcpyHostToDevice);
     MatCreate(PETSC_COMM_WORLD, &K);
     MatSetType(K, MATAIJCUSPARSE);
+    MatSetSizes(K, nlocalfunc, nlocalfunc, PETSC_DETERMINE, PETSC_DETERMINE);
     MatSetPreallocationCOO(K, nnz, d_rows, d_cols);
     cudaFree(d_rows);
     cudaFree(d_cols);
