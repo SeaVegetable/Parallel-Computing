@@ -52,9 +52,8 @@ int main (int argc, char *argv[])
     cudaMemcpy(d_rows, rows.data(), nnz * sizeof(PetscInt), cudaMemcpyHostToDevice);
     cudaMemcpy(d_cols, cols.data(), nnz * sizeof(PetscInt), cudaMemcpyHostToDevice);
     MatCreate(PETSC_COMM_WORLD, &K);
-    MatSetSizes(K, nlocalfunc, nlocalfunc, PETSC_DETERMINE, PETSC_DETERMINE);
     MatSetType(K, MATAIJCUSPARSE);
-    MatSetPreallocationCOO(A, nnz, d_rows, d_cols);
+    MatSetPreallocationCOO(K, nnz, d_rows, d_cols);
     cudaFree(d_rows);
     cudaFree(d_cols);
 
