@@ -64,6 +64,9 @@ target_link_libraries(preprocess_fem eigenvalue_problem_lib)
 add_executable(dry_run dry_run.cpp)
 target_link_libraries(dry_run eigenvalue_problem_lib ${PETSC_LIB})
 
+add_executable(coo2aij coo2aij.cu)
+target_link_libraries(coo2aij eigenvalue_problem_lib ${PETSC_LIB})
+
 if(OPENMP_CXX_FOUND)
   set_target_properties( eigenvalue_problem_lib PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )
   set_target_properties( preprocess_fem PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )
