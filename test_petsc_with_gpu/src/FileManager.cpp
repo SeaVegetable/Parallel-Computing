@@ -372,6 +372,24 @@ void FileManager::ReadPartition(const std::string &filename,
     }
 }
 
+void FileManager::ReadPartition(const std::string &filename,
+    int &nlocalfunc) const
+{
+    std::ifstream file(filename.c_str());
+    if (!file.is_open())
+    {
+        std::cerr << "Error: Could not open file " << filename << std::endl;
+        exit(1);
+    }
+
+    std::string line;
+    std::getline(file, line);
+    if (line.find("nlocalfunc: ") != std::string::npos)
+    {
+        nlocalfunc = std::stoi(line.substr(12));
+    }
+}
+
 void FileManager::WritePreprocessInfo(const std::string &filename, const int &p, const int &q, const double &Lx, const double &Ly,
     const int &nElemX, const int &nElemY, const int &part_num_1d, const int &dim, const std::string &base_name) const
 {

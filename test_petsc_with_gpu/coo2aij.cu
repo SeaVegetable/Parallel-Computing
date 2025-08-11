@@ -30,6 +30,20 @@ int main (int argc, char *argv[])
         std::cout << "base_name: " << base_name << std::endl;
     }
 
+    std::vector<double> CP_fem;
+    std::vector<int> ID_fem;
+    std::vector<int> Dir_fem;
+    std::vector<int> IEN_fem;
+    int nlocalfunc_fem;
+    int nlocalelemx_fem;
+    int nlocalelemy_fem;
+
+    std::string base_name_fem = "part_fem";
+    std::string filename_fem = fm->GetPartitionFilename(base_name_fem, rank);
+    fm->ReadPartition(filename_fem, nlocalfunc_fem,
+        nlocalelemx_fem, nlocalelemy_fem,
+        CP_fem, ID_fem, Dir_fem, IEN_fem);
+
     std::string filename_dr = "dryrun";
 
     std::vector<int> rows{};
