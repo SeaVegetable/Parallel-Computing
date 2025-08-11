@@ -89,6 +89,6 @@ void GlobalAssemblyDR::DirichletBCK(const std::vector<int> &Dir)
     for (int ii = 0; ii < Dir.size(); ++ii)
     {
         int row = Dir[ii];
-        MatSetValue(K, row, row, 1.0, INSERT_VALUES);
+        MatSetValue(K, row, row, 1.0, ADD_VALUES);
     }
 }
