@@ -50,7 +50,8 @@ set(SOURCES ${SOURCE_DIR}/BSplineBasis.cpp
             ${SOURCE_DIR}/ElementFEM.cpp
             ${SOURCE_DIR}/Elem2COOGenerator.cpp)
 
-set(CUDA_SOURCES ${SOURCE_DIR}/assembly.cu)
+set(CUDA_SOURCES ${SOURCE_DIR}/assembly.cu
+                 ${SOURCE_DIR}/GlobalAssembly.cu)
 
 # Find PETSc
 set(PETSC_DIR $ENV{HOME}/lib/petsc-3.23.4-opt)
@@ -66,6 +67,7 @@ set(CMAKE_CXX_COMPILER $ENV{HOME}/lib/openmpi-5.0.8/bin/mpicxx)
 include_directories(${PETSC_INC})
 
 add_library(eigenvalue_problem_lib ${SOURCES})
+add_library(eigenvalue_problem_cuda_lib ${CUDA_SOURCES})
 
 add_executable(preprocess_fem preprocess_fem.cpp)
 target_link_libraries(preprocess_fem eigenvalue_problem_lib)
@@ -80,6 +82,10 @@ target_include_directories(coo2aij PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C_INCL
 add_executable(memorytest memorytest.cu)
 target_link_libraries(memorytest eigenvalue_problem_lib ${PETSC_LIB})
 target_include_directories(memorytest PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C_INCLUDE_PATH})
+
+add_executable(assemblytest assemblytest.cu)
+target_link_libraries(assemblytest eigenvalue_problem_lib eigenvalue_problem_cuda_lib ${PETSC_LIB})
+target_include_directories(assemblytest PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C_INCLUDE_PATH})
 
 if(OPENMP_CXX_FOUND)
   set_target_properties( eigenvalue_problem_lib PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )
@@ -97,6 +103,13 @@ set_target_properties(coo2aij PROPERTIES
 )
 
 set_target_properties(memorytest PROPERTIES
+  CUDA_STANDARD 11
+  CUDA_STANDARD_REQUIRED YES
+  CUDA_SEPARABLE_COMPILATION ON
+  CUDA_ARCHITECTURES 75
+)
+
+set_target_properties(assemblytest PROPERTIES
   CUDA_STANDARD 11
   CUDA_STANDARD_REQUIRED YES
   CUDA_SEPARABLE_COMPILATION ON

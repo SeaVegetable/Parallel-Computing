@@ -1,7 +1,7 @@
 #include <petscmat.h>
 #include "FileManager.hpp"
 #include "memory.cuh"
-#include "GlobalAssembly.hpp"
+#include "GlobalAssembly.cuh"
 #include "Elem2COOGenerator.hpp"
 #include "AbscissaeGenerator.hpp"
 #include "IENGenerator.hpp"
