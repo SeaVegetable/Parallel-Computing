@@ -1,5 +1,9 @@
-void MallocDeviceMemory(void **ptr, size_t size);
+#pragma once
+template <class T>
+void MallocDeviceMemory(T **ptr, size_t size);
 
-void FreeDeviceMemory(void *ptr);
+template <class T>
+void FreeDeviceMemory(T *ptr);
 
-void CopyToDevice(void *dst, const void *src, size_t size);
+template <class T>
+void CopyToDevice(T *dst, const T *src, size_t size);

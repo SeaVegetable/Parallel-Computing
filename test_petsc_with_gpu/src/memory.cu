@@ -1,16 +1,18 @@
 #include <cuda_runtime.h>
 #include "memory.hpp"
 
-void MallocDeviceMemory(void **ptr, size_t size)
+template <class T>
+void MallocDeviceMemory(T **ptr, size_t n)
 {
-    cudaError_t err = cudaMalloc(ptr, size);
+    cudaError_t err = cudaMalloc((void**)ptr, n * sizeof(T));
     if (err != cudaSuccess) {
         fprintf(stderr, "Error allocating device memory: %s\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
 }
 
-void FreeDeviceMemory(void *ptr)
+template <class T>
+void FreeDeviceMemory(T *ptr)
 {
     cudaError_t err = cudaFree(ptr);
     if (err != cudaSuccess) {
@@ -19,9 +21,10 @@ void FreeDeviceMemory(void *ptr)
     }
 }
 
-void CopyToDevice(void *dst, const void *src, size_t size)
+template <class T>
+void CopyToDevice(T *dst, const T *src, size_t n)
 {
-    cudaError_t err = cudaMemcpy(dst, src, size, cudaMemcpyHostToDevice);
+    cudaError_t err = cudaMemcpy(dst, src, n * sizeof(T), cudaMemcpyHostToDevice);
     if (err != cudaSuccess) {
         fprintf(stderr, "Error copying to device memory: %s\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
