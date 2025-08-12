@@ -50,6 +50,8 @@ set(SOURCES ${SOURCE_DIR}/BSplineBasis.cpp
             ${SOURCE_DIR}/ElementFEM.cpp
             ${SOURCE_DIR}/memory.cu)
 
+set(CUDA_SOURCES ${SOURCE_DIR}/memory.cu)
+
 # Find PETSc
 set(PETSC_DIR $ENV{HOME}/lib/petsc-3.23.4-opt)
 set(PETSC_ARCH .)
@@ -64,6 +66,7 @@ set(CMAKE_CXX_COMPILER $ENV{HOME}/lib/openmpi-5.0.8/bin/mpicxx)
 include_directories(${PETSC_INC})
 
 add_library(eigenvalue_problem_lib ${SOURCES})
+add_library(cuda_source_lib STATIC ${CUDA_SOURCES})
 
 add_executable(preprocess_fem preprocess_fem.cpp)
 target_link_libraries(preprocess_fem eigenvalue_problem_lib)
@@ -76,7 +79,7 @@ target_link_libraries(coo2aij eigenvalue_problem_lib ${PETSC_LIB})
 target_include_directories(coo2aij PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C_INCLUDE_PATH})
 
 add_executable(memorytest memorytest.cpp)
-target_link_libraries(memorytest eigenvalue_problem_lib ${PETSC_LIB})
+target_link_libraries(memorytest eigenvalue_problem_lib cuda_source_lib ${PETSC_LIB})
 target_include_directories(memorytest PRIVATE ${PETSC_INC} ${CUDA_INC})
 
 if(OPENMP_CXX_FOUND)
