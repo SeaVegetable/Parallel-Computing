@@ -74,6 +74,10 @@ add_executable(coo2aij coo2aij.cu)
 target_link_libraries(coo2aij eigenvalue_problem_lib ${PETSC_LIB})
 target_include_directories(coo2aij PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C_INCLUDE_PATH})
 
+add_executable(memorytest memorytest.cpp)
+target_link_libraries(memorytest eigenvalue_problem_lib ${PETSC_LIB})
+target_include_directories(memorytest PRIVATE ${PETSC_INC} ${CUDA_INC})
+
 if(OPENMP_CXX_FOUND)
   set_target_properties( eigenvalue_problem_lib PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )
   set_target_properties( preprocess_fem PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )
@@ -83,6 +87,13 @@ if(OPENMP_CXX_FOUND)
 endif()
 
 set_target_properties(coo2aij PROPERTIES
+  CUDA_STANDARD 11
+  CUDA_STANDARD_REQUIRED YES
+  CUDA_SEPARABLE_COMPILATION ON
+  CUDA_ARCHITECTURES 75
+)
+
+set_target_properties(memorytest PROPERTIES
   CUDA_STANDARD 11
   CUDA_STANDARD_REQUIRED YES
   CUDA_SEPARABLE_COMPILATION ON
