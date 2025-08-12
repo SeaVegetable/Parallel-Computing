@@ -47,10 +47,7 @@ set(SOURCES ${SOURCE_DIR}/BSplineBasis.cpp
             ${SOURCE_DIR}/LocalAssembly.cpp
             ${SOURCE_DIR}/GlobalAssemblyDR.cpp
             ${SOURCE_DIR}/AbscissaeGenerator.cpp
-            ${SOURCE_DIR}/ElementFEM.cpp
-            ${SOURCE_DIR}/memory.cu)
-
-set(CUDA_SOURCES ${SOURCE_DIR}/memory.cu)
+            ${SOURCE_DIR}/ElementFEM.cpp)
 
 # Find PETSc
 set(PETSC_DIR $ENV{HOME}/lib/petsc-3.23.4-opt)
@@ -79,7 +76,7 @@ target_link_libraries(coo2aij eigenvalue_problem_lib ${PETSC_LIB})
 target_include_directories(coo2aij PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C_INCLUDE_PATH})
 
 add_executable(memorytest memorytest.cpp)
-target_link_libraries(memorytest eigenvalue_problem_lib cuda_source_lib ${PETSC_LIB})
+target_link_libraries(memorytest eigenvalue_problem_lib ${PETSC_LIB})
 target_include_directories(memorytest PRIVATE ${PETSC_INC} ${CUDA_INC})
 
 if(OPENMP_CXX_FOUND)
