@@ -1,7 +1,6 @@
 #pragma once
 #include <cuda_runtime.h>
 #include <stdio.h>
-#include "memory.hpp"
 
 template <class T>
 void MallocDeviceMemory(T **ptr, size_t n)

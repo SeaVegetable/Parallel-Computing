@@ -63,7 +63,6 @@ set(CMAKE_CXX_COMPILER $ENV{HOME}/lib/openmpi-5.0.8/bin/mpicxx)
 include_directories(${PETSC_INC})
 
 add_library(eigenvalue_problem_lib ${SOURCES})
-add_library(cuda_source_lib STATIC ${CUDA_SOURCES})
 
 add_executable(preprocess_fem preprocess_fem.cpp)
 target_link_libraries(preprocess_fem eigenvalue_problem_lib)
@@ -75,9 +74,9 @@ add_executable(coo2aij coo2aij.cu)
 target_link_libraries(coo2aij eigenvalue_problem_lib ${PETSC_LIB})
 target_include_directories(coo2aij PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C_INCLUDE_PATH})
 
-add_executable(memorytest memorytest.cpp)
+add_executable(memorytest memorytest.cu)
 target_link_libraries(memorytest eigenvalue_problem_lib ${PETSC_LIB})
-target_include_directories(memorytest PRIVATE ${PETSC_INC} ${CUDA_INC})
+target_include_directories(memorytest PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C_INCLUDE_PATH})
 
 if(OPENMP_CXX_FOUND)
   set_target_properties( eigenvalue_problem_lib PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )

@@ -1,6 +1,6 @@
 #include <petscmat.h>
 #include "FileManager.hpp"
-#include "memory.hpp"
+#include "memory.cuh"
 
 int main (int argc, char *argv[])
 {
