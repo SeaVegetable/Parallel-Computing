@@ -1,5 +1,4 @@
 #include "GlobalAssembly.hpp"
-#include "memory.hpp"
 
 GlobalAssembly::GlobalAssembly(const int &nLocBas,
     const int &nnz, const int &nlocalfunc,
@@ -89,11 +88,13 @@ void GlobalAssembly::AssemStiffness(QuadraturePoint * const &quad1,
     CopyToDevice(d_elem2coo, elem2coo.data(), elem2coo.size());
     cudaMemset(d_val, 0, nnz * sizeof(double));
 
-    AssembleKernel<<<dim3(nlocalelemx, nlocalelemy), dim3(nqp1, nqp2), nLocBas * sizeof(PetscInt) + 2 * nLocBas * sizeof(double)>>>(
-        nLocBas, nqp1 * nqp2, d_N, d_dN_dxi, d_dN_deta, d_weight,
-        d_IEN, d_ID, d_dir2coo, d_CP, d_elem2coo, d_val);
+    AssembleStiffnessCUDA(nLocBas, nqp1, nqp2,
+        nlocalelemx, nlocalelemy,
+        d_N, d_dN_dxi, d_dN_deta,
+        d_weight, d_IEN, d_ID,
+        d_CP, d_elem2coo, d_val);
 
-    DirichletBCKernel<<<(Dir.size() + 255) / 256, 256>>>(d_dir2coo, dir2coo.size(), d_val);
+    DirichletBCKCUDA(d_dir2coo, dir2coo.size(), d_val);
 
     MatSetValuesCOO(K, d_val, INSERT_VALUES);
 

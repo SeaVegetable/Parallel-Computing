@@ -47,7 +47,10 @@ set(SOURCES ${SOURCE_DIR}/BSplineBasis.cpp
             ${SOURCE_DIR}/LocalAssembly.cpp
             ${SOURCE_DIR}/GlobalAssemblyDR.cpp
             ${SOURCE_DIR}/AbscissaeGenerator.cpp
-            ${SOURCE_DIR}/ElementFEM.cpp)
+            ${SOURCE_DIR}/ElementFEM.cpp
+            ${SOURCE_DIR}/Elem2COOGenerator.cpp)
+
+set(CUDA_SOURCES ${SOURCE_DIR}/assembly.cu)
 
 # Find PETSc
 set(PETSC_DIR $ENV{HOME}/lib/petsc-3.23.4-opt)

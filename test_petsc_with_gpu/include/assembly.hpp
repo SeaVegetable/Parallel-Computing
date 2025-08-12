@@ -1,8 +1,10 @@
-void AssembleStiffness(const int nLocBas, const int nqp1, const int nqp2,
+#pragma once
+
+void AssembleStiffnessCUDA(const int nLocBas, const int nqp1, const int nqp2,
     const int nlocalelemx, const int nlocalelemy,
     const double * d_N, const double * d_dN_dxi, const double * d_dN_deta,
     const double * d_weight, const int * d_IEN, const int * d_ID,
-    const int * d_Dir, const double * d_CP, const int * d_elem2coo,
+    const double * d_CP, const int * d_elem2coo,
     double * d_val);
 
-void DirichletBCK(const int * d_dir2coo, const int dir_size, double * d_val);
+void DirichletBCKCUDA(const int * d_dir2coo, const int dir_size, double * d_val);

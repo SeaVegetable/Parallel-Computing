@@ -3,6 +3,9 @@
 
 #include <petscmat.h>
 #include "QuadraturePoint.hpp"
+#include "ElementFEM.hpp"
+#include "memory.cuh"
+#include "assembly.hpp"
 
 class GlobalAssembly
 {
@@ -16,24 +19,14 @@ class GlobalAssembly
             const std::vector<int> &cols);
 
         ~GlobalAssembly();
-
-        void AssemStiffnessLoad(LocalAssembly * const &locassem,
-            const std::vector<int> &IEN,
-            const std::vector<int> &ID,
-            const std::vector<int> &Dir,
-            const std::vector<double> &CP,
-            const std::vector<double> &NURBSExtraction1,
-            const std::vector<double> &NURBSExtraction2,
-            const std::vector<double> &elem_size1,
-            const std::vector<double> &elem_size2,
-            Element * const &elem);
         
         void AssemStiffness(QuadraturePoint * const &quad1,
             QuadraturePoint * const &quad2,
             const std::vector<int> &IEN,
             const std::vector<int> &ID,
+            const std::vector<int> &dir2coo,
             const std::vector<double> &CP,
-            
+            const std::vector<int> &elem2coo,
             ElementFEM * const &elem);
     
     private:

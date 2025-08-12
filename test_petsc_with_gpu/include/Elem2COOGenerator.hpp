@@ -2,6 +2,9 @@
 #define ELEM2COOGENERATOR_HPP
 
 #include <vector>
+#include <algorithm>
+#include <iterator>
+#include <omp.h>
 
 class Elem2COOGenerator
 {

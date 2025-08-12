@@ -1,11 +1,11 @@
 #include <coda_runtime.h>
 #include "assembly.hpp"
 
-void AssemStiffness(const int nLocBas, const int nqp1, const int nqp2,
+void AssemStiffnessCUDA(const int nLocBas, const int nqp1, const int nqp2,
     const int nlocalelemx, const int nlocalelemy,
     const double * d_N, const double * d_dN_dxi, const double * d_dN_deta,
     const double * d_weight, const int * d_IEN, const int * d_ID,
-    const int * d_Dir, const double * d_CP, const int * d_elem2coo,
+    const double * d_CP, const int * d_elem2coo,
     double * d_val)
 {
     int nelem = nlocalelemx * nlocalelemy;
@@ -14,9 +14,7 @@ void AssemStiffness(const int nLocBas, const int nqp1, const int nqp2,
 
     AssembleStiffnessKernel<<<gridsize, blocksize>>>(nLocBas, nqp1*nqp2,
         d_N, d_dN_dxi, d_dN_deta,
-        d_weight, d_IEN, d_ID,
-        d_Dir, d_CP, d_elem2coo,
-        d_val);
+        d_weight, d_IEN, d_ID, d_CP, d_elem2coo, d_val);
 
     cudaError_t err = cudaGetLastError();
     if (err != cudaSuccess) {
@@ -25,7 +23,7 @@ void AssemStiffness(const int nLocBas, const int nqp1, const int nqp2,
     }
 }
 
-void DirichletBCK(const int * d_dir2coo, const int dir_size, double * d_val)
+void DirichletBCKCUDA(const int * d_dir2coo, const int dir_size, double * d_val)
 {
     int blockSize = 256;
     int numBlocks = (dir_size + blockSize - 1) / blockSize;
@@ -39,7 +37,7 @@ void DirichletBCK(const int * d_dir2coo, const int dir_size, double * d_val)
     }
 }
 
-__global__ void AssembleKernel(const int nLocBas, const int nqp,
+__global__ void AssembleStiffnessKernel(const int nLocBas, const int nqp,
     const double * d_N, const double * d_dN_dxi, const double * d_dN_deta,
     const double * d_weight,
     const int * d_IEN, const int * d_ID,
@@ -91,7 +89,7 @@ __global__ void AssembleKernel(const int nLocBas, const int nqp,
     }
 }
 
-__global__ void DirichletBCKernel(const int * dir2coo, const int dirsize, double * d_val)
+__global__ void DirichletBCKKernel(const int * dir2coo, const int dirsize, double * d_val)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
 

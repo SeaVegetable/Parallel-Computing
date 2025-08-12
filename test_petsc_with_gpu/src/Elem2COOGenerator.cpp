@@ -5,12 +5,15 @@ Elem2COOGenerator::GenerateElem2COO(const std::vector<int> &IEN,
     const std::vector<int> &cols, std::vector<int> &elem2coo)
 {
     elem2coo.clear();
-    elem2coo.reserve(IEN.size() * nLocBas);
+    elem2coo.resize(IEN.size() * nLocBas);
+
+    #pragma omp parallel for
     for (int elem = 0; elem < nlocalelemx * nlocalelemy; ++elem)
     {
         for (int i = 0; i < nLocBas; ++i)
         {
             int II = ID[IEN[elem * nLocBas + i]];
+            int base_idx = elem * nLocBas * nLocBas + i * nLocBas;
             if(II >= 0)
             {
                 auto it = std::find(rows.begin(), rows.end(), II);
@@ -21,13 +24,13 @@ Elem2COOGenerator::GenerateElem2COO(const std::vector<int> &IEN,
                     int JJ = ID[IEN[elem * nLocBas + j]];
                     if(JJ >= 0)
                     {
-                        auto it2 = std::find(cols.begin() + Index, cols.begin() + Index + nLocBas, JJ);
+                        auto it2 = std::find(cols.begin() + Index, cols.end(), JJ);
                         int colIndex = std::distance(cols.begin() + Index, it2);
-                        elem2coo.push_back(Index + colIndex);
+                        elem2coo[base_idx + j] = Index + colIndex;
                     }
                     else
                     {
-                        elem2coo.push_back(-1); // If JJ is negative, we do not add it to the COO format
+                        elem2coo[base_idx + j] = -1; // If JJ is negative, we do not add it to the COO format
                     }
                 }
             }
@@ -35,7 +38,7 @@ Elem2COOGenerator::GenerateElem2COO(const std::vector<int> &IEN,
             {
                 for (int j = 0; j < nLocBas; ++j)
                 {
-                    elem2coo.push_back(-1); // If II is negative, we do not add it to the COO format
+                    elem2coo[base_idx + j] = -1; // If II is negative, we do not add it to the COO format
                 }
             }
         }
