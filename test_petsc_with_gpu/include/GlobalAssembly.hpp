@@ -35,10 +35,6 @@ class GlobalAssembly
         const int nlocalfunc;
         const int nlocalelemx;
         const int nlocalelemy;
-
-        void DirichletBCK(const std::vector<int> &Dir);
-
-        void DirichletBC(const std::vector<int> &Dir);
 };
 
 #endif
