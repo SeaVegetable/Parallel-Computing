@@ -49,9 +49,9 @@ __global__ void AssembleStiffnessKernel(const int nqp,
 
     double eCP[2 * 4];
 
-    for (int j = 0; j < nLocBas; ++j)
+    for (int j = 0; j < 4; ++j)
     {
-        int ien = d_IEN[elemIndex * nLocBas + j];
+        int ien = d_IEN[elemIndex * 4 + j];
         eCP[2 * j]     = d_CP[2 * ien];
         eCP[2 * j + 1] = d_CP[2 * ien + 1];
     }
@@ -61,25 +61,28 @@ __global__ void AssembleStiffnessKernel(const int nqp,
 
     for (int qp = 0; qp < nqp; ++qp)
     {
-        for (int i = 0; i < nLocBas; ++i)
+        for (int i = 0; i < 4; ++i)
         {
-            dN_dxi_q[i] = d_dN_dxi[qp * nLocBas + i];
-            dN_deta_q[i] = d_dN_deta[qp * nLocBas + i];
+            dN_dxi_q[i] = d_dN_dxi[qp * 4 + i];
+            dN_deta_q[i] = d_dN_deta[qp * 4 + i];
         }
 
         double jacobian;
         double dR_dx[4];
         double dR_dy[4];
 
-        compute_jacobian_basis_derivative(nLocBas, dN_dxi_q, dN_deta_q, eCP, jacobian, dR_dx, dR_dy);
+        compute_jacobian_basis_derivative(4, dN_dxi_q, dN_deta_q, eCP, jacobian, dR_dx, dR_dy);
 
-        for (int i = 0; i < nLocBas; ++i)
+        for (int i = 0; i < 4; ++i)
         {
-            for (int j = 0; j < nLocBas; ++j)
+            for (int j = 0; j < 4; ++j)
             {
-                int elem2coo_index = elem2coo[elemIndex * nLocBas * nLocBas + i * nLocBas + j];
-                double val = (dR_dx[i] * dR_dx[j] + dR_dy[i] * dR_dy[j]) * jacobian * d_weight[qp];
-                atomicAdd(&d_val[elem2coo_index], val);
+                int elem2coo_index = elem2coo[elemIndex * 16 + i * 4 + j];
+                if (elem2coo_index >= 0)
+                {
+                    double val = (dR_dx[i] * dR_dx[j] + dR_dy[i] * dR_dy[j]) * jacobian * d_weight[qp];
+                    atomicAdd(&d_val[elem2coo_index], val);
+                }
             }
         }
     }
