@@ -117,7 +117,7 @@ int main (int argc, char *argv[])
     ElementFEM * elemmf = new ElementFEM(1, 1);
     
     assembly->AssemStiffness(quad1, quad2,
-        IEN, ID, dir2coo, CP, elem2coo, elemmf);
+        IEN, dir2coo, CP, elem2coo, elemmf);
 
     MatView(assembly->K, PETSC_VIEWER_STDOUT_WORLD);
 
