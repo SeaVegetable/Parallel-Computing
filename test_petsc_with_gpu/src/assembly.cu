@@ -93,7 +93,7 @@ __global__ void DirichletBCKKernel(const int * dir2coo, const int dirsize, doubl
     d_val[coo_index] = 1.0;
 }
 
-void AssemStiffnessCUDA(const int nLocBas, const int nqp1, const int nqp2,
+void AssembleStiffnessCUDA(const int nLocBas, const int nqp1, const int nqp2,
     const int nlocalelemx, const int nlocalelemy,
     const double * d_N, const double * d_dN_dxi, const double * d_dN_deta,
     const double * d_weight, const int * d_IEN, const int * d_ID,
