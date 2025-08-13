@@ -60,11 +60,6 @@ public:
     void ReadPartition(const std::string &filename,
         int &nlocalfunc) const;
 
-    void ReadPartition(const std::string &filename,
-        int &nlocalfunc,
-        int &nlocalelemx,
-        int &nlocalelemy) const;
-
     void WritePreprocessInfo(const std::string &filename,
         const int &p, const int &q,
         const double &Lx, const double &Ly,

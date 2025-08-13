@@ -65,7 +65,7 @@ int main (int argc, char *argv[])
         int nlocalfunc = 0;
         std::string base_name_fem = "part_fem";
         std::string filename_fem = fm->GetPartitionFilename(base_name_fem, ii);
-        fm->ReadPartition(filename_fem, nlocalfunc, nlocalelemx, nlocalelemy);
+        fm->ReadPartition(filename_fem, nlocalfunc);
         nfunc += nlocalfunc;
     }
 
