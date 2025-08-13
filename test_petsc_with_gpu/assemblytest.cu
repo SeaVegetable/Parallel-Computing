@@ -102,38 +102,6 @@ int main (int argc, char *argv[])
     std::vector<int> elem2coo{};
     std::vector<int> dir2coo{};
     elem2coogen->GenerateElem2COO(IEN, ID, rows, cols, elem2coo);
-    for (int elem = 0; elem < nElemX * nElemY; ++elem)
-    {
-        std::cout << "elem: " << elem << std::endl;
-        int offset = elem * 4 * 4;
-        int nLocBas = 4;
-        bool isprint = false;
-        for (int i = 0; i < nLocBas; ++i)
-        {
-            for (int j = 0; j < nLocBas; ++j)
-            {
-                int coo_index = elem2coo[offset + i * nLocBas + j];
-                if (coo_index >= nnz)
-                {
-                    isprint = true;
-                }
-            }
-        }
-        if (isprint)
-        {
-            std::cout << "elem: " << elem << " has invalid coo_index" << std::endl;
-            for (int i = 0; i < nLocBas; ++i)
-            {
-                for (int j = 0; j < nLocBas; ++j)
-                {
-                    int coo_index = elem2coo[offset + i * nLocBas + j];
-                    std::cout << "elem: " << elem << " i: " << i << " j: " << j
-                              << " coo_index: " << coo_index << std::endl;
-                }
-            }
-        }
-        break;
-    }
     elem2coogen->GenerateDir2COO(ID, rows, dir2coo);
 
     PetscPrintf(PETSC_COMM_WORLD, "Finished generating elem2coo and dir2coo.\n");
