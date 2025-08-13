@@ -86,7 +86,7 @@ void GlobalAssembly::AssemStiffness(QuadraturePoint * const &quad1,
     CopyToDevice(d_elem2coo, elem2coo.data(), elem2coo.size());
     cudaMemset(d_val, 0, nnz * sizeof(double));
 
-    AssembleStiffnessCUDA(nLocBas, nqp1, nqp2,
+    AssembleStiffnessCUDA(nqp1, nqp2,
         nlocalelemx, nlocalelemy,
         d_N, d_dN_dxi, d_dN_deta,
         d_weight, d_IEN,

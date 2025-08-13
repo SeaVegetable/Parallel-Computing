@@ -38,17 +38,16 @@ __device__ void compute_jacobian_basis_derivative(
     }
 }
 
-__global__ void AssembleStiffnessKernel(const int nLocBas, const int nqp,
+__global__ void AssembleStiffnessKernel(const int nqp,
     const double * d_N, const double * d_dN_dxi, const double * d_dN_deta,
     const double * d_weight, const int * d_IEN,
-    const double * d_CP, const int * elem2coo, double * eCP,
-    double * R, double * dN_dxi_q, double * dN_deta_q,
-    double * dR_dx, double * dR_dy,
-    double * d_val)
+    const double * d_CP, const int * elem2coo, double * d_val)
 {
     int elemIndex = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (elemIndex >= gridDim.x * blockDim.x) return;
+
+    double eCP[2 * 4];
 
     for (int j = 0; j < nLocBas; ++j)
     {
@@ -57,16 +56,20 @@ __global__ void AssembleStiffnessKernel(const int nLocBas, const int nqp,
         eCP[2 * j + 1] = d_CP[2 * ien + 1];
     }
 
+    double dN_dxi_q[4];
+    double dN_deta_q[4];
+
     for (int qp = 0; qp < nqp; ++qp)
     {
         for (int i = 0; i < nLocBas; ++i)
         {
-            R[i] = d_N[qp * nLocBas + i];
             dN_dxi_q[i] = d_dN_dxi[qp * nLocBas + i];
             dN_deta_q[i] = d_dN_deta[qp * nLocBas + i];
         }
 
         double jacobian;
+        double dR_dx[4];
+        double dR_dy[4];
 
         compute_jacobian_basis_derivative(nLocBas, dN_dxi_q, dN_deta_q, eCP, jacobian, dR_dx, dR_dy);
 
@@ -92,7 +95,7 @@ __global__ void DirichletBCKKernel(const int * dir2coo, const int dirsize, doubl
     d_val[coo_index] = 1.0;
 }
 
-void AssembleStiffnessCUDA(const int nLocBas, const int nqp1, const int nqp2,
+void AssembleStiffnessCUDA(const int nqp1, const int nqp2,
     const int nlocalelemx, const int nlocalelemy,
     const double * d_N, const double * d_dN_dxi, const double * d_dN_deta,
     const double * d_weight, const int * d_IEN,
@@ -103,34 +106,15 @@ void AssembleStiffnessCUDA(const int nLocBas, const int nqp1, const int nqp2,
     int blocksize = 256;
     int gridsize = (nelem + blocksize - 1) / blocksize;
 
-    double *eCP;
-    double *R, *dN_dxi_q, *dN_deta_q;
-    double *dR_dx, *dR_dy;
-
-    MallocDeviceMemory(&eCP, 2*nLocBas);
-    MallocDeviceMemory(&R, nLocBas);
-    MallocDeviceMemory(&dN_dxi_q, 2*nLocBas);
-    MallocDeviceMemory(&dN_deta_q, nLocBas);
-    MallocDeviceMemory(&dR_dx, 2*nLocBas);
-    MallocDeviceMemory(&dR_dy, nLocBas);
-
-    AssembleStiffnessKernel<<<gridsize, blocksize>>>(nLocBas, nqp1*nqp2,
+    AssembleStiffnessKernel<<<gridsize, blocksize>>>(nqp1*nqp2,
         d_N, d_dN_dxi, d_dN_deta,
-        d_weight, d_IEN, d_CP, d_elem2coo,
-        eCP, R, dN_dxi_q, dN_deta_q, dR_dx, dR_dy, d_val);
+        d_weight, d_IEN, d_CP, d_elem2coo, d_val);
 
     cudaError_t err = cudaGetLastError();
     if (err != cudaSuccess) {
         fprintf(stderr, "Error launching kernel: %s\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
-
-    FreeDeviceMemory(eCP);
-    FreeDeviceMemory(R);
-    FreeDeviceMemory(dN_dxi_q);
-    FreeDeviceMemory(dN_deta_q);
-    FreeDeviceMemory(dR_dx);
-    FreeDeviceMemory(dR_dy);
 }
 
 void DirichletBCKCUDA(const int * d_dir2coo, const int dir_size, double * d_val)
