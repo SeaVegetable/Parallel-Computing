@@ -38,14 +38,14 @@ __device__ void compute_jacobian_basis_derivative(
     }
 }
 
-__global__ void AssembleStiffnessKernel(const int nqp,
+__global__ void AssembleStiffnessKernel(const int nqp, const int nelem,
     const double * d_N, const double * d_dN_dxi, const double * d_dN_deta,
     const double * d_weight, const int * d_IEN,
     const double * d_CP, const int * elem2coo, double * d_val)
 {
     int elemIndex = blockIdx.x * blockDim.x + threadIdx.x;
 
-    if (elemIndex >= gridDim.x * blockDim.x) return;
+    if (elemIndex >= nelem) return;
 
     double eCP[2 * 4];
 
@@ -110,8 +110,11 @@ void AssembleStiffnessCUDA(const int nqp1, const int nqp2,
     int gridsize = (nelem + blocksize - 1) / blocksize;
 
     AssembleStiffnessKernel<<<gridsize, blocksize>>>(nqp1*nqp2,
+        nlocalelemx*nlocalelemy,
         d_N, d_dN_dxi, d_dN_deta,
         d_weight, d_IEN, d_CP, d_elem2coo, d_val);
+    
+    cudaDeviceSynchronize();
 
     cudaError_t err = cudaGetLastError();
     if (err != cudaSuccess) {
@@ -126,6 +129,8 @@ void DirichletBCKCUDA(const int * d_dir2coo, const int dir_size, double * d_val)
     int numBlocks = (dir_size + blockSize - 1) / blockSize;
 
     DirichletBCKKernel<<<numBlocks, blockSize>>>(d_dir2coo, dir_size, d_val);
+
+    cudaDeviceSynchronize();
 
     cudaError_t err = cudaGetLastError();
     if (err != cudaSuccess) {
