@@ -7,24 +7,33 @@ void Elem2COOGenerator::GenerateElem2COO(const std::vector<int> &IEN,
     elem2coo.clear();
     elem2coo.resize(IEN.size() * nLocBas);
 
+    std::vector<int> row_counts(ID.size(), 0);
+    std::vector<int> row_offsets(ID.size(), 0);
+
+    for (size_t i = 0; i < rows.size(); ++i) {
+        row_counts[rows[i]]++;
+    }
+    for (size_t i = 1; i < row_counts.size(); ++i) {
+        row_offsets[i] = row_offsets[i - 1] + row_counts[i - 1];
+    }
+
     #pragma omp parallel for
     for (int elem = 0; elem < nlocalelemx * nlocalelemy; ++elem)
     {
         for (int i = 0; i < nLocBas; ++i)
         {
             int II = ID[IEN[elem * nLocBas + i]];
+            int Index = row_offsets[II];
+            int counts = row_counts[II];
             int base_idx = elem * nLocBas * nLocBas + i * nLocBas;
             if(II >= 0)
             {
-                auto it = std::find(rows.begin(), rows.end(), II);
-                int Index = std::distance(rows.begin(), it);
-
                 for (int j = 0; j < nLocBas; ++j)
                 {
                     int JJ = ID[IEN[elem * nLocBas + j]];
                     if(JJ >= 0)
                     {
-                        auto it2 = std::find(cols.begin() + Index, cols.end(), JJ);
+                        auto it2 = std::find(cols.begin() + Index, cols.begin() + Index + counts, JJ);
                         int colIndex = std::distance(cols.begin() + Index, it2);
                         elem2coo[base_idx + j] = Index + colIndex;
                     }
