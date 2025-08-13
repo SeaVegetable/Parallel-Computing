@@ -104,6 +104,8 @@ int main (int argc, char *argv[])
     elem2coogen->GenerateElem2COO(IEN, ID, rows, cols, elem2coo);
     elem2coogen->GenerateDir2COO(ID, rows, dir2coo);
 
+    PetscPrintf(PETSC_COMM_WORLD, "Finished generating elem2coo and dir2coo.\n");
+
     GlobalAssembly * assembly = new GlobalAssembly(4,
         nnz, nfunc, nElemX, nElemY, rows, cols);
     QuadraturePoint * quad1 = new QuadraturePoint(2, 0, 1);
