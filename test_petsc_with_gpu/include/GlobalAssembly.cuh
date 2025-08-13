@@ -5,7 +5,7 @@
 #include "QuadraturePoint.hpp"
 #include "ElementFEM.hpp"
 #include "memory.cuh"
-#include "assembly.hpp"
+#include "assembly.cuh"
 
 class GlobalAssembly
 {

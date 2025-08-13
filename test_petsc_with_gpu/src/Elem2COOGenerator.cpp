@@ -1,6 +1,6 @@
 #include "Elem2COOGenerator.hpp"
 
-Elem2COOGenerator::GenerateElem2COO(const std::vector<int> &IEN,
+void Elem2COOGenerator::GenerateElem2COO(const std::vector<int> &IEN,
     const std::vector<int> &ID, const std::vector<int> &rows,
     const std::vector<int> &cols, std::vector<int> &elem2coo)
 {

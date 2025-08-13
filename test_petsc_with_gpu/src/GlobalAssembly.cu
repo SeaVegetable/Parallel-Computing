@@ -1,11 +1,12 @@
-#include "GlobalAssembly.hpp"
+#include "GlobalAssembly.cuh"
 
 GlobalAssembly::GlobalAssembly(const int &nLocBas,
     const int &nnz, const int &nlocalfunc,
     const int &nlocalelemx, const int &nlocalelemy,
     const std::vector<int> &rows,
     const std::vector<int> &cols)
-: nLocBas(nlocalfunc), nnz(nnz)
+: nLocBas(nlocalfunc), nnz(nnz), nlocalfunc(nlocalfunc),
+  nlocalelemx(nlocalelemx), nlocalelemy(nlocalelemy)
 {
     PetscInt * d_rows, * d_cols;
     MallocDeviceMemory(&d_rows, nnz);
@@ -15,7 +16,7 @@ GlobalAssembly::GlobalAssembly(const int &nLocBas,
     MatCreate(PETSC_COMM_WORLD, &K);
     MatSetSizes(K, nlocalfunc, nlocalfunc, PETSC_DETERMINE, PETSC_DETERMINE);
     MatSetType(K, MATAIJCUSPARSE);
-    MatSetPreallocationCOO(A, nnz, d_rows, d_cols);
+    MatSetPreallocationCOO(K, nnz, d_rows, d_cols);
     FreeDeviceMemory(d_rows);
     FreeDeviceMemory(d_cols);
 }
@@ -56,9 +57,9 @@ void GlobalAssembly::AssemStiffness(QuadraturePoint * const &quad1,
         for (int ii = 0; ii < nqp1; ++ii)
         {
             elem->GenerateRefElementSingleQP(qp1[ii], qp2[jj], sqp_N, sqp_dN_dxi, sqp_dN_deta);
-            N.push_back(sqp_N);
-            dN_dxi.push_back(sqp_dN_dxi);
-            dN_deta.push_back(sqp_dN_deta);
+            N.insert(N.end(), sqp_N.begin(),sqp_N.end());
+            dN_dxi.insert(dN_dxi.end(), sqp_dN_dxi.begin(), sqp_dN_dxi.end());
+            dN_deta.insert(dN_deta.end(), sqp_dN_deta.begin(), sqp_dN_deta.end());
             weight.push_back(w1[ii] * w2[jj]);
         }
     }

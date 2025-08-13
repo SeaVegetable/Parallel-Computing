@@ -29,6 +29,6 @@ class Elem2COOGenerator
         const int nlocalfunc;
         const int nlocalelemx;
         const int nlocalelemy;
-}
+};
 
 #endif

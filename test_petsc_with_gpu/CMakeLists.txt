@@ -68,6 +68,13 @@ include_directories(${PETSC_INC})
 
 add_library(eigenvalue_problem_lib ${SOURCES})
 add_library(eigenvalue_problem_cuda_lib ${CUDA_SOURCES})
+target_include_directories(eigenvalue_problem_cuda_lib PRIVATE ${MPI_C_INCLUDE_PATH})
+set_target_properties(eigenvalue_problem_cuda_lib PROPERTIES
+  CUDA_STANDARD 11
+  CUDA_STANDARD_REQUIRED YES
+  CUDA_SEPARABLE_COMPILATION ON
+  CUDA_ARCHITECTURES 75
+)
 
 add_executable(preprocess_fem preprocess_fem.cpp)
 target_link_libraries(preprocess_fem eigenvalue_problem_lib)

@@ -1,5 +1,9 @@
 #pragma once
 
+#include <cuda_runtime.h>
+#include <stdio.h>
+#include <memory.cuh>
+
 void AssembleStiffnessCUDA(const int nLocBas, const int nqp1, const int nqp2,
     const int nlocalelemx, const int nlocalelemy,
     const double * d_N, const double * d_dN_dxi, const double * d_dN_deta,

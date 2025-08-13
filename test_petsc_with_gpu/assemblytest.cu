@@ -32,13 +32,9 @@ int main (int argc, char *argv[])
 
     double hx = Lx / (nElemX + 2);
     double hy = Ly / (nElemY + 2);
-
-    int nElem = nElemX * nElemY;
-    int nLocBas = (p + 1) * (q + 1);
     
     int nFuncX = p + nElemX;
     int nFuncY = q + nElemY;
-    int nFunc = nFuncX * nFuncY;
 
     std::vector<double> S;
     std::vector<double> T;
@@ -56,7 +52,6 @@ int main (int argc, char *argv[])
 
     nElemX = nFuncX - 1;
     nElemY = nFuncY - 1;
-    nElem = nElemX * nElemY;
 
     IENGenerator * ien = new IENGenerator();
     std::vector<int> IEN = ien->GenerateIEN2D(nElemX, nElemY);
@@ -107,19 +102,19 @@ int main (int argc, char *argv[])
         cols[i] = new_to_old[cols[i]];
     }
 
-    Elem2COOGenerator * elem2coogen = new Elem2COOGenerator((p+1)*(q+1), nnz,
+    Elem2COOGenerator * elem2coogen = new Elem2COOGenerator(4, nnz,
         nfunc, nelemx_fem, nelemy_fem);
     
     std::vector<int> elem2coo{};
     std::vector<int> dir2coo{};
     elem2coogen->GenerateElem2COO(IEN, ID, rows, cols, elem2coo);
-    elem2coogen->GenerateDir2COO(ID, rows, cols, dir2coo);
+    elem2coogen->GenerateDir2COO(ID, rows, dir2coo);
 
-    GlobalAssembly * assembly = new GlobalAssembly((p+1) * (q+1),
+    GlobalAssembly * assembly = new GlobalAssembly(4,
         nnz, nfunc, nelemx_fem, nelemy_fem, rows, cols);
-    QuadraturePoint * quad1 = new QuadraturePoint(p, 0, 1);
-    QuadraturePoint * quad2 = new QuadraturePoint(q, 0, 1);
-    ElementFEM * elemmf = new ElementFEM(p, q);
+    QuadraturePoint * quad1 = new QuadraturePoint(2, 0, 1);
+    QuadraturePoint * quad2 = new QuadraturePoint(2, 0, 1);
+    ElementFEM * elemmf = new ElementFEM(1, 1);
     
     assembly->AssemStiffness(quad1, quad2,
         IEN, ID, dir2coo, CP, elem2coo, elemmf);
