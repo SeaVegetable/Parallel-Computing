@@ -23,7 +23,6 @@ class GlobalAssembly
         void AssemStiffness(QuadraturePoint * const &quad1,
             QuadraturePoint * const &quad2,
             const std::vector<int> &IEN,
-            const std::vector<int> &ID,
             const std::vector<int> &dir2coo,
             const std::vector<double> &CP,
             const std::vector<int> &elem2coo,

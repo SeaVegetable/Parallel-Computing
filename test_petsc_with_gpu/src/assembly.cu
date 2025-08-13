@@ -40,8 +40,7 @@ __device__ void compute_jacobian_basis_derivative(
 
 __global__ void AssembleStiffnessKernel(const int nLocBas, const int nqp,
     const double * d_N, const double * d_dN_dxi, const double * d_dN_deta,
-    const double * d_weight,
-    const int * d_IEN, const int * d_ID,
+    const double * d_weight, const int * d_IEN,
     const double * d_CP, const int * elem2coo, double * eCP,
     double * R, double * dN_dxi_q, double * dN_deta_q,
     double * dR_dx, double * dR_dy,
@@ -96,7 +95,7 @@ __global__ void DirichletBCKKernel(const int * dir2coo, const int dirsize, doubl
 void AssembleStiffnessCUDA(const int nLocBas, const int nqp1, const int nqp2,
     const int nlocalelemx, const int nlocalelemy,
     const double * d_N, const double * d_dN_dxi, const double * d_dN_deta,
-    const double * d_weight, const int * d_IEN, const int * d_ID,
+    const double * d_weight, const int * d_IEN,
     const double * d_CP, const int * d_elem2coo,
     double * d_val)
 {
@@ -117,7 +116,7 @@ void AssembleStiffnessCUDA(const int nLocBas, const int nqp1, const int nqp2,
 
     AssembleStiffnessKernel<<<gridsize, blocksize>>>(nLocBas, nqp1*nqp2,
         d_N, d_dN_dxi, d_dN_deta,
-        d_weight, d_IEN, d_ID, d_CP, d_elem2coo,
+        d_weight, d_IEN, d_CP, d_elem2coo,
         eCP, R, dN_dxi_q, dN_deta_q, dR_dx, dR_dy, d_val);
 
     cudaError_t err = cudaGetLastError();

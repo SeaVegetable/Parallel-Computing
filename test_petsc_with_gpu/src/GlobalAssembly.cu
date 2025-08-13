@@ -29,7 +29,6 @@ GlobalAssembly::~GlobalAssembly()
 void GlobalAssembly::AssemStiffness(QuadraturePoint * const &quad1,
     QuadraturePoint * const &quad2,
     const std::vector<int> &IEN,
-    const std::vector<int> &ID,
     const std::vector<int> &dir2coo,
     const std::vector<double> &CP,
     const std::vector<int> &elem2coo,
@@ -74,16 +73,14 @@ void GlobalAssembly::AssemStiffness(QuadraturePoint * const &quad1,
     CopyToDevice(d_dN_deta, dN_deta.data(), dN_deta.size());
     CopyToDevice(d_weight, weight.data(), weight.size());
 
-    int * d_IEN, * d_ID, * d_dir2coo, * d_elem2coo;
+    int * d_IEN, * d_dir2coo, * d_elem2coo;
     double * d_CP, * d_val;
     MallocDeviceMemory(&d_IEN, IEN.size());
-    MallocDeviceMemory(&d_ID, ID.size());
     MallocDeviceMemory(&d_dir2coo, dir2coo.size());
     MallocDeviceMemory(&d_CP, CP.size());
     MallocDeviceMemory(&d_elem2coo, elem2coo.size());
     MallocDeviceMemory(&d_val, nnz);
     CopyToDevice(d_IEN, IEN.data(), IEN.size());
-    CopyToDevice(d_ID, ID.data(), ID.size());
     CopyToDevice(d_dir2coo, dir2coo.data(), dir2coo.size());
     CopyToDevice(d_CP, CP.data(), CP.size());
     CopyToDevice(d_elem2coo, elem2coo.data(), elem2coo.size());
@@ -92,7 +89,7 @@ void GlobalAssembly::AssemStiffness(QuadraturePoint * const &quad1,
     AssembleStiffnessCUDA(nLocBas, nqp1, nqp2,
         nlocalelemx, nlocalelemy,
         d_N, d_dN_dxi, d_dN_deta,
-        d_weight, d_IEN, d_ID,
+        d_weight, d_IEN,
         d_CP, d_elem2coo, d_val);
 
     DirichletBCKCUDA(d_dir2coo, dir2coo.size(), d_val);
@@ -105,7 +102,6 @@ void GlobalAssembly::AssemStiffness(QuadraturePoint * const &quad1,
     FreeDeviceMemory(d_weight);
 
     FreeDeviceMemory(d_IEN);
-    FreeDeviceMemory(d_ID);
     FreeDeviceMemory(d_dir2coo);
     FreeDeviceMemory(d_CP);
     FreeDeviceMemory(d_elem2coo);
