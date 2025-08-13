@@ -86,13 +86,19 @@ void GlobalAssembly::AssemStiffness(QuadraturePoint * const &quad1,
     CopyToDevice(d_elem2coo, elem2coo.data(), elem2coo.size());
     cudaMemset(d_val, 0, nnz * sizeof(double));
 
+    cudaDeviceSynchronize();
+
     AssembleStiffnessCUDA(nqp1, nqp2,
         nlocalelemx, nlocalelemy,
         d_N, d_dN_dxi, d_dN_deta,
         d_weight, d_IEN,
         d_CP, d_elem2coo, d_val);
 
+    cudaDeviceSynchronize();
+
     DirichletBCKCUDA(d_dir2coo, dir2coo.size(), d_val);
+
+    cudaDeviceSynchronize();
 
     MatSetValuesCOO(K, d_val, INSERT_VALUES);
 
