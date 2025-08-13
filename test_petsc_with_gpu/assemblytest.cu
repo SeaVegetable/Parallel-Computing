@@ -90,10 +90,13 @@ int main (int argc, char *argv[])
     std::vector<int> new_to_old;
     fm->ReadNewToOldMapping(map_name, new_to_old);
 
+    std::vector<int> old_rows = rows;
+    std::vector<int> old_cols = cols;
+
     for (int i = 0; i < rows.size(); ++i)
     {
-        rows[i] = new_to_old[rows[i]];
-        cols[i] = new_to_old[cols[i]];
+        old_rows[i] = new_to_old[rows[i]];
+        old_cols[i] = new_to_old[cols[i]];
     }
 
     Elem2COOGenerator * elem2coogen = new Elem2COOGenerator(4, nnz,
@@ -101,13 +104,13 @@ int main (int argc, char *argv[])
 
     std::vector<int> elem2coo{};
     std::vector<int> dir2coo{};
-    elem2coogen->GenerateElem2COO(IEN, ID, rows, cols, elem2coo);
-    elem2coogen->GenerateDir2COO(ID, rows, dir2coo);
+    elem2coogen->GenerateElem2COO(IEN, ID, old_rows, old_cols, elem2coo);
+    elem2coogen->GenerateDir2COO(ID, old_rows, dir2coo);
 
     PetscPrintf(PETSC_COMM_WORLD, "Finished generating elem2coo and dir2coo.\n");
 
     GlobalAssembly * assembly = new GlobalAssembly(4,
-        nnz, nfunc, nElemX, nElemY, rows, cols);
+        nnz, nfunc, nElemX, nElemY, old_rows, old_cols);
     QuadraturePoint * quad1 = new QuadraturePoint(2, 0, 1);
     QuadraturePoint * quad2 = new QuadraturePoint(2, 0, 1);
     ElementFEM * elemmf = new ElementFEM(1, 1);
