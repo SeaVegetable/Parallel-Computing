@@ -60,19 +60,13 @@ int main (int argc, char *argv[])
     std::vector<int> ID = idgen->GenerateID2D(nFuncX, nFuncY);
 
     int nfunc = 0;
-    int nelemx_fem = 0;
-    int nelemy_fem = 0;
     for (int ii = 0; ii < part_num_1d * part_num_1d; ++ii)
     {
         int nlocalfunc = 0;
-        int nlocalelemx = 0;
-        int nlocalelemy = 0;
         std::string base_name_fem = "part_fem";
         std::string filename_fem = fm->GetPartitionFilename(base_name_fem, ii);
         fm->ReadPartition(filename_fem, nlocalfunc, nlocalelemx, nlocalelemy);
         nfunc += nlocalfunc;
-        nelemx_fem += nlocalelemx;
-        nelemy_fem += nlocalelemy;
     }
 
     std::string filename_dr = "coordinate";
@@ -103,15 +97,15 @@ int main (int argc, char *argv[])
     }
 
     Elem2COOGenerator * elem2coogen = new Elem2COOGenerator(4, nnz,
-        nfunc, nelemx_fem, nelemy_fem);
-    
+        nfunc, nElemX, nElemY);
+
     std::vector<int> elem2coo{};
     std::vector<int> dir2coo{};
     elem2coogen->GenerateElem2COO(IEN, ID, rows, cols, elem2coo);
     elem2coogen->GenerateDir2COO(ID, rows, dir2coo);
 
     GlobalAssembly * assembly = new GlobalAssembly(4,
-        nnz, nfunc, nelemx_fem, nelemy_fem, rows, cols);
+        nnz, nfunc, nElemX, nElemY, rows, cols);
     QuadraturePoint * quad1 = new QuadraturePoint(2, 0, 1);
     QuadraturePoint * quad2 = new QuadraturePoint(2, 0, 1);
     ElementFEM * elemmf = new ElementFEM(1, 1);
