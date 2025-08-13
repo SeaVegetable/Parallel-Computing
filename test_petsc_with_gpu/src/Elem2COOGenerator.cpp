@@ -23,11 +23,11 @@ void Elem2COOGenerator::GenerateElem2COO(const std::vector<int> &IEN,
         for (int i = 0; i < nLocBas; ++i)
         {
             int II = ID[IEN[elem * nLocBas + i]];
-            int Index = row_offsets[II];
-            int counts = row_counts[II];
             int base_idx = elem * nLocBas * nLocBas + i * nLocBas;
             if(II >= 0)
             {
+                int Index = row_offsets[II];
+                int counts = row_counts[II];
                 for (int j = 0; j < nLocBas; ++j)
                 {
                     int JJ = ID[IEN[elem * nLocBas + j]];
