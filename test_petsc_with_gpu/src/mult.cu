@@ -232,11 +232,11 @@ __global__ void AssembleKernel(const int p, const int q,
     int *s_eID = (int*)(shared_data + offset);
     offset += (p + 1) * (q + 1) * sizeof(int);
     double *s_eCP = (double*)(shared_data + offset);
-    offset += (p + 1) * (p + 1) * sizeof(double);
+    offset += 2 * (p + 1) * (q + 1) * sizeof(double);
     double *s_eNURBSExtraction1 = (double*)(shared_data + offset);
-    offset += (q + 1) * (q + 1) * sizeof(double);
+    offset += (p + 1) * (p + 1) * sizeof(double);
     double *s_eNURBSExtraction2 = (double*)(shared_data + offset);
-    offset += (p + 1) * (q + 1) * sizeof(double);
+    offset += (q + 1) * (q + 1) * sizeof(double);
     double *s_qw = (double*)(shared_data + offset);
 
     int elemIndex = blockIdx.y * gridDim.x + blockIdx.x;
@@ -500,7 +500,7 @@ void MatrixFreeMatMultCUDA(const int p, const int q,
     double * d_F_array_in, double * d_F_array_out)
 {
     int blocksize = 64;
-    int shared_size = (p + 1) * (q + 1) * sizeof(PetscInt)
+    int shared_size = (p + 1) * (q + 1) * sizeof(int)
                 + 2 * (p + 1) * (q + 1) * sizeof(double)
                 + (p + 1) * (p + 1) * sizeof(double)
                 + (q + 1) * (q + 1) * sizeof(double)
