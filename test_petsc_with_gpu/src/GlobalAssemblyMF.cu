@@ -87,6 +87,7 @@ void GlobalAssemblyMF::AssemLoad(QuadraturePoint * const &quad1,
     CopyToDeviceMemory(qw1, w1.data(), nqp1);
     CopyToDeviceMemory(qw2, w2.data(), nqp2);
 
+    VecSet(F, 0.0);
     double *d_F_array;
     VecCUDAGetArray(F, &d_F_array);
 
@@ -196,6 +197,8 @@ void GlobalAssemblyMF::MatMulMF(QuadraturePoint * const &quad1,
     CopyToDeviceMemory(qw1, w1.data(), nqp1.size());
     CopyToDeviceMemory(qw2, w2.data(), nqp2.size());
 
+    VecSet(y, 0.0);
+    double *d_x_array, *d_y_array;
     VecCUDAGetArray(x, &d_x_array);
     VecCUDAGetArray(y, &d_y_array);
 

@@ -4,7 +4,6 @@
 #include <petscmat.h>
 #include "QuadraturePoint.hpp"
 #include "ElementMF.hpp"
-#include "memory.cuh"
 #include "mult.cuh"
 
 class GlobalAssemblyMF
