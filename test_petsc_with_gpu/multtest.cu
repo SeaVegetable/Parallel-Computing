@@ -59,9 +59,11 @@ int main (int argc, char *argv[])
         IEN, ID, Dir, CP,
         NURBSExtraction1, NURBSExtraction2,
         elem_size1, elem_size2, elemmf, bernstein);
+    VecView(globalAssembly->F, PETSC_VIEWER_STDOUT_WORLD);
     
     Vec x;
     VecDuplicate(globalAssembly->F, &x);
+    VecCopy(globalAssembly->F, x);
 
     Vec y;
     VecDuplicate(globalAssembly->F, &y);
@@ -72,6 +74,14 @@ int main (int argc, char *argv[])
         elem_size1, elem_size2, elemmf, bernstein,
         x, y);
     
+    VecView(y, PETSC_VIEWER_STDOUT_WORLD);
+
+    VecCopy(y,x);
+    globalAssembly->MatMulMF(quad1, quad2,
+        IEN, ID, Dir, CP,
+        NURBSExtraction1, NURBSExtraction2,
+        elem_size1, elem_size2, elemmf, bernstein,
+        x, y);
     VecView(y, PETSC_VIEWER_STDOUT_WORLD);
 
     VecDestroy(&x);

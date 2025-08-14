@@ -93,6 +93,7 @@ __device__ void compute_jacobian_basis(
         }
     }
     jacobian = dx_dxi * dy_deta - dx_deta * dy_dxi;
+    jacobian *= h1*h2;
 }
 
 __device__ void compute_jacobian_derivative(
@@ -276,7 +277,7 @@ __global__ void AssembleKernel(const int in_p, const int in_q,
 
     int qpx = threadIdx.x;
     int qpy = threadIdx.y;
-    int qp = threadIdx.x;
+    int qp = threadIdx.y * blockDim.x + threadIdx.x;
 
     double B1[p + 1];
     double dB1[p + 1];
@@ -430,15 +431,13 @@ __global__ void MatrixFreeMatMultKernel(const int in_p, const int in_q,
             temp_y += dR_dy[jj] * Floc_in[jj];
         }
 
-        temp_x *= -s_qw[qp] * jacobian;
-        temp_y *= -s_qw[qp] * jacobian;
+        temp_x *= -s_qw[qp]*jacobian;
+        temp_y *= -s_qw[qp]*jacobian;
 
         for (int ii = 0; ii < nLocBas; ++ii)
         {
             Floc_out[ii] += (dR_dx[ii] * temp_x + dR_dy[ii] * temp_y);
         }
-
-        __syncthreads();
 
         for (int ii = 0; ii < nLocBas; ++ii)
         {
@@ -480,7 +479,7 @@ void AssembleLoadCUDA(const int p, const int q,
                 + (q + 1) * (q + 1) * sizeof(double)
                 + (p + 1) * (q + 1) * sizeof(double);
 
-    AssembleKernel<<<dim3(nlocalelemx, nlocalelemy), dim3(p+1,q+1), shared_size>>>(
+    AssembleKernel<<<dim3(nlocalelemx, nlocalelemy), dim3(p+1, q+1), shared_size>>>(
         p, q, d_B1, d_B2, d_dB1, d_dB2,
         d_nurbs_extraction1, d_nurbs_extraction2,
         d_elem_size1, d_elem_size2,
@@ -515,7 +514,7 @@ void MatrixFreeMatMultCUDA(const int p, const int q,
                 + (p + 1) * (q + 1) * sizeof(double)
                 + (p + 1) * (q + 1) * sizeof(double);
 
-    MatrixFreeMatMultKernel<<<dim3(nlocalelemx, nlocalelemy), dim3(p+1,q+1), shared_size>>>(
+    MatrixFreeMatMultKernel<<<dim3(nlocalelemx, nlocalelemy), dim3(p+1, q+1), shared_size>>>(
         p, q, d_B1, d_B2, d_dB1, d_dB2,
         d_nurbs_extraction1, d_nurbs_extraction2,
         d_elem_size1, d_elem_size2,
