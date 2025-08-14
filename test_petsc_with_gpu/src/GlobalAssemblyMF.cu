@@ -72,12 +72,12 @@ void GlobalAssemblyMF::AssemLoad(QuadraturePoint * const &quad1,
 
     int * d_IEN, * d_ID;
     double * d_CP;
-    MallocDeviceMemory<int>(&d_IEN, IEN.size());
-    MallocDeviceMemory<int>(&d_ID, ID.size());
-    MallocDeviceMemory<double>(&d_CP, CP.size());
-    CopyToDevice<int>(d_IEN, IEN.data(), IEN.size());
-    CopyToDevice<int>(d_ID, ID.data(), ID.size());
-    CopyToDevice<double>(d_CP, CP.data(), CP.size());
+    MallocDeviceMemory(&d_IEN, IEN.size());
+    MallocDeviceMemory(&d_ID, ID.size());
+    MallocDeviceMemory(&d_CP, CP.size());
+    CopyToDevice(d_IEN, IEN.data(), IEN.size());
+    CopyToDevice(d_ID, ID.data(), ID.size());
+    CopyToDevice(d_CP, CP.data(), CP.size());
 
     double * d_elem_size1, * d_elem_size2;
     MallocDeviceMemory(&d_elem_size1, elem_size1.size());
