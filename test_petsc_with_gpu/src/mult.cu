@@ -265,9 +265,9 @@ __global__ void AssembleKernel(const int in_p, const int in_q,
     }
 
     for (int i = 0; i < (p + 1) * (p + 1); ++i)
-        s_eNURBSExtraction1[i] = d_nurbs_extraction1[elemIndex * (p + 1) * (p + 1) + i];
+        s_eNURBSExtraction1[i] = d_nurbs_extraction1[blockIdx.x * (p + 1) * (p + 1) + i];
     for (int i = 0; i < (q + 1) * (q + 1); ++i)
-        s_eNURBSExtraction2[i] = d_nurbs_extraction2[elemIndex * (q + 1) * (q + 1) + i];
+        s_eNURBSExtraction2[i] = d_nurbs_extraction2[blockIdx.y * (q + 1) * (q + 1) + i];
 
     double h1 = d_elem_size1[blockIdx.x];
     double h2 = d_elem_size2[blockIdx.y];
@@ -376,9 +376,9 @@ __global__ void MatrixFreeMatMultKernel(const int in_p, const int in_q,
     }
 
     for (int i = 0; i < (p + 1) * (p + 1); ++i)
-        s_eNURBSExtraction1[i] = d_nurbs_extraction1[elemIndex * (p + 1) * (p + 1) + i];
+        s_eNURBSExtraction1[i] = d_nurbs_extraction1[blockIdx.x * (p + 1) * (p + 1) + i];
     for (int i = 0; i < (q + 1) * (q + 1); ++i)
-        s_eNURBSExtraction2[i] = d_nurbs_extraction2[elemIndex * (q + 1) * (q + 1) + i];
+        s_eNURBSExtraction2[i] = d_nurbs_extraction2[blockIdx.y * (q + 1) * (q + 1) + i];
 
     for (int i = 0; i < nLocBas; ++i)
     {
