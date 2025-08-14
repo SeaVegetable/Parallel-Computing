@@ -210,6 +210,11 @@ __device__ void compute_jacobian_derivative(
     jacobian *= h1 * h2;
 }
 
+__device__ double get_force(double x, double y)
+{
+    return x * (1.0 - x) * y * (1.0 - y);
+}
+
 __global__ void AssembleKernel(const int p, const int q,
     double *d_B1, double *d_B2,
     double *d_dB1, double *d_dB2,
@@ -299,9 +304,11 @@ __global__ void AssembleKernel(const int p, const int q,
             y += s_eCP[2 * ii + 1] * R[ii];
         }
 
+        double force = get_force(x, y);
+
         for (int ii = 0; ii < nLocBas; ++ii)
         {
-            double val = R[ii] * jacobian * s_qw[qp];
+            double val = R[ii] * force * jacobian * s_qw[qp];
             int coo_index = s_eID[ii];
             if (coo_index >= 0)
             {
