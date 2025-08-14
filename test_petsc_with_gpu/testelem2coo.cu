@@ -117,7 +117,7 @@ int main (int argc, char *argv[])
         if (old_rows[j] != temp_row_index)
         {
             std::cout << std::endl;
-            std::cout << "Row " << old_rows[j] << ": ";
+            std::cout << "Row " << old_rows[j] << ": " << old_cols[j] << " ";
             temp_row_index = old_rows[j];
         }
         else
