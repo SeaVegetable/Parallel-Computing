@@ -460,7 +460,7 @@ __global__ void DirichletBCKernel(const int * d_Dir, const int dirsize, double *
         int coo_index = d_Dir[idx];
         if (coo_index >= 0)
         {
-            d_val[coo_index] = 0.0;
+            d_val[coo_index] = value;
         }
     }
 }
@@ -474,14 +474,13 @@ void AssembleLoadCUDA(const int p, const int q,
     int * d_IEN, int * d_ID, double * d_CP,
     double * qw1, double * qw2, double * d_F_array)
 {
-    int blocksize = 64;
     int shared_size = (p + 1) * (q + 1) * sizeof(int)
                 + 2 * (p + 1) * (q + 1) * sizeof(double)
                 + (p + 1) * (p + 1) * sizeof(double)
                 + (q + 1) * (q + 1) * sizeof(double)
                 + (p + 1) * (q + 1) * sizeof(double);
 
-    AssembleKernel<<<dim3(nlocalelemx, nlocalelemy), blocksize, shared_size>>>(
+    AssembleKernel<<<dim3(nlocalelemx, nlocalelemy), dim3(p+1,q+1), shared_size>>>(
         p, q, d_B1, d_B2, d_dB1, d_dB2,
         d_nurbs_extraction1, d_nurbs_extraction2,
         d_elem_size1, d_elem_size2,
@@ -508,7 +507,6 @@ void MatrixFreeMatMultCUDA(const int p, const int q,
     double * qw1, double * qw2,
     double * d_F_array_in, double * d_F_array_out)
 {
-    int blocksize = 64;
     int shared_size = (p + 1) * (q + 1) * sizeof(int)
                 + 2 * (p + 1) * (q + 1) * sizeof(double)
                 + (p + 1) * (p + 1) * sizeof(double)
@@ -517,7 +515,7 @@ void MatrixFreeMatMultCUDA(const int p, const int q,
                 + (p + 1) * (q + 1) * sizeof(double)
                 + (p + 1) * (q + 1) * sizeof(double);
 
-    MatrixFreeMatMultKernel<<<dim3(nlocalelemx, nlocalelemy), blocksize, shared_size>>>(
+    MatrixFreeMatMultKernel<<<dim3(nlocalelemx, nlocalelemy), dim3(p+1,q+1), shared_size>>>(
         p, q, d_B1, d_B2, d_dB1, d_dB2,
         d_nurbs_extraction1, d_nurbs_extraction2,
         d_elem_size1, d_elem_size2,
