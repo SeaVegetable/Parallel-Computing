@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
     double Lx, Ly;
     std::string base_name;
 
-    std::string file_info = "info.txt";
+    std::string file_info = "fem_info.txt";
 
     FileManager * fm = new FileManager();
     fm->ReadPreprocessInfo(file_info, p, q, Lx, Ly, nElemX, nElemY, part_num_1d, dim, base_name);

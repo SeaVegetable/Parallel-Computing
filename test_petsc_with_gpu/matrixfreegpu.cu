@@ -36,11 +36,11 @@ typedef struct {
     int nlocalfunc;
     int nghost;
     PetscInt * ghostIdx;
-    std::vector<double> CP_fem;
-    std::vector<int> ID_fem;
+    std::vector<double> CP;
+    std::vector<int> ID;
     std::vector<int> Dir;
     std::vector<int> EQ;
-    std::vector<int> IEN_fem;
+    std::vector<int> IEN;
     std::vector<double> elem_size1;
     std::vector<double> elem_size2;
     std::vector<double> NURBSExtraction1;
@@ -60,7 +60,7 @@ PetscErrorCode MyMatMult(Mat A, Vec x, Vec y)
     VecSet(y, 0.0);
     
     data->globalassem->MatMulMF(data->quad1, data->quad2,
-        data->IEN_fem, data->ID_fem, data->Dir, data->CP_fem,
+        data->IEN, data->ID, data->Dir, data->CP,
         data->NURBSExtraction1, data->NURBSExtraction2,
         data->elem_size1, data->elem_size2,
         data->elem, data->bernstein, x, y);
@@ -204,10 +204,10 @@ int main(int argc, char **argv)
         nnz, nfunc, nElemX, nElemY, old_rows, old_cols);
     QuadraturePoint * quad1_fem = new QuadraturePoint(2, 0, 1);
     QuadraturePoint * quad2_fem = new QuadraturePoint(2, 0, 1);
-    ElementFEM * elemmf = new ElementFEM(1, 1);
+    ElementFEM * elemfem = new ElementFEM(1, 1);
 
     assembly_fem->AssemStiffness(quad1_fem, quad2_fem,
-        IEN_fem, dir2coo, CP_fem, elem2coo, elemmf);
+        IEN_fem, dir2coo, CP_fem, elem2coo, elemfem);
     PetscPrintf(PETSC_COMM_WORLD, "Assembling FEM stiffness matrix...done\n");
 
     file_info = "info.txt";
@@ -228,7 +228,7 @@ int main(int argc, char **argv)
     int nlocalfunc;
     int nlocalelemx;
     int nlocalelemy;
-
+    std::vector<int> ghostID;
     MyMeshData * data;
     PetscNew(&data);
 
@@ -305,7 +305,7 @@ int main(int argc, char **argv)
     VecSet(u, 0.0);
     KSPSolve(ksp, data->globalassem->F, u);
 
-    VecView(u, PETSC_VIEWER_STDOUT_WORLD);
+    // VecView(u, PETSC_VIEWER_STDOUT_WORLD);
 
     delete fm; fm = nullptr;
     delete absgen; absgen = nullptr;
@@ -313,6 +313,7 @@ int main(int argc, char **argv)
     delete idgen; idgen = nullptr;
     delete elem2coogen; elem2coogen = nullptr;
     delete assembly_fem; assembly_fem = nullptr;
+    delete elemfem; elemfem = nullptr;
     delete elemmf; elemmf = nullptr;
     delete data->quad1; data->quad1 = nullptr;
     delete data->quad2; data->quad2 = nullptr;
