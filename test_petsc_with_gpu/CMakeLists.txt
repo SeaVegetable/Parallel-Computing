@@ -77,6 +77,9 @@ set_target_properties(eigenvalue_problem_cuda_lib PROPERTIES
   CUDA_ARCHITECTURES 75
 )
 
+add_executable(preprocess preprocess.cpp)
+target_link_libraries(preprocess eigenvalue_problem_lib)
+
 add_executable(preprocess_fem preprocess_fem.cpp)
 target_link_libraries(preprocess_fem eigenvalue_problem_lib)
 
@@ -101,10 +104,13 @@ target_include_directories(testelem2coo PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C
 
 if(OPENMP_CXX_FOUND)
   set_target_properties( eigenvalue_problem_lib PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )
+  set_target_properties( preprocess PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )
   set_target_properties( preprocess_fem PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )
   target_include_directories( eigenvalue_problem_lib PRIVATE ${OpenMP_CXX_INCLUDE_DIR} )
+  target_include_directories( preprocess PRIVATE ${OpenMP_CXX_INCLUDE_DIR} )
   target_include_directories( preprocess_fem PRIVATE ${OpenMP_CXX_INCLUDE_DIR} )
   target_link_libraries( eigenvalue_problem_lib ${OpenMP_CXX_LIBRARIES} )
+  target_link_libraries( preprocess ${OpenMP_CXX_LIBRARIES} )
   target_link_libraries( preprocess_fem ${OpenMP_CXX_LIBRARIES} )
 endif()
 
