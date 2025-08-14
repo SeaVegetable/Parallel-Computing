@@ -99,6 +99,17 @@ int main (int argc, char *argv[])
         old_cols[i] = new_to_old[cols[i]];
     }
 
+    std::vector<std::pair<int, int>> row_col_pairs;
+    row_col_pairs.reserve(old_rows.size());
+    for (size_t i = 0; i < old_rows.size(); ++i) {
+        row_col_pairs.emplace_back(old_rows[i], old_cols[i]);
+    }
+    std::sort(row_col_pairs.begin(), row_col_pairs.end());
+    for (size_t i = 0; i < row_col_pairs.size(); ++i) {
+        old_rows[i] = row_col_pairs[i].first;
+        old_cols[i] = row_col_pairs[i].second;
+    }
+
     int temp_row_index = 0;
     std::cout << "Row 0: ";
     for (int j = 0; j < nnz; ++j)
