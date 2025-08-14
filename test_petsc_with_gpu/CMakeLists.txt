@@ -108,6 +108,10 @@ add_executable(multtest multtest.cu)
 target_link_libraries(multtest eigenvalue_problem_lib eigenvalue_problem_cuda_lib ${PETSC_LIB})
 target_include_directories(multtest PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C_INCLUDE_PATH})
 
+add_executable(matrixfreegpu matrixfreegpu.cu)
+target_link_libraries(matrixfreegpu eigenvalue_problem_lib eigenvalue_problem_cuda_lib ${PETSC_LIB})
+target_include_directories(matrixfreegpu PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C_INCLUDE_PATH})
+
 if(OPENMP_CXX_FOUND)
   set_target_properties( eigenvalue_problem_lib PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )
   set_target_properties( preprocess PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )
@@ -149,6 +153,13 @@ set_target_properties(testelem2coo PROPERTIES
 )
 
 set_target_properties(multtest PROPERTIES
+  CUDA_STANDARD 11
+  CUDA_STANDARD_REQUIRED YES
+  CUDA_SEPARABLE_COMPILATION ON
+  CUDA_ARCHITECTURES 75
+)
+
+set_target_properties(matrixfreegpu PROPERTIES
   CUDA_STANDARD 11
   CUDA_STANDARD_REQUIRED YES
   CUDA_SEPARABLE_COMPILATION ON
