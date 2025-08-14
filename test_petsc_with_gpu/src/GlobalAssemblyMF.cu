@@ -41,13 +41,17 @@ void GlobalAssemblyMF::AssemLoad(QuadraturePoint * const &quad1,
 
     for (int i = 0; i < nqp1; ++i)
     {
-        B1.push_back(bernstein->GetBernsteinBasisSingleQP(qp1[i]));
-        dB1.push_back(bernstein->GetBernsteinBasisDerivativeSingleQP(qp1[i]));
+        B1.insert(B1.end(), bernstein->GetBernsteinBasisSingleQP(qp1[i]).begin(),
+                          bernstein->GetBernsteinBasisSingleQP(qp1[i]).end());
+        dB1.insert(dB1.end(), bernstein->GetBernsteinBasisDerivativeSingleQP(qp1[i]).begin(),
+                          bernstein->GetBernsteinBasisDerivativeSingleQP(qp1[i]).end());
     }
     for (int j = 0; j < nqp2; ++j)
     {
-        B2.push_back(bernstein->GetBernsteinBasisSingleQP(qp2[j]));
-        dB2.push_back(bernstein->GetBernsteinBasisDerivativeSingleQP(qp2[j]));
+        B2.insert(B2.end(), bernstein->GetBernsteinBasisSingleQP(qp2[j]).begin(),
+                          bernstein->GetBernsteinBasisSingleQP(qp2[j]).end());
+        dB2.insert(dB2.end(), bernstein->GetBernsteinBasisDerivativeSingleQP(qp2[j]).begin(),
+                          bernstein->GetBernsteinBasisDerivativeSingleQP(qp2[j]).end());
     }
 
     double * d_B1, * d_B2, * d_dB1, * d_dB2;
@@ -149,13 +153,17 @@ void GlobalAssemblyMF::MatMulMF(QuadraturePoint * const &quad1,
 
     for (int i = 0; i < nqp1; ++i)
     {
-        B1.push_back(bernstein->GetBernsteinBasisSingleQP(qp1[i]));
-        dB1.push_back(bernstein->GetBernsteinBasisDerivativeSingleQP(qp1[i]));
+        B1.insert(B1.end(), bernstein->GetBernsteinBasisSingleQP(qp1[i]).begin(),
+                          bernstein->GetBernsteinBasisSingleQP(qp1[i]).end());
+        dB1.insert(dB1.end(), bernstein->GetBernsteinBasisDerivativeSingleQP(qp1[i]).begin(),
+                          bernstein->GetBernsteinBasisDerivativeSingleQP(qp1[i]).end());
     }
     for (int j = 0; j < nqp2; ++j)
     {
-        B2.push_back(bernstein->GetBernsteinBasisSingleQP(qp2[j]));
-        dB2.push_back(bernstein->GetBernsteinBasisDerivativeSingleQP(qp2[j]));
+        B2.insert(B2.end(), bernstein->GetBernsteinBasisSingleQP(qp2[j]).begin(),
+                          bernstein->GetBernsteinBasisSingleQP(qp2[j]).end());
+        dB2.insert(dB2.end(), bernstein->GetBernsteinBasisDerivativeSingleQP(qp2[j]).begin(),
+                          bernstein->GetBernsteinBasisDerivativeSingleQP(qp2[j]).end());
     }
 
     double * d_B1, * d_B2, * d_dB1, * d_dB2;
