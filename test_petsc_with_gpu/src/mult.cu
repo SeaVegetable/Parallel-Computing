@@ -1,7 +1,7 @@
 #include "mult.cuh"
 
 __device__ void compute_jacobian_basis(
-    const int p, const int q, const double h1, const double h2,
+    const int in_p, const int in_q, const double h1, const double h2,
     const double *d_B1, const double *d_B2,
     const double *d_dB1, const double *d_dB2,
     const double *s_nurbs_extraction1, const double *s_nurbs_extraction2,
@@ -9,6 +9,8 @@ __device__ void compute_jacobian_basis(
     double &jacobian,
     double *R)
 {
+    const int p = 3;
+    const int q = 3;
     double N1[p + 1];
     double dN1[p + 1];
     for (int i = 0; i < p + 1; ++i)
@@ -43,7 +45,7 @@ __device__ void compute_jacobian_basis(
         dN2[jj] /= h2;
     }
 
-    int nLocBas = (p + 1) * (q + 1);
+    const int nLocBas = (p + 1) * (q + 1);
     double N[nLocBas];
     double dN_dxi[nLocBas];
     double dN_deta[nLocBas];
@@ -94,7 +96,7 @@ __device__ void compute_jacobian_basis(
 }
 
 __device__ void compute_jacobian_derivative(
-    const int p, const int q, const double h1, const double h2,
+    const int in_p, const int in_q, const double h1, const double h2,
     const double *d_B1, const double *d_B2,
     const double *d_dB1, const double *d_dB2,
     const double *s_nurbs_extraction1, const double *s_nurbs_extraction2,
@@ -103,6 +105,8 @@ __device__ void compute_jacobian_derivative(
     double *dR_dx, 
     double *dR_dy)
 {
+    const int p = 3;
+    const int q = 3;
     double N1[p + 1];
     double dN1[p + 1];
     for (int i = 0; i < p + 1; ++i)
@@ -122,8 +126,8 @@ __device__ void compute_jacobian_derivative(
     {
         for (int kk = 0; kk < p + 1; ++kk)
         {
-            N1[jj] +=  s_nurbs_extraction1[jj * (p + 1) + kk] * B1[kk];
-            dN1[jj] += s_nurbs_extraction1[jj * (p + 1) + kk] * dB1[kk];
+            N1[jj] +=  s_nurbs_extraction1[jj * (p + 1) + kk] * d_B1[kk];
+            dN1[jj] += s_nurbs_extraction1[jj * (p + 1) + kk] * d_dB1[kk];
         }
         dN1[jj] /= h1;
     }
@@ -131,13 +135,13 @@ __device__ void compute_jacobian_derivative(
     {
         for (int kk = 0; kk < q + 1; ++kk)
         {
-            N2[jj] += s_nurbs_extraction2[jj * (q + 1) + kk] * B2[kk];
-            dN2[jj] += s_nurbs_extraction2[jj * (q + 1) + kk] * dB2[kk];
+            N2[jj] += s_nurbs_extraction2[jj * (q + 1) + kk] * d_B2[kk];
+            dN2[jj] += s_nurbs_extraction2[jj * (q + 1) + kk] * d_dB2[kk];
         }
         dN2[jj] /= h2;
     }
 
-    int nLocBas = (p + 1) * (q + 1);
+    const int nLocBas = (p + 1) * (q + 1);
     double N[nLocBas];
     double dN_dxi[nLocBas];
     double dN_deta[nLocBas];
@@ -158,6 +162,7 @@ __device__ void compute_jacobian_derivative(
         }
     }
 
+    double R[nLocBas];
     double dR_dxi[nLocBas];
     double dR_deta[nLocBas];
 
@@ -215,7 +220,7 @@ __device__ double get_force(double x, double y)
     return x * (1.0 - x) * y * (1.0 - y);
 }
 
-__global__ void AssembleKernel(const int p, const int q,
+__global__ void AssembleKernel(const int in_p, const int in_q,
     double *d_B1, double *d_B2,
     double *d_dB1, double *d_dB2,
     double *d_nurbs_extraction1, double *d_nurbs_extraction2,
@@ -226,6 +231,8 @@ __global__ void AssembleKernel(const int p, const int q,
     double *d_x_array
     )
 {
+    const int p = 3;
+    const int q = 3;
     extern __shared__ char shared_data[];
 
     int offset = 0;
@@ -240,7 +247,7 @@ __global__ void AssembleKernel(const int p, const int q,
     double *s_qw = (double*)(shared_data + offset);
 
     int elemIndex = blockIdx.y * gridDim.x + blockIdx.x;
-    int nLocBas = (p + 1) * (q + 1);
+    const int nLocBas = (p + 1) * (q + 1);
 
     for (int j = 0; j < nLocBas; ++j)
     {
@@ -269,14 +276,14 @@ __global__ void AssembleKernel(const int p, const int q,
 
     int qpx = threadIdx.x;
     int qpy = threadIdx.y;
-    int qp = threadIdx.y * blockDim.x + threadIdx.x;
+    int qp = threadIdx.x;
 
     double B1[p + 1];
     double dB1[p + 1];
     double B2[q + 1];
     double dB2[q + 1];
 
-    if (qp < nqp)
+    if (qp < (p+1)*(q+1))
     {
         for (int i = 0; i < p + 1; ++i)
         {
@@ -318,7 +325,7 @@ __global__ void AssembleKernel(const int p, const int q,
     }
 }
 
-__global__ void MatrixFreeMatMultKernel(const int p, const int q,
+__global__ void MatrixFreeMatMultKernel(const int in_p, const int in_q,
     double *d_B1, double *d_B2,
     double *d_dB1, double *d_dB2,
     double *d_nurbs_extraction1, double *d_nurbs_extraction2,
@@ -332,22 +339,24 @@ __global__ void MatrixFreeMatMultKernel(const int p, const int q,
 {
     extern __shared__ char shared_data[];
 
-    int nLocBas = (p + 1) * (q + 1);
+    const int p = 3;
+    const int q = 3;
+    const int nLocBas = (p + 1) * (q + 1);
 
     int offset = 0;
     int *s_eID = (int*)(shared_data + offset);
     offset += nLocBas * sizeof(int);
-    double *s_eCP = shared_data + offset;
+    double *s_eCP = (double*)(shared_data + offset);
     offset += 2 * nLocBas * sizeof(double);
-    double *s_eNURBSExtraction1 = shared_data + offset;
+    double *s_eNURBSExtraction1 = (double*)(shared_data + offset);
     offset += (p + 1) * (p + 1) * sizeof(double);
-    double *s_eNURBSExtraction2 = shared_data + offset;
+    double *s_eNURBSExtraction2 = (double*)(shared_data + offset);
     offset += (q + 1) * (q + 1) * sizeof(double);
-    double *s_qw = shared_data + offset;
+    double *s_qw = (double*)(shared_data + offset);
     offset += (p + 1) * (q + 1) * sizeof(double);
-    double *Floc_in = shared_data + offset;
+    double *Floc_in = (double*)(shared_data + offset);
     offset += nLocBas * sizeof(double);
-    double *Floc_out = shared_data + offset;
+    double *Floc_out = (double*)(shared_data + offset);
     
     int elemIndex = blockIdx.y * gridDim.x + blockIdx.x;
 
@@ -392,7 +401,7 @@ __global__ void MatrixFreeMatMultKernel(const int p, const int q,
     double B2[q + 1];
     double dB2[q + 1];
 
-    if (qp < nqp)
+    if (qp < (p+1)*(q+1))
     {
         for (int i = 0; i < p + 1; ++i)
         {
@@ -417,12 +426,12 @@ __global__ void MatrixFreeMatMultKernel(const int p, const int q,
 
         for (int jj = 0; jj < nLocBas; ++jj)
         {
-            temp_x += dR_dx(jj) * Floc_in[jj];
-            temp_y += dR_dy(jj) * Floc_in[jj];
+            temp_x += dR_dx[jj] * Floc_in[jj];
+            temp_y += dR_dy[jj] * Floc_in[jj];
         }
 
-        temp_x *= -s_qw(qp) * jacobian;
-        temp_y *= -s_qw(qp) * jacobian;
+        temp_x *= -s_qw[qp] * jacobian;
+        temp_y *= -s_qw[qp] * jacobian;
 
         for (int ii = 0; ii < nLocBas; ++ii)
         {
@@ -442,7 +451,7 @@ __global__ void MatrixFreeMatMultKernel(const int p, const int q,
     }
 }
 
-__global__ void DirichletBCKernel(int * d_Dir, const int dirsize, double * d_val, double value)
+__global__ void DirichletBCKernel(const int * d_Dir, const int dirsize, double * d_val, double value)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
 

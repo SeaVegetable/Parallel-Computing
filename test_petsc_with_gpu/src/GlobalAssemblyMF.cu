@@ -1,4 +1,4 @@
-#include "GlobalAssemblyMF.hpp"
+#include "GlobalAssemblyMF.cuh"
 
 GlobalAssemblyMF::GlobalAssemblyMF(const int &nLocBas, const int &nlocalfunc,
     const int &nlocalelemx, const int &nlocalelemy)

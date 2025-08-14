@@ -29,7 +29,8 @@ class GlobalAssemblyMF
             const std::vector<double> &NURBSExtraction2,
             const std::vector<double> &elem_size1,
             const std::vector<double> &elem_size2,
-            ElementMF * const &elemmf);
+            ElementMF * const &elemmf,
+            BernsteinBasis * const &bernstein);
         
         void MatMulMF(QuadraturePoint * const &quad1,
             QuadraturePoint * const &quad2,
@@ -42,6 +43,7 @@ class GlobalAssemblyMF
             const std::vector<double> &elem_size1,
             const std::vector<double> &elem_size2,
             ElementMF * const &elemmf,
+            BernsteinBasis * const &bernstein,
             Vec x, Vec y);
     
     private:
