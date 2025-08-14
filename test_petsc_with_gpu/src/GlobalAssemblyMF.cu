@@ -200,10 +200,10 @@ void GlobalAssemblyMF::MatMulMF(QuadraturePoint * const &quad1,
     CopyToDevice(d_elem_size2, elem_size2.data(), elem_size2.size());
 
     double * qw1, * qw2;
-    MallocDeviceMemory(&qw1, nqp1.size());
-    MallocDeviceMemory(&qw2, nqp2.size());
-    CopyToDevice(qw1, w1.data(), nqp1.size());
-    CopyToDevice(qw2, w2.data(), nqp2.size());
+    MallocDeviceMemory(&qw1, nqp1);
+    MallocDeviceMemory(&qw2, nqp2);
+    CopyToDevice(qw1, w1.data(), nqp1);
+    CopyToDevice(qw2, w2.data(), nqp2);
 
     VecSet(y, 0.0);
     double *d_x_array, *d_y_array;
