@@ -54,14 +54,16 @@ void Elem2COOGenerator::GenerateElem2COO(const std::vector<int> &IEN,
     }
 }
 
-void Elem2COOGenerator::GenerateDir2COO(const std::vector<int> &Dir,
+void Elem2COOGenerator::GenerateDir2COO(const std::vector<int> &ID,
     const std::vector<int> &rows, std::vector<int> &dir2coo)
 {
     dir2coo.clear();
-    dir2coo.reserve(Dir.size());
-    for (size_t i = 0; i < Dir.size(); ++i)
+    for (size_t i = 0; i < ID.size(); ++i)
     {
-        auto it = std::find(rows.begin(), rows.end(), Dir[i]);
-        dir2coo.push_back(std::distance(rows.begin(), it));
+        if(ID[i] == -1)
+        {
+            auto it = std::find(rows.begin(), rows.end(), i);
+            dir2coo.push_back(std::distance(rows.begin(), it));
+        }
     }
 }

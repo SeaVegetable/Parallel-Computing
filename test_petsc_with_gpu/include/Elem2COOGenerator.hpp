@@ -20,7 +20,7 @@ class Elem2COOGenerator
             const std::vector<int> &ID, const std::vector<int> &rows,
             const std::vector<int> &cols, std::vector<int> &elem2coo);
 
-        void GenerateDir2COO(const std::vector<int> &Dir,
+        void GenerateDir2COO(const std::vector<int> &ID,
             const std::vector<int> &rows, std::vector<int> &dir2coo);
     
     private:

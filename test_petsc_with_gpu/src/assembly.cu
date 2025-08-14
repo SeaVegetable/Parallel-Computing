@@ -80,7 +80,7 @@ __global__ void AssembleStiffnessKernel(const int nqp, const int nelem,
                 int elem2coo_index = elem2coo[elemIndex * 16 + i * 4 + j];
                 if (elem2coo_index >= 0)
                 {
-                    double val = (dR_dx[i] * dR_dx[j] + dR_dy[i] * dR_dy[j]) * jacobian * d_weight[qp];
+                    double val = -(dR_dx[i] * dR_dx[j] + dR_dy[i] * dR_dy[j]) * jacobian * d_weight[qp];
                     atomicAdd(&d_val[elem2coo_index], val);
                 }
             }

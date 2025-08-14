@@ -59,6 +59,12 @@ int main (int argc, char *argv[])
     IDGenerator * idgen = new IDGenerator();
     std::vector<int> ID = idgen->GenerateID2D(nFuncX, nFuncY);
 
+    for (int i = 0; i < ID.size(); ++i)
+    {
+        if(ID[i] != -1)
+            ID[i] = i;
+    }
+
     int nfunc = 0;
     for (int ii = 0; ii < part_num_1d * part_num_1d; ++ii)
     {
