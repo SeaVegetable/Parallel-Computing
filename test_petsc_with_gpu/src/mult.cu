@@ -334,7 +334,7 @@ __global__ void MatrixFreeMatMultKernel(const int in_p, const int in_q,
     int *d_IEN, int *d_ID,
     double *d_CP,
     double *qw1, double *qw2,
-    double *d_F_array_in,
+    const double *d_F_array_in,
     double *d_F_array_out
     )
 {
@@ -504,7 +504,7 @@ void MatrixFreeMatMultCUDA(const int p, const int q,
     double * d_elem_size1, double * d_elem_size2,
     int * d_IEN, int * d_ID, double * d_CP,
     double * qw1, double * qw2,
-    double * d_F_array_in, double * d_F_array_out)
+    const double * d_F_array_in, double * d_F_array_out)
 {
     int shared_size = (p + 1) * (q + 1) * sizeof(int)
                 + 2 * (p + 1) * (q + 1) * sizeof(double)

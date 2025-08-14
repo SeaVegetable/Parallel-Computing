@@ -305,7 +305,7 @@ int main(int argc, char **argv)
     VecSet(u, 0.0);
     KSPSolve(ksp, data->globalassem->F, u);
 
-    // VecView(u, PETSC_VIEWER_STDOUT_WORLD);
+    VecView(u, PETSC_VIEWER_STDOUT_WORLD);
 
     delete fm; fm = nullptr;
     delete absgen; absgen = nullptr;

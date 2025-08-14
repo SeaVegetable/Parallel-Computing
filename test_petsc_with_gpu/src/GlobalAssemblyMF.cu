@@ -208,8 +208,9 @@ void GlobalAssemblyMF::MatMulMF(QuadraturePoint * const &quad1,
     CopyToDevice(qw2, w2.data(), nqp2);
 
     VecSet(y, 0.0);
-    double *d_x_array, *d_y_array;
-    VecCUDAGetArray(x, &d_x_array);
+    const double *d_x_array;
+    double *d_y_array;
+    VecCUDAGetArrayRead(x, &d_x_array);
     VecCUDAGetArray(y, &d_y_array);
 
     MatrixFreeMatMultCUDA(pp, qq,
@@ -222,7 +223,7 @@ void GlobalAssemblyMF::MatMulMF(QuadraturePoint * const &quad1,
 
     DirichletBCCUDA(Dir.data(), static_cast<int>(Dir.size()), d_y_array, 0.0);
     
-    VecCUDARestoreArray(x, &d_x_array);
+    VecCUDARestoreArrayRead(x, &d_x_array);
     VecCUDARestoreArray(y, &d_y_array);
 
     FreeDeviceMemory(d_B1);

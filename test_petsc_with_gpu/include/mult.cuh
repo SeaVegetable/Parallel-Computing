@@ -21,7 +21,7 @@ void MatrixFreeMatMultCUDA(const int p, const int q,
     double * d_elem_size1, double * d_elem_size2,
     int * d_IEN, int * d_ID, double * d_CP,
     double * qw1, double * qw2,
-    double * d_F_array_in, double * d_F_array_out);
+    const double * d_F_array_in, double * d_F_array_out);
 
 void DirichletBCCUDA(const int * d_Dir,
     const int dir_size, double * d_x_array, const double value);
