@@ -55,41 +55,41 @@ void GlobalAssemblyMF::AssemLoad(QuadraturePoint * const &quad1,
     }
 
     double * d_B1, * d_B2, * d_dB1, * d_dB2;
-    MallocDevice(&d_B1, B1.size());
-    MallocDevice(&d_B2, B2.size());
-    MallocDevice(&d_dB1, dB1.size());
-    MallocDevice(&d_dB2, dB2.size());
-    CopyToDeviceMemory(d_B1, B1.data(), B1.size());
-    CopyToDeviceMemory(d_B2, B2.data(), B2.size());
-    CopyToDeviceMemory(d_dB1, dB1.data(), dB1.size());
-    CopyToDeviceMemory(d_dB2, dB2.data(), dB2.size());
+    MallocDeviceMemory(&d_B1, B1.size());
+    MallocDeviceMemory(&d_B2, B2.size());
+    MallocDeviceMemory(&d_dB1, dB1.size());
+    MallocDeviceMemory(&d_dB2, dB2.size());
+    CopyToDevice(d_B1, B1.data(), B1.size());
+    CopyToDevice(d_B2, B2.data(), B2.size());
+    CopyToDevice(d_dB1, dB1.data(), dB1.size());
+    CopyToDevice(d_dB2, dB2.data(), dB2.size());
 
     double * d_NURBSExtraction1, * d_NURBSExtraction2;
-    MallocDevice(&d_NURBSExtraction1, NURBSExtraction1.size());
-    MallocDevice(&d_NURBSExtraction2, NURBSExtraction2.size());
-    CopyToDeviceMemory(d_NURBSExtraction1, NURBSExtraction1.data(), NURBSExtraction1.size());
-    CopyToDeviceMemory(d_NURBSExtraction2, NURBSExtraction2.data(), NURBSExtraction2.size());
+    MallocDeviceMemory(&d_NURBSExtraction1, NURBSExtraction1.size());
+    MallocDeviceMemory(&d_NURBSExtraction2, NURBSExtraction2.size());
+    CopyToDevice(d_NURBSExtraction1, NURBSExtraction1.data(), NURBSExtraction1.size());
+    CopyToDevice(d_NURBSExtraction2, NURBSExtraction2.data(), NURBSExtraction2.size());
 
     int * d_IEN, * d_ID;
     double * d_CP;
-    MallocDevice(&d_IEN, IEN.size());
-    MallocDevice(&d_ID, ID.size());
-    MallocDevice(&d_CP, CP.size());
-    CopyToDeviceMemory(d_IEN, IEN.data(), IEN.size());
-    CopyToDeviceMemory(d_ID, ID.data(), ID.size());
-    CopyToDeviceMemory(d_CP, CP.data(), CP.size());
+    MallocDeviceMemory(&d_IEN, IEN.size());
+    MallocDeviceMemory(&d_ID, ID.size());
+    MallocDeviceMemory(&d_CP, CP.size());
+    CopyToDevice(d_IEN, IEN.data(), IEN.size());
+    CopyToDevice(d_ID, ID.data(), ID.size());
+    CopyToDevice(d_CP, CP.data(), CP.size());
 
     double * d_elem_size1, * d_elem_size2;
-    MallocDevice(&d_elem_size1, elem_size1.size());
-    MallocDevice(&d_elem_size2, elem_size2.size());
-    CopyToDeviceMemory(d_elem_size1, elem_size1.data(), elem_size1.size());
-    CopyToDeviceMemory(d_elem_size2, elem_size2.data(), elem_size2.size());
+    MallocDeviceMemory(&d_elem_size1, elem_size1.size());
+    MallocDeviceMemory(&d_elem_size2, elem_size2.size());
+    CopyToDevice(d_elem_size1, elem_size1.data(), elem_size1.size());
+    CopyToDevice(d_elem_size2, elem_size2.data(), elem_size2.size());
 
     double * qw1, * qw2;
-    MallocDevice(&qw1, nqp1);
-    MallocDevice(&qw2, nqp2);
-    CopyToDeviceMemory(qw1, w1.data(), nqp1);
-    CopyToDeviceMemory(qw2, w2.data(), nqp2);
+    MallocDeviceMemory(&qw1, nqp1);
+    MallocDeviceMemory(&qw2, nqp2);
+    CopyToDevice(qw1, w1.data(), nqp1);
+    CopyToDevice(qw2, w2.data(), nqp2);
 
     VecSet(F, 0.0);
     double *d_F_array;
@@ -167,43 +167,43 @@ void GlobalAssemblyMF::MatMulMF(QuadraturePoint * const &quad1,
     }
 
     double * d_B1, * d_B2, * d_dB1, * d_dB2;
-    MallocDevice(&d_B1, B1.size());
-    MallocDevice(&d_B2, B2.size());
-    MallocDevice(&d_dB1, dB1.size());
-    MallocDevice(&d_dB2, dB2.size());
-    CopyToDeviceMemory(d_B1, B1.data(), B1.size());
-    CopyToDeviceMemory(d_B2, B2.data(), B2.size());
-    CopyToDeviceMemory(d_dB1, dB1.data(), dB1.size());
-    CopyToDeviceMemory(d_dB2, dB2.data(), dB2.size());
+    MallocDeviceMemory(&d_B1, B1.size());
+    MallocDeviceMemory(&d_B2, B2.size());
+    MallocDeviceMemory(&d_dB1, dB1.size());
+    MallocDeviceMemory(&d_dB2, dB2.size());
+    CopyToDevice(d_B1, B1.data(), B1.size());
+    CopyToDevice(d_B2, B2.data(), B2.size());
+    CopyToDevice(d_dB1, dB1.data(), dB1.size());
+    CopyToDevice(d_dB2, dB2.data(), dB2.size());
 
     double * d_NURBSExtraction1, * d_NURBSExtraction2;
-    MallocDevice(&d_NURBSExtraction1, NURBSExtraction1.size());
-    MallocDevice(&d_NURBSExtraction2, NURBSExtraction2.size());
-    CopyToDeviceMemory(d_NURBSExtraction1, NURBSExtraction1.data(),
+    MallocDeviceMemory(&d_NURBSExtraction1, NURBSExtraction1.size());
+    MallocDeviceMemory(&d_NURBSExtraction2, NURBSExtraction2.size());
+    CopyToDevice(d_NURBSExtraction1, NURBSExtraction1.data(),
         NURBSExtraction1.size());
-    CopyToDeviceMemory(d_NURBSExtraction2, NURBSExtraction2.data(),
+    CopyToDevice(d_NURBSExtraction2, NURBSExtraction2.data(),
         NURBSExtraction2.size());
     
     int * d_IEN, * d_ID;
     double * d_CP;
-    MallocDevice(&d_IEN, IEN.size());
-    MallocDevice(&d_ID, ID.size());
-    MallocDevice(&d_CP, CP.size());
-    CopyToDeviceMemory(d_IEN, IEN.data(), IEN.size());
-    CopyToDeviceMemory(d_ID, ID.data(), ID.size());
-    CopyToDeviceMemory(d_CP, CP.data(), CP.size());
+    MallocDeviceMemory(&d_IEN, IEN.size());
+    MallocDeviceMemory(&d_ID, ID.size());
+    MallocDeviceMemory(&d_CP, CP.size());
+    CopyToDevice(d_IEN, IEN.data(), IEN.size());
+    CopyToDevice(d_ID, ID.data(), ID.size());
+    CopyToDevice(d_CP, CP.data(), CP.size());
 
     double * d_elem_size1, * d_elem_size2;
-    MallocDevice(&d_elem_size1, elem_size1.size());
-    MallocDevice(&d_elem_size2, elem_size2.size());
-    CopyToDeviceMemory(d_elem_size1, elem_size1.data(), elem_size1.size());
-    CopyToDeviceMemory(d_elem_size2, elem_size2.data(), elem_size2.size());
+    MallocDeviceMemory(&d_elem_size1, elem_size1.size());
+    MallocDeviceMemory(&d_elem_size2, elem_size2.size());
+    CopyToDevice(d_elem_size1, elem_size1.data(), elem_size1.size());
+    CopyToDevice(d_elem_size2, elem_size2.data(), elem_size2.size());
 
     double * qw1, * qw2;
-    MallocDevice(&qw1, nqp1.size());
-    MallocDevice(&qw2, nqp2.size());
-    CopyToDeviceMemory(qw1, w1.data(), nqp1.size());
-    CopyToDeviceMemory(qw2, w2.data(), nqp2.size());
+    MallocDeviceMemory(&qw1, nqp1.size());
+    MallocDeviceMemory(&qw2, nqp2.size());
+    CopyToDevice(qw1, w1.data(), nqp1.size());
+    CopyToDevice(qw2, w2.data(), nqp2.size());
 
     VecSet(y, 0.0);
     double *d_x_array, *d_y_array;
