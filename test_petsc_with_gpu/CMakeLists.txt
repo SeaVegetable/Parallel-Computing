@@ -95,6 +95,10 @@ add_executable(assemblytest assemblytest.cu)
 target_link_libraries(assemblytest eigenvalue_problem_lib eigenvalue_problem_cuda_lib ${PETSC_LIB})
 target_include_directories(assemblytest PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C_INCLUDE_PATH})
 
+add_executable(testelem2coo testelem2coo.cu)
+target_link_libraries(testelem2coo eigenvalue_problem_lib eigenvalue_problem_cuda_lib ${PETSC_LIB})
+target_include_directories(testelem2coo PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C_INCLUDE_PATH})
+
 if(OPENMP_CXX_FOUND)
   set_target_properties( eigenvalue_problem_lib PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )
   set_target_properties( preprocess_fem PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )
@@ -119,6 +123,13 @@ set_target_properties(memorytest PROPERTIES
 )
 
 set_target_properties(assemblytest PROPERTIES
+  CUDA_STANDARD 11
+  CUDA_STANDARD_REQUIRED YES
+  CUDA_SEPARABLE_COMPILATION ON
+  CUDA_ARCHITECTURES 75
+)
+
+set_target_properties(testelem2coo PROPERTIES
   CUDA_STANDARD 11
   CUDA_STANDARD_REQUIRED YES
   CUDA_SEPARABLE_COMPILATION ON
