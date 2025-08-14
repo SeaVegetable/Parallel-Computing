@@ -53,10 +53,12 @@ int main (int argc, char *argv[])
     QuadraturePoint * quad1 = new QuadraturePoint(p+1, 0, 1);
     QuadraturePoint * quad2 = new QuadraturePoint(q+1, 0, 1);
 
+    BernsteinBasis * bernstein = new BernsteinBasis(p);
+
     globalAssembly->AssemLoad(quad1, quad2,
         IEN, ID, Dir, CP,
         NURBSExtraction1, NURBSExtraction2,
-        elem_size1, elem_size2, elemmf);
+        elem_size1, elem_size2, elemmf, bernstein);
     
     Vec x;
     VecDuplicate(globalAssembly->F, &x);
@@ -67,7 +69,8 @@ int main (int argc, char *argv[])
     globalAssembly->MatMulMF(quad1, quad2,
         IEN, ID, Dir, CP,
         NURBSExtraction1, NURBSExtraction2,
-        elem_size1, elem_size2, elemmf, x, y);
+        elem_size1, elem_size2, elemmf, bernstein,
+        x, y);
     
     VecView(y, PETSC_VIEWER_STDOUT_WORLD);
 
