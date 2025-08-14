@@ -56,10 +56,13 @@ class ElementMF
         {
             return JxW[qpIdx];
         }
+
+        int get_p() const { return p; }
+        int get_q() const { return q; }
     
     private:
-        const double p;
-        const double q;
+        const int p;
+        const int q;
         const int nLocBas;
 
         std::vector<double> RR{};

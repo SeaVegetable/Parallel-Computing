@@ -2,8 +2,10 @@
 #define GLOBALASSEMBLYMF_HPP
 
 #include <petscmat.h>
-#include "LocalAssemblyMF.hpp"
-#include "LocalAssemblyMFSF.hpp"
+#include "QuadraturePoint.hpp"
+#include "ElementMF.hpp"
+#include "memory.cuh"
+#include "mult.cuh"
 
 class GlobalAssemblyMF
 {
@@ -18,7 +20,8 @@ class GlobalAssemblyMF
             VecDestroy(&F);
         }
 
-        void AssemLoad(LocalAssemblyMF * const &locassem,
+        void AssemLoad(QuadraturePoint * const &quad1,
+            QuadraturePoint * const &quad2,
             const std::vector<int> &IEN,
             const std::vector<int> &ID,
             const std::vector<int> &Dir,
@@ -29,18 +32,8 @@ class GlobalAssemblyMF
             const std::vector<double> &elem_size2,
             ElementMF * const &elemmf);
         
-        void AssemLoad(LocalAssemblyMFSF * const &locassem,
-            const std::vector<int> &IEN,
-            const std::vector<int> &ID,
-            const std::vector<int> &Dir,
-            const std::vector<double> &CP,
-            const std::vector<double> &NURBSExtraction1,
-            const std::vector<double> &NURBSExtraction2,
-            const std::vector<double> &elem_size1,
-            const std::vector<double> &elem_size2,
-            ElementMFSF * const &elemmf);
-        
-        void MatMulMF(LocalAssemblyMF * const &locassem,
+        void MatMulMF(QuadraturePoint * const &quad1,
+            QuadraturePoint * const &quad2,
             const std::vector<int> &IEN,
             const std::vector<int> &ID,
             const std::vector<int> &Dir,
@@ -51,28 +44,12 @@ class GlobalAssemblyMF
             const std::vector<double> &elem_size2,
             ElementMF * const &elemmf,
             Vec x, Vec y);
-        
-        void MatMulMF(LocalAssemblyMFSF * const &locassem,
-            const std::vector<int> &IEN,
-            const std::vector<int> &ID,
-            const std::vector<int> &Dir,
-            const std::vector<double> &CP,
-            const std::vector<double> &NURBSExtraction1,
-            const std::vector<double> &NURBSExtraction2,
-            const std::vector<double> &elem_size1,
-            const std::vector<double> &elem_size2,
-            ElementMFSF * const &elemmf,
-            Vec x, Vec y);
     
     private:
         const int nLocBas;
         const int nlocalfunc;
         const int nlocalelemx;
         const int nlocalelemy;
-
-        void DirichletBC(const std::vector<int> &Dir);
-
-        void DirichletBCFout(const std::vector<int> &Dir);
 };
 
 #endif
