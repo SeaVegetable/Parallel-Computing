@@ -7,7 +7,7 @@ GlobalAssemblyDR::GlobalAssemblyDR(FileManager * const &fm, const std::vector<in
     : nLocBas(nLocBas), nlocalfunc(nlocalfunc),
       nlocalelemx(nlocalelemx), nlocalelemy(nlocalelemy)
 {
-    const int dnz = nlocalfunc;
+    const int dnz = 2*nLocBas+1;
     const int onz = dnz;
     MatCreateAIJ(PETSC_COMM_WORLD, nlocalfunc, nlocalfunc, PETSC_DETERMINE,
         PETSC_DETERMINE, dnz, PETSC_NULLPTR, dnz, PETSC_NULLPTR, &K);
