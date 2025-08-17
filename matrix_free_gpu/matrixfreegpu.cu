@@ -34,12 +34,9 @@ PetscErrorCode MyPCDestroy(PC pc)
 
 typedef struct {
     int nlocalfunc;
-    int nghost;
-    PetscInt * ghostIdx;
     std::vector<double> CP;
     std::vector<int> ID;
     std::vector<int> Dir;
-    std::vector<int> EQ;
     std::vector<int> IEN;
     std::vector<double> elem_size1;
     std::vector<double> elem_size2;
@@ -228,7 +225,6 @@ int main(int argc, char **argv)
     int nlocalfunc;
     int nlocalelemx;
     int nlocalelemy;
-    std::vector<int> ghostID;
     MyMeshData * data;
     PetscNew(&data);
 
@@ -236,14 +232,10 @@ int main(int argc, char **argv)
     fm->ReadPartition(filename, nlocalfunc,
         nlocalelemx, nlocalelemy,
         data->elem_size1, data->elem_size2,
-        data->CP, data->ID, ghostID, data->Dir, data->IEN,
+        data->CP, data->ID, data->Dir, data->IEN,
         data->NURBSExtraction1, data->NURBSExtraction2);
 
     data->nlocalfunc = nlocalfunc;
-    data->nghost = ghostID.size();
-    data->ghostIdx = new PetscInt[data->nghost];
-    for (int i = 0; i < data->nghost; ++i)
-        data->ghostIdx[i] = ghostID[i];
 
     ElementMF * elemmf = new ElementMF(p, q);
     int nLocBas = elemmf->GetNumLocalBasis();
@@ -323,7 +315,6 @@ int main(int argc, char **argv)
     VecDestroy(&u);
     MatDestroy(&K);
     KSPDestroy(&ksp);
-    delete[] data->ghostIdx;
     PetscFree(data);
 
     PetscFinalize();

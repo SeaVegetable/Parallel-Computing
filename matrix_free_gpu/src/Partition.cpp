@@ -478,6 +478,7 @@ void Partition::GeneratePartition(const int &nElemX, const int &nElemY,
 
             std::cout << "Partition " << count << " generated." << std::endl;
         }
+    }
     delete fm;
 }
 
