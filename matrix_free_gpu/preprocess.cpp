@@ -1,12 +1,3 @@
-// #if __has_include(<filesystem>)
-//   #include <filesystem>
-//   namespace fs = std::__fs::filesystem;
-// #elif __has_include(<experimental/filesystem>)
-//   #include <experimental/filesystem>
-//   namespace fs = std::experimental::filesystem;
-// #else
-//   #error "No filesystem support"
-// #endif
 #include "ControlPointGenerator.hpp"
 #include "IENGenerator.hpp"
 #include "IDGenerator.hpp"
@@ -23,16 +14,6 @@ int main(int argc, char *argv[])
 
     FileManager * fm = new FileManager();
     fm->ReadPreprocessInfo(file_info, p, q, Lx, Ly, nElemX, nElemY, part_num_1d, dim, base_name);
-
-    // for (const auto& entry : fs::directory_iterator(fs::current_path())) {
-    //     if (entry.is_regular_file()) {
-    //         std::string filename = entry.path().filename().string();
-    //         if (filename.find(base_name) == 0) {
-    //             std::cout << "Deleting file: " << filename << std::endl;
-    //             fs::remove(entry.path());
-    //         }
-    //     }
-    // }
 
     double hx = Lx / nElemX;
     double hy = Ly / nElemY;
