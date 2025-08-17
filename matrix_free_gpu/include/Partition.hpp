@@ -20,8 +20,15 @@ class Partition
         void GeneratePartition(const BSplineBasis * const &basis1, const BSplineBasis * const &basis2,
             const std::vector<double> &CP, const std::vector<int> &IEN, const std::vector<int> &ID,
             const std::vector<double> &NURBSExtraction1, const std::vector<double> &NURBSExtraction2);
+        
+        void GeneratePartitionSerial(const BSplineBasis * const &basis1, const BSplineBasis * const &basis2,
+            const std::vector<double> &CP, const std::vector<int> &IEN, const std::vector<int> &ID,
+            const std::vector<double> &NURBSExtraction1, const std::vector<double> &NURBSExtraction2);
 
         void GeneratePartition(const int &nElemX, const int &nElemY,
+            const std::vector<double> &CP, const std::vector<int> &ID, const std::vector<int> &IEN);
+
+        void GeneratePartitionSerial(const int &nElemX, const int &nElemY,
             const std::vector<double> &CP, const std::vector<int> &ID, const std::vector<int> &IEN);
 
     private:

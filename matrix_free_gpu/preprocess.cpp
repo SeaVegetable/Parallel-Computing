@@ -84,7 +84,10 @@ int main(int argc, char *argv[])
 
     std::cout << "Generating partition..." << std::endl;
     Partition * part = new Partition(part_num_1d, part_num_1d, dim, base_name);
-    part->GeneratePartition(basis1, basis2, CP, IEN, ID, NURBSExtraction1, NURBSExtraction2);
+    if (part_num_1d == 1)
+        part->GeneratePartitionSerial(basis1, basis2, CP, IEN, ID, NURBSExtraction1, NURBSExtraction2);
+    else
+        part->GeneratePartition(basis1, basis2, CP, IEN, ID, NURBSExtraction1, NURBSExtraction2);
 
     delete cpg; cpg = nullptr;
     delete basis1; basis1 = nullptr;

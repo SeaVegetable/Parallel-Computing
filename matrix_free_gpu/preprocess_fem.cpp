@@ -70,7 +70,10 @@ int main(int argc, char *argv[])
     std::vector<int> ID = idgen->GenerateID2D(nFuncX, nFuncY);
 
     Partition * part = new Partition(part_num_1d, part_num_1d, dim, base_name_fem);
-    part->GeneratePartition(nElemX, nElemY, CP, IEN, ID);
+    if (part_num_1d == 1)
+        part->GeneratePartitionSerial(nElemX, nElemY, CP, IEN, ID);
+    else
+        part->GeneratePartition(nElemX, nElemY, CP, IEN, ID);
 
     delete fm; fm = nullptr;
     delete ien; ien = nullptr;

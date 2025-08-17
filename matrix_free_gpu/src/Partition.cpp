@@ -232,6 +232,50 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
             std::cout << "Partition " << count << " generated." << std::endl;
         }
     }
+    delete fm;
+}
+
+void Partition::GeneratePartitionSerial(const BSplineBasis * const &basis1, const BSplineBasis * const &basis2,
+    const std::vector<double> &CP, const std::vector<int> &IEN, const std::vector<int> &ID,
+    const std::vector<double> &NURBSExtraction1, const std::vector<double> &NURBSExtraction2)
+{
+    const int p = basis1->GetDegree();
+    const int q = basis2->GetDegree();
+    const std::vector<double> S = basis1->GetKnotVector();
+    const std::vector<double> T = basis2->GetKnotVector();
+    const int m = static_cast<int>(S.size()) - p - 1;
+    const int n = static_cast<int>(T.size()) - q - 1;
+    const int nElemX = m - p;
+    const int nElemY = n - q;
+    const double hx = (S.back() - S.front()) / nElemX;
+    const double hy = (T.back() - T.front()) / nElemY;
+
+    std::vector<double> elem_size1(nElemX, hx);
+    std::vector<double> elem_size2(nElemY, hy);
+
+    FileManager * fm = new FileManager();
+
+    std::vector<int> newID = ID;
+    std::vector<int> Dir{};
+    for (int ii = 0; ii < ID.size(); ++ii)
+    {
+        if (ID[ii] == -1)
+            newID[ii] = -1;
+            Dir.push_back(ii);
+        else
+            newID[ii] = ii;
+    }
+
+    int count = 0;
+    std::cout << "Generating partition " << count << "..." << std::endl;
+
+    std::string filename = fm->GetPartitionFilename(base_name, 0);
+    fm->WritePartition(filename, m * n, nElemX, nElemY,
+                elem_size1, elem_size2, CP, newID,
+                Dir, IEN, NURBSExtraction1, NURBSExtraction2);
+
+    std::cout << "Partition " << count << " generated." << std::endl;
+    delete fm;
 }
 
 void Partition::GeneratePartition(const int &nElemX, const int &nElemY,
@@ -434,5 +478,36 @@ void Partition::GeneratePartition(const int &nElemX, const int &nElemY,
 
             std::cout << "Partition " << count << " generated." << std::endl;
         }
-    }
+    delete fm;
 }
+
+void Partition::GeneratePartitionSerial(const int &nElemX, const int &nElemY,
+    const std::vector<double> &CP, const std::vector<int> &IEN, const std::vector<int> &ID)
+{
+    FileManager * fm = new FileManager();
+
+    const int m = nElemX + 1;
+    const int n = nElemY + 1;
+    const int nLocBas = 4;
+
+    std::vector<int> newID = ID;
+    std::vector<int> Dir{};
+    for (int ii = 0; ii < ID.size(); ++ii)
+    {
+        if (ID[ii] == -1)
+            newID[ii] = -1;
+            Dir.push_back(ii);
+        else
+            newID[ii] = ii;
+    }
+
+    int count = 0;
+    std::cout << "Generating partition " << count << "..." << std::endl;
+
+    std::string filename = fm->GetPartitionFilename(base_name, 0);
+
+    fm->WritePartition(filename, m * n, nElemX, nElemY, CP, newID, Dir, IEN);
+    std::cout << "Partition " << count << " generated." << std::endl;
+    delete fm;
+}
+
