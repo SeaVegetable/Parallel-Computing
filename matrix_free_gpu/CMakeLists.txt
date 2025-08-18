@@ -104,13 +104,18 @@ add_executable(testelem2coo testelem2coo.cu)
 target_link_libraries(testelem2coo eigenvalue_problem_lib eigenvalue_problem_cuda_lib ${PETSC_LIB})
 target_include_directories(testelem2coo PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C_INCLUDE_PATH})
 
+set(P_ORDER 3 CACHE STRING "Polynomial order p")
+set(Q_ORDER 3 CACHE STRING "Polynomial order q")
+
 add_executable(multtest multtest.cu)
 target_link_libraries(multtest eigenvalue_problem_lib eigenvalue_problem_cuda_lib ${PETSC_LIB})
 target_include_directories(multtest PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C_INCLUDE_PATH})
+target_compile_definitions(multtest PRIVATE P_ORDER=${P_ORDER} Q_ORDER=${Q_ORDER})
 
 add_executable(matrixfreegpu matrixfreegpu.cu)
 target_link_libraries(matrixfreegpu eigenvalue_problem_lib eigenvalue_problem_cuda_lib ${PETSC_LIB})
 target_include_directories(matrixfreegpu PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C_INCLUDE_PATH})
+target_compile_definitions(matrixfreegpu PRIVATE P_ORDER=${P_ORDER} Q_ORDER=${Q_ORDER})
 
 if(OPENMP_CXX_FOUND)
   set_target_properties( eigenvalue_problem_lib PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )
