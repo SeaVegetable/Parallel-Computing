@@ -365,8 +365,6 @@ __global__ void MatrixFreeMatMultKernel(
     double *s_qw = (double*)(shared_data + offset);
     offset += nLocBas * sizeof(double);
     double *Floc_in = (double*)(shared_data + offset);
-    offset += nLocBas * sizeof(double);
-    double *Floc_out = (double*)(shared_data + offset);
     
     int elemIndex = blockIdx.y * gridDim.x + blockIdx.x;
 
@@ -394,13 +392,18 @@ __global__ void MatrixFreeMatMultKernel(
     {
         int coo_index = d_IEN[elemIndex * nLocBas + i];
         Floc_in[i] = d_F_array_in[coo_index];
-        Floc_out[i] = 0.0;
     }
 
     double h1 = d_elem_size1[blockIdx.x];
     double h2 = d_elem_size2[blockIdx.y];
 
     __syncthreads();
+
+    double Floc_out[nLocBas];
+    for (int i = 0; i < nLocBas; ++i)
+    {
+        Floc_out[i] = 0.0;
+    }
 
     int qpx = threadIdx.x;
     int qpy = threadIdx.y;
