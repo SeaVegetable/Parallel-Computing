@@ -247,7 +247,7 @@ __global__ void AssembleKernel(
 
     int offset = 0;
     int *s_eID = (int*)(shared_data + offset);
-    offset += nx * ny * sizeof(int);
+    offset += nx * ny * sizeof(int) + MYOFFSET;
     double *s_eCP = (double*)(shared_data + offset);
     offset += 2 * nx * ny * sizeof(double);
     double *s_eNURBSExtraction1 = (double*)(shared_data + offset);
@@ -355,7 +355,7 @@ __global__ void MatrixFreeMatMultKernel(
 
     int offset = 0;
     int *s_eID = (int*)(shared_data + offset);
-    offset += nLocBas * sizeof(int);
+    offset += nLocBas * sizeof(int) + MYOFFSET;
     double *s_eCP = (double*)(shared_data + offset);
     offset += 2 * nLocBas * sizeof(double);
     double *s_eNURBSExtraction1 = (double*)(shared_data + offset);
