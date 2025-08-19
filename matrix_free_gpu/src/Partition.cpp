@@ -260,8 +260,10 @@ void Partition::GeneratePartitionSerial(const BSplineBasis * const &basis1, cons
     for (int ii = 0; ii < ID.size(); ++ii)
     {
         if (ID[ii] == -1)
+        {
             newID[ii] = -1;
             Dir.push_back(ii);
+        }
         else
             newID[ii] = ii;
     }
@@ -496,8 +498,10 @@ void Partition::GeneratePartitionSerial(const int &nElemX, const int &nElemY,
     for (int ii = 0; ii < ID.size(); ++ii)
     {
         if (ID[ii] == -1)
+        {
             newID[ii] = -1;
             Dir.push_back(ii);
+        }
         else
             newID[ii] = ii;
     }

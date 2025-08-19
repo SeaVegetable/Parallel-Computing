@@ -68,6 +68,9 @@ set(CMAKE_CXX_COMPILER $ENV{HOME}/lib/openmpi-5.0.8/bin/mpicxx)
 
 include_directories(${PETSC_INC})
 
+set(P_ORDER 3 CACHE STRING "Polynomial order p")
+set(Q_ORDER 3 CACHE STRING "Polynomial order q")
+
 add_library(eigenvalue_problem_lib ${SOURCES})
 add_library(eigenvalue_problem_cuda_lib ${CUDA_SOURCES})
 target_link_libraries(eigenvalue_problem_cuda_lib PUBLIC eigenvalue_problem_lib)
@@ -78,6 +81,7 @@ set_target_properties(eigenvalue_problem_cuda_lib PROPERTIES
   CUDA_SEPARABLE_COMPILATION ON
   CUDA_ARCHITECTURES 75
 )
+target_compile_definitions(eigenvalue_problem_cuda_lib PRIVATE P_ORDER=${P_ORDER} Q_ORDER=${Q_ORDER})
 
 add_executable(preprocess preprocess.cpp)
 target_link_libraries(preprocess eigenvalue_problem_lib)
@@ -103,9 +107,6 @@ target_include_directories(assemblytest PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C
 add_executable(testelem2coo testelem2coo.cu)
 target_link_libraries(testelem2coo eigenvalue_problem_lib eigenvalue_problem_cuda_lib ${PETSC_LIB})
 target_include_directories(testelem2coo PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C_INCLUDE_PATH})
-
-set(P_ORDER 3 CACHE STRING "Polynomial order p")
-set(Q_ORDER 3 CACHE STRING "Polynomial order q")
 
 add_executable(multtest multtest.cu)
 target_link_libraries(multtest eigenvalue_problem_lib eigenvalue_problem_cuda_lib ${PETSC_LIB})
