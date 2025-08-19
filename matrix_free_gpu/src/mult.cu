@@ -537,7 +537,6 @@ void MatrixFreeMatMultCUDA(const int p, const int q,
                 + (q + 1) * (q + 1) * sizeof(double)
                 + (p + 1) * (q + 1) * sizeof(double)
                 + (p + 1) * (q + 1) * sizeof(double)
-                + (p + 1) * (q + 1) * sizeof(double)
                 + MYOFFSET;
 
     MatrixFreeMatMultKernel<<<dim3(nlocalelemx, nlocalelemy), dim3(p+1, q+1), shared_size>>>(
