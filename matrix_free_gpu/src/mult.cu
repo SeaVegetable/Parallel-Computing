@@ -261,6 +261,17 @@ __global__ void AssembleKernel(
 
     for (int j = 0; j < nLocBas; ++j)
     {
+        for (int j = 0; j < nLocBas; ++j) {
+    int ien_idx = elemIndex * nLocBas + j;
+    int ien_val = d_IEN[ien_idx];
+    if (ien_val < 0 || ien_val >= ID_size) {
+        printf("Device check: d_IEN[%d]=%d 越界, elemIndex=%d\n", ien_idx, ien_val, elemIndex);
+    }
+    int id_val = d_ID[ien_val];
+    if (id_val < 0) {
+        printf("Device check: d_ID[%d]=%d 越界, ien_val=%d\n", ien_val, id_val, ien_val);
+    }
+}
         s_eID[j] = d_ID[d_IEN[elemIndex * nLocBas + j]];
         s_eCP[2 * j] = d_CP[2 * d_IEN[elemIndex * nLocBas + j]];
         s_eCP[2 * j + 1] = d_CP[2 * d_IEN[elemIndex * nLocBas + j] + 1];
