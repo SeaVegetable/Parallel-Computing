@@ -295,9 +295,15 @@ int main(int argc, char **argv)
     Vec u;
     VecDuplicate(data->globalassem->F, &u);
     VecSet(u, 0.0);
+
+    PetscLogDouble tstart, tend;
+    PetscTime(&tstart);
     KSPSolve(ksp, data->globalassem->F, u);
+    PetscTime(&tend);
+    PetscLogDouble time = tend - tstart;
 
     VecView(u, PETSC_VIEWER_STDOUT_WORLD);
+    PetscPrintf(PETSC_COMM_WORLD, "Time: %f\n", time);
 
     delete fm; fm = nullptr;
     delete absgen; absgen = nullptr;
