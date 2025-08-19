@@ -4,6 +4,8 @@
 #ifndef Q_ORDER
 #define Q_ORDER 3
 #endif
+#define NLOC_MOD2 (((P_ORDER + 1) * (Q_ORDER + 1)) % 2)
+#define MYOFFSET (NLOC_MOD2 ? 4 : 0)
 
 #include "mult.cuh"
 
@@ -490,7 +492,8 @@ void AssembleLoadCUDA(const int p, const int q,
                 + 2 * (p + 1) * (q + 1) * sizeof(double)
                 + (p + 1) * (p + 1) * sizeof(double)
                 + (q + 1) * (q + 1) * sizeof(double)
-                + (p + 1) * (q + 1) * sizeof(double);
+                + (p + 1) * (q + 1) * sizeof(double)
+                + MYOFFSET;
 
     AssembleKernel<<<dim3(nlocalelemx, nlocalelemy), dim3(p+1, q+1), shared_size>>>(
         d_B1, d_B2, d_dB1, d_dB2,
@@ -531,7 +534,8 @@ void MatrixFreeMatMultCUDA(const int p, const int q,
                 + (q + 1) * (q + 1) * sizeof(double)
                 + (p + 1) * (q + 1) * sizeof(double)
                 + (p + 1) * (q + 1) * sizeof(double)
-                + (p + 1) * (q + 1) * sizeof(double);
+                + (p + 1) * (q + 1) * sizeof(double)
+                + MYOFFSET;
 
     MatrixFreeMatMultKernel<<<dim3(nlocalelemx, nlocalelemy), dim3(p+1, q+1), shared_size>>>(
         d_B1, d_B2, d_dB1, d_dB2,
