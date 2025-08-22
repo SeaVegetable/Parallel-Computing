@@ -7,7 +7,7 @@
 class ElementFEM
 {
     public:
-        ElementFEM(const double &p, const double &q) : p(p), q(q) {}
+        ElementFEM(const int &p, const int &q) : p(p), q(q) {}
         ~ElementFEM(){}
 
         int GetNumLocalBasis() const { return (p+1)*(q+1); }
@@ -28,8 +28,8 @@ class ElementFEM
             std::vector<double> &dN_dx, std::vector<double> &dN_dy) const;
         
     private:
-        const double p;
-        const double q;
+        const int p;
+        const int q;
 
         std::vector<double> GenerateBasis1DSingleQP(const double &xi, const int &pp) const;
 

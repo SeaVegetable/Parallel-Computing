@@ -8,7 +8,7 @@
 class ElementMF
 {
     public:
-        ElementMF(const double &p, const double &q) : p(p), q(q), nLocBas((p+1)*(q+1)) {}
+        ElementMF(const int &p, const int &q) : p(p), q(q), nLocBas((p+1)*(q+1)) {}
         ~ElementMF(){}
 
         void SetElement(const std::vector<double> &extraction1,

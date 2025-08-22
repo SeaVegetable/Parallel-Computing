@@ -7,7 +7,7 @@
 class Element
 {
     public:
-        Element(const double &p, const double &q) : p(p), q(q) {}
+        Element(const int &p, const int &q) : p(p), q(q) {}
         ~Element(){}
 
         void SetElement(const std::vector<double> &extraction1,
@@ -34,8 +34,8 @@ class Element
             double &jacobian) const;
     
     private:
-        const double p;
-        const double q;
+        const int p;
+        const int q;
 
         std::vector<double> extraction1{};
         std::vector<double> extraction2{};
