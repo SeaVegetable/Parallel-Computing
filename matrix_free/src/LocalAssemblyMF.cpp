@@ -3,7 +3,7 @@
 void LocalAssemblyMF::AssemLocalLoad(ElementMF * const &elem,
     const std::vector<double> &eCP)
 {
-    elem->GenerateElement(quad1, quad2, eCP);
+    elem->GenerateElement(quad1, quad2, bern1, bern2, eCP);
     const int nqp1 = quad1->GetNumQuadraturePoint();
     const int nqp2 = quad2->GetNumQuadraturePoint();
     const int nqp = nqp1 * nqp2;
@@ -31,7 +31,7 @@ void LocalAssemblyMF::AssemLocalLoad(ElementMF * const &elem,
 void LocalAssemblyMF::LocalMatMulMF(ElementMF * const &elem,
     const std::vector<double> &eCP)
 {
-    elem->GenerateElement(quad1, quad2, eCP);
+    elem->GenerateElement(quad1, quad2, bern1, bern2, eCP);
     const int nqp1 = quad1->GetNumQuadraturePoint();
     const int nqp2 = quad2->GetNumQuadraturePoint();
     const int nqp = nqp1 * nqp2;

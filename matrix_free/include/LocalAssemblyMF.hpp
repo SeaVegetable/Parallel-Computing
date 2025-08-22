@@ -16,6 +16,10 @@ class LocalAssemblyMF
         {
             quad1 = new QuadraturePoint(p+1, 0, 1);
             quad2 = new QuadraturePoint(q+1, 0, 1);
+            bern1 = new BernsteinBasis(p);
+            bern2 = new BernsteinBasis(q);
+            bern1->GenerateBernsteinBasis(quad1);
+            bern2->GenerateBernsteinBasis(quad2);
             Floc = new PetscScalar[n];
             Floc_in = new PetscScalar[n];
             Floc_out = new PetscScalar[n];
@@ -25,6 +29,8 @@ class LocalAssemblyMF
         {
             delete quad1; quad1 = nullptr;
             delete quad2; quad2 = nullptr;
+            delete bern1; bern1 = nullptr;
+            delete bern2; bern2 = nullptr;
             delete[] Floc; Floc = nullptr;
             delete[] Floc_in; Floc_in = nullptr;
             delete[] Floc_out; Floc_out = nullptr;
@@ -40,6 +46,8 @@ class LocalAssemblyMF
         const int n;
         QuadraturePoint * quad1;
         QuadraturePoint * quad2;
+        BernsteinBasis * bern1;
+        BernsteinBasis * bern2;
 
         double Getf(const double &xi, const double &eta)
         {

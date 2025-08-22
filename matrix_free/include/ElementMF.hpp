@@ -8,7 +8,7 @@
 class ElementMF
 {
     public:
-        ElementMF(const double &p, const double &q) : p(p), q(q), nLocBas((p+1)*(q+1)) {}
+        ElementMF(const int &p, const int &q) : p(p), q(q), nLocBas((p+1)*(q+1)) {}
         ~ElementMF(){}
 
         void SetElement(const std::vector<double> &extraction1,
@@ -32,9 +32,23 @@ class ElementMF
             const std::vector<double> &eCP, 
             std::vector<double> &R, std::vector<double> &dR_dx, std::vector<double> &dR_dy,
             double &jacobian) const;
+
+        void GenerateElementSingleQP(const std::vector<double> &B1,
+            const std::vector<double> &B2,
+            const std::vector<double> &dB1,
+            const std::vector<double> &dB2,
+            const std::vector<double> &eCP,
+            std::vector<double> &R, std::vector<double> &dR_dx, std::vector<double> &dR_dy,
+            double &jacobian) const;
         
         void GenerateElement(const QuadraturePoint * const &quad1,
             const QuadraturePoint * const &quad2,
+            const std::vector<double> &eCP);
+
+        void GenerateElement(const QuadraturePoint * const &quad1,
+            const QuadraturePoint * const &quad2,
+            const BernsteinBasis * const &bern1,
+            const BernsteinBasis * const &bern2,
             const std::vector<double> &eCP);
         
         double get_R(const int &qpIdx, const int &basIdx)
@@ -58,8 +72,8 @@ class ElementMF
         }
     
     private:
-        const double p;
-        const double q;
+        const int p;
+        const int q;
         const int nLocBas;
 
         std::vector<double> RR{};

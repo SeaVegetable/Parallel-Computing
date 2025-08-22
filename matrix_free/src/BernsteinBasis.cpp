@@ -139,6 +139,11 @@ std::vector<double> BernsteinBasis::GetBernsteinBasisDerivativeSingleQP(const do
             std::cerr << "Error: Invalid polynomial degree" << std::endl;
             exit(1);
     }
+}
+
+std::vector<double> BernsteinBasis::GetBernsteinBasisDerivativeSingleQP(const double &xi, const double &h) const
+{
+    std::vector<double> dB = GetBernsteinBasisDerivativeSingleQP(xi);
     for (int i = 0; i < p + 1; ++i)
         dB[i] = dB[i] / h;
     return dB;
