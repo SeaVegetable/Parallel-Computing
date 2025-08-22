@@ -10,7 +10,7 @@ class BernsteinBasis {
         BernsteinBasis(const int &p) : p(p) {}
         ~BernsteinBasis(){}
 
-        void GenerateBernsteinBasis(const QuadraturePoint * const &qp) const
+        void GenerateBernsteinBasis(const QuadraturePoint * const &qp)
         {
             B.clear();
             dB.clear();
