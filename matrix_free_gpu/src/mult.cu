@@ -284,7 +284,9 @@ __global__ void AssembleKernel(
 
     __syncthreads();
 
-    int qp = threadIdx.x;
+    int qpx = threadIdx.x;
+    int qpy = threadIdx.y;
+    int qp = threadIdx.y * blockDim.x + threadIdx.x;
 
     double B1[nx];
     double dB1[nx];
@@ -293,8 +295,6 @@ __global__ void AssembleKernel(
 
     if (qp < nx*ny)
     {
-        int qpx = qp % nx;
-        int qpy = qp / nx;
         for (int i = 0; i < nx; ++i)
         {
             B1[i] = d_B1[qpx * nx + i];
@@ -405,7 +405,9 @@ __global__ void MatrixFreeMatMultKernel(
         Floc_out[i] = 0.0;
     }
 
-    int qp = threadIdx.x;
+    int qpx = threadIdx.x;
+    int qpy = threadIdx.y;
+    int qp = threadIdx.y * blockDim.x + threadIdx.x;
 
     double B1[nx];
     double dB1[nx];
@@ -414,8 +416,6 @@ __global__ void MatrixFreeMatMultKernel(
 
     if (qp < nx * ny)
     {
-        int qpx = qp % nx;
-        int qpy = qp / nx;
         for (int i = 0; i < nx; ++i)
         {
             B1[i] = d_B1[qpx * nx + i];
@@ -498,9 +498,7 @@ void AssembleLoadCUDA(const int p, const int q,
                 + (p + 1) * (q + 1) * sizeof(double)
                 + MYOFFSET;
 
-    size_t block_size = ((p + 1) * (q + 1) + 31) / 32 * 32;
-
-    AssembleKernel<<<dim3(nlocalelemx, nlocalelemy), block_size, shared_size>>>(
+    AssembleKernel<<<dim3(nlocalelemx, nlocalelemy), dim3(p+1, q+1), shared_size>>>(
         d_B1, d_B2, d_dB1, d_dB2,
         d_nurbs_extraction1, d_nurbs_extraction2,
         d_elem_size1, d_elem_size2,
@@ -541,9 +539,7 @@ void MatrixFreeMatMultCUDA(const int p, const int q,
                 + (p + 1) * (q + 1) * sizeof(double)
                 + MYOFFSET;
 
-    size_t block_size = ((p + 1) * (q + 1) + 31) / 32 * 32;
-
-    MatrixFreeMatMultKernel<<<dim3(nlocalelemx, nlocalelemy), block_size, shared_size>>>(
+    MatrixFreeMatMultKernel<<<dim3(nlocalelemx, nlocalelemy), dim3(p+1, q+1), shared_size>>>(
         d_B1, d_B2, d_dB1, d_dB2,
         d_nurbs_extraction1, d_nurbs_extraction2,
         d_elem_size1, d_elem_size2,
