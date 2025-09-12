@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
   {
     ghost[0] = 10;
   }
-  else (rank == 1)
+  else
   {
     ghost[0] = 9;
   }
@@ -35,8 +35,8 @@ int main(int argc, char **argv) {
 
   Vec xlocal, ylocal;
   PetscScalar *xarr, *yarr;
-  VecGhostGetLocalVector(x, &xlocal);
-  VecGhostGetLocalVector(y, &ylocal);
+  VecGhostGetLocalForm(x, &xlocal);
+  VecGhostGetLocalForm(y, &ylocal);
   VecCUDAGetArray(xlocal, &xarr);
   VecCUDAGetArray(ylocal, &yarr);
   for (PetscInt i = nghost; i < nlocal + nghost; ++i) {
@@ -44,8 +44,8 @@ int main(int argc, char **argv) {
   }
   VecCUDARestoreArray(xlocal, &xarr);
   VecCUDARestoreArray(ylocal, &yarr);
-  VecGhostRestoreLocalVector(x, &xlocal);
-  VecGhostRestoreLocalVector(y, &ylocal);
+  VecGhostRestoreLocalForm(x, &xlocal);
+  VecGhostRestoreLocalForm(y, &ylocal);
 
   VecView(x, PETSC_VIEWER_STDOUT_WORLD);
   VecView(y, PETSC_VIEWER_STDOUT_WORLD);

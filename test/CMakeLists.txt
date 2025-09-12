@@ -16,9 +16,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 
 # Add your source files here
 set(CUDA_INC "/public/software/compiler/nvidia/cuda/12.1.0/include")
-set(EIGEN3_INCLUDE_DIR "/work/home/mae_yuexh/lib/eigen-3.4.0")
-
-message(STATUS "EIGEN3_INCLUDE_DIR: ${EIGEN3_INCLUDE_DIR}")
 
 # Include directories
 include_directories(${EIGEN3_INCLUDE_DIR})
@@ -37,8 +34,19 @@ set(CMAKE_CXX_COMPILER /public/software/mpi/openmpi/4.1.5/bin/mpicxx)
 include_directories(${PETSC_INC})
 
 add_executable(test ghost_with_cuda.cpp)
-
+target_link_libraries(test ${PETSC_LIB})
+target_include_directories(test PRIVATE ${PETSC_INC} ${CUDA_INC})
 set_target_properties(test PROPERTIES
+  CUDA_STANDARD 11
+  CUDA_STANDARD_REQUIRED YES
+  CUDA_SEPARABLE_COMPILATION ON
+  CUDA_ARCHITECTURES 86
+)
+
+add_executable(test_func cuda_function_test.cpp)
+target_link_libraries(test_func ${PETSC_LIB})
+target_include_directories(test_func PRIVATE ${PETSC_INC} ${CUDA_INC})
+set_target_properties(test_func PROPERTIES
   CUDA_STANDARD 11
   CUDA_STANDARD_REQUIRED YES
   CUDA_SEPARABLE_COMPILATION ON
