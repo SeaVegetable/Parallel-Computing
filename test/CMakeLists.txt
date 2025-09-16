@@ -37,17 +37,17 @@ add_executable(test ghost_with_cuda.cpp)
 target_link_libraries(test ${PETSC_LIB})
 target_include_directories(test PRIVATE ${PETSC_INC} ${CUDA_INC})
 set_target_properties(test PROPERTIES
-  CUDA_STANDARD 11
+  CUDA_STANDARD 14
   CUDA_STANDARD_REQUIRED YES
   CUDA_SEPARABLE_COMPILATION ON
   CUDA_ARCHITECTURES 86
 )
 
-add_executable(test_func cuda_function_test.cpp)
+add_executable(test_func cuda_function_test.cu)
 target_link_libraries(test_func ${PETSC_LIB})
 target_include_directories(test_func PRIVATE ${PETSC_INC} ${CUDA_INC})
 set_target_properties(test_func PROPERTIES
-  CUDA_STANDARD 11
+  CUDA_STANDARD 14
   CUDA_STANDARD_REQUIRED YES
   CUDA_SEPARABLE_COMPILATION ON
   CUDA_ARCHITECTURES 86
