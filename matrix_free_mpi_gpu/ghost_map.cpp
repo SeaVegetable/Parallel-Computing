@@ -11,6 +11,14 @@ int main(int argc, char **argv)
     FileManager * fm = new FileManager();
     fm->ReadPreprocessInfo(file_info, p, q, Lx, Ly, nElemX, nElemY, part_num_1d, dim, base_name);
 
+    if (part_num_1d > 1)
+    {
+        std::cerr << "Error: part_num_1d should be greater than 1 to generate ghost map." << std::endl;
+        exit(1);
+    }
+
+    std::string ghost_map_filebasename = "ghost_map";
+
     std::vector<int> ownlocalID;
     std::vector<int> ownghostID;
     std::vector<int> otherlocalID;
@@ -61,5 +69,9 @@ int main(int argc, char **argv)
         recieveOffsets.erase(std::unique(recieveOffsets.begin(), recieveOffsets.end()), recieveOffsets.end());
         sendRanks.erase(std::unique(sendRanks.begin(), sendRanks.end()), sendRanks.end());
         sendOffsets.erase(std::unique(sendOffsets.begin(), sendOffsets.end()), sendOffsets.end());
+
+        std::string ghost_map_filename = ghost_map_filebasename + "_" + std::to_string(rank) + ".txt";
+        fm->WriteGhostMap(ghost_map_filename, recieveRanks, recieveOffsets,
+            recieveIndices, sendRanks, sendOffsets, sendIndices);
     }
 }
