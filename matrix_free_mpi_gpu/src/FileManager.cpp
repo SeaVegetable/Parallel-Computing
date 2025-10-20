@@ -31,6 +31,10 @@ void FileManager::WritePartition(const std::string &filename,
     for (int ii = 0; ii < ID.size(); ++ii) file << ID[ii] << " ";
     file << std::endl;
 
+    file << "localID" << std::endl;
+    for (int ii = 0; ii < localID.size(); ++ii) file << localID[ii] << " ";
+    file << std::endl;
+
     file << "ghostID" << std::endl;
     for (int ii = 0; ii < ghostID.size(); ++ii) file << ghostID[ii] << " ";
     file << std::endl;
@@ -583,6 +587,84 @@ void FileManager::ReadPartition(const std::string &filename,
                 IEN.push_back(i);
                 if (IEN_ss.peek() == ' ')
                     IEN_ss.ignore();
+            }
+        }
+    }
+}
+
+void FileManager::ReadPartition(const std::string &filename,
+    std::vector<int> &localID,
+    std::vector<int> &ghostID) const
+{
+    std::ifstream file(filename.c_str());
+    if (!file.is_open())
+    {
+        std::cerr << "Error: Could not open file " << filename << std::endl;
+        exit(1);
+    }
+
+    std::string line;
+    while (std::getline(file, line))
+    {
+        if (line == "localID")
+        {
+            std::string localID_str;
+            std::getline(file, localID_str);
+            std::istringstream localID_ss(localID_str);
+            localID.clear();
+            int i;
+            while (localID_ss >> i)
+            {
+                localID.push_back(i);
+                if (localID_ss.peek() == ' ')
+                    localID_ss.ignore();
+            }
+        }
+    }
+    while (std::getline(file, line))
+    {
+        if (line == "ghostID")
+        {
+            std::string ghostID_str;
+            std::getline(file, ghostID_str);
+            std::istringstream ghostID_ss(ghostID_str);
+            ghostID.clear();
+            int i;
+            while (ghostID_ss >> i)
+            {
+                ghostID.push_back(i);
+                if (ghostID_ss.peek() == ' ')
+                    ghostID_ss.ignore();
+            }
+        }
+    }
+}
+
+void FileManager::ReadPartition(const std::string &filename,
+    std::vector<int> &localID) const
+{
+    std::ifstream file(filename.c_str());
+    if (!file.is_open())
+    {
+        std::cerr << "Error: Could not open file " << filename << std::endl;
+        exit(1);
+    }
+
+    std::string line;
+    while (std::getline(file, line))
+    {
+        if (line == "localID")
+        {
+            std::string localID_str;
+            std::getline(file, localID_str);
+            std::istringstream localID_ss(localID_str);
+            localID.clear();
+            int i;
+            while (localID_ss >> i)
+            {
+                localID.push_back(i);
+                if (localID_ss.peek() == ' ')
+                    localID_ss.ignore();
             }
         }
     }

@@ -19,6 +19,7 @@ public:
         const std::vector<double> &elem_size2,
         const std::vector<double> &CP,
         const std::vector<int> &ID,
+        const std::vector<int> &localID,
         const std::vector<int> &ghostID,
         const std::vector<int> &Dir,
         const std::vector<int> &IEN,
@@ -82,6 +83,13 @@ public:
         std::vector<int> &ID,
         std::vector<int> &Dir,
         std::vector<int> &IEN) const;
+    
+    void ReadPartition(const std::string &filename,
+        std::vector<int> &localID,
+        std::vector<int> &ghostID) const;
+    
+    void ReadPartition(const std::string &filename,
+        std::vector<int> &localID) const;
 
     void ReadPartition(const std::string &filename,
         int &nlocalfunc) const;
