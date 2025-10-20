@@ -226,7 +226,7 @@ void Partition::GeneratePartition(const BSplineBasis * const &basis1, const BSpl
             std::string filename = fm->GetPartitionFilename(base_name, count);
             fm->WritePartition(filename, nlocalfunc,
                 nlocalelemx, nlocalelemy,
-                elem_size1, elem_size2, localCP, localID, local_to_global_ghost,
+                elem_size1, elem_size2, localCP, localID, local_to_global, local_to_global_ghost,
                 localDir, localIEN, localNURBSExtraction1, localNURBSExtraction2);
 
             std::cout << "Partition " << count << " generated." << std::endl;
