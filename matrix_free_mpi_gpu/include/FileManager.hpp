@@ -107,6 +107,22 @@ public:
         int &part_num_1d, int &dim,
         std::string &base_name) const;
     
+    void WriteGhostMap(const std::string &filename,
+        const std::vector<int> &recieveRanks,
+        const std::vector<int> &recieveOffsets,
+        const std::vector<int> &revieveIndices,
+        const std::vector<int> &sendRanks,
+        const std::vector<int> &sendOffsets,
+        const std::vector<int> &sendIndices) const;
+    
+    void ReadGhostMap(const std::string &filename,
+        std::vector<int> &recieveRanks,
+        std::vector<int> &recieveOffsets,
+        std::vector<int> &recieveIndices,
+        std::vector<int> &sendRanks,
+        std::vector<int> &sendOffsets,
+        std::vector<int> &sendIndices) const;
+    
     void WriteNonZeroCoordinate(const std::string &filename, const int &nnz,
         const std::vector<int> &rows, const std::vector<int> &cols) const;
 

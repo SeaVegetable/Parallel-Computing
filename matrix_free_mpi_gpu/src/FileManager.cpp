@@ -763,6 +763,141 @@ void FileManager::ReadPreprocessInfo(const std::string &filename, int &p, int &q
     }
 }
 
+void FileManager::WriteGhostMap(const std::string &filename,
+    const std::vector<int> &recieveRanks,
+    const std::vector<int> &recieveOffsets,
+    const std::vector<int> &recieveIndices,
+    const std::vector<int> &sendRanks,
+    const std::vector<int> &sendOffsets,
+    const std::vector<int> &sendIndices) const
+{
+    std::ofstream file(filename.c_str());
+    if (!file.is_open())
+    {
+        std::cerr << "Error: Could not open file " << filename << std::endl;
+        exit(1);
+    }
+
+    file << "recieveRanks: ";
+    for (const auto &rank : recieveRanks)
+    {
+        file << rank << " ";
+    }
+    file << std::endl;
+
+    file << "recieveOffsets: ";
+    for (const auto &offset : recieveOffsets)
+    {
+        file << offset << " ";
+    }
+    file << std::endl;
+
+    file << "recieveIndices: ";
+    for (const auto &index : recieveIndices)
+    {
+        file << index << " ";
+    }
+    file << std::endl;
+
+    file << "sendRanks: ";
+    for (const auto &rank : sendRanks)
+    {
+        file << rank << " ";
+    }
+    file << std::endl;
+
+    file << "sendOffsets: ";
+    for (const auto &offset : sendOffsets)
+    {
+        file << offset << " ";
+    }
+    file << std::endl;
+
+    file << "sendIndices: ";
+    for (const auto &index : sendIndices)
+    {
+        file << index << " ";
+    }
+    file << std::endl;
+
+    file.close();
+}
+
+void FileManager::ReadGhostMap(const std::string &filename,
+    std::vector<int> &recieveRanks,
+    std::vector<int> &recieveOffsets,
+    std::vector<int> &recieveIndices,
+    std::vector<int> &sendRanks,
+    std::vector<int> &sendOffsets,
+    std::vector<int> &sendIndices) const
+{
+    std::ifstream file(filename.c_str());
+    if (!file.is_open())
+    {
+        std::cerr << "Error: Could not open file " << filename << std::endl;
+        exit(1);
+    }
+
+    std::string line;
+    while (std::getline(file, line))
+    {
+        if (line.find("recieveRanks: ") != std::string::npos)
+        {
+            std::istringstream iss(line.substr(15));
+            int rank;
+            while (iss >> rank)
+            {
+                recieveRanks.push_back(rank);
+            }
+        }
+        else if (line.find("recieveOffsets: ") != std::string::npos)
+        {
+            std::istringstream iss(line.substr(17));
+            int offset;
+            while (iss >> offset)
+            {
+                recieveOffsets.push_back(offset);
+            }
+        }
+        else if (line.find("recieveIndices: ") != std::string::npos)
+        {
+            std::istringstream iss(line.substr(17));
+            int index;
+            while (iss >> index)
+            {
+                recieveIndices.push_back(index);
+            }
+        }
+        else if (line.find("sendRanks: ") != std::string::npos)
+        {
+            std::istringstream iss(line.substr(11));
+            int rank;
+            while (iss >> rank)
+            {
+                sendRanks.push_back(rank);
+            }
+        }
+        else if (line.find("sendOffsets: ") != std::string::npos)
+        {
+            std::istringstream iss(line.substr(13));
+            int offset;
+            while (iss >> offset)
+            {
+                sendOffsets.push_back(offset);
+            }
+        }
+        else if (line.find("sendIndices: ") != std::string::npos)
+        {
+            std::istringstream iss(line.substr(13));
+            int index;
+            while (iss >> index)
+            {
+                sendIndices.push_back(index);
+            }
+        }
+    }
+}
+
 void FileManager::WriteNonZeroCoordinate(const std::string &filename, const int &nnz,
     const std::vector<int> &rows, const std::vector<int> &cols) const
 {
