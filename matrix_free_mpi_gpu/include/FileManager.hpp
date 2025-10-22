@@ -56,6 +56,7 @@ public:
         std::vector<double> &elem_size2,
         std::vector<double> &CP,
         std::vector<int> &ID,
+        std::vector<int> &localID,
         std::vector<int> &ghostID,
         std::vector<int> &Dir,
         std::vector<int> &IEN,

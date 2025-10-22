@@ -187,6 +187,7 @@ void FileManager::ReadPartition(const std::string &filename,
     std::vector<double> &elem_size2,
     std::vector<double> &CP,
     std::vector<int> &ID,
+    std::vector<int> &localID,
     std::vector<int> &ghostID,
     std::vector<int> &Dir,
     std::vector<int> &IEN,
@@ -272,6 +273,20 @@ void FileManager::ReadPartition(const std::string &filename,
                 ID.push_back(i);
                 if (ID_ss.peek() == ' ')
                     ID_ss.ignore();
+            }
+        }
+        else if (line == "localID")
+        {
+            std::string localID_str;
+            std::getline(file, localID_str);
+            std::istringstream localID_ss(localID_str);
+            localID.clear();
+            int i;
+            while (localID_ss >> i)
+            {
+                localID.push_back(i);
+                if (localID_ss.peek() == ' ')
+                    localID_ss.ignore();
             }
         }
         else if (line == "ghostID")
