@@ -10,6 +10,7 @@
 #include "AbscissaeGenerator.hpp"
 #include "IENGenerator.hpp"
 #include "IDGenerator.hpp"
+#include "InvLM.hpp"
 
 typedef struct {
     KSP innerksp;
@@ -42,6 +43,7 @@ typedef struct {
     std::vector<double> elem_size2;
     std::vector<double> NURBSExtraction1;
     std::vector<double> NURBSExtraction2;
+    InvLM * invlm;
     GlobalAssemblyMF * globalassem;
     QuadraturePoint * quad1;
     QuadraturePoint * quad2;
@@ -236,6 +238,9 @@ int main(int argc, char **argv)
         data->NURBSExtraction1, data->NURBSExtraction2);
 
     data->nlocalfunc = nlocalfunc;
+
+    data->invlm = new InvLM((p+1)*(q+1), nlocalelemx*nlocalelemy,
+        nlocalfunc, data->ID, data->IEN);
 
     ElementMF * elemmf = new ElementMF(p, q);
     int nLocBas = elemmf->GetNumLocalBasis();
