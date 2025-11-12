@@ -42,6 +42,26 @@ public:
         return result;
     }
 
+    std::vector<int> GetAllElemIdx() const
+    {
+        return elemIdx;
+    }
+
+    std::vector<int> GetAllBaseIdx() const
+    {
+        return baseIdx;
+    }
+
+    std::vector<int> GetAllElemNum() const
+    {
+        return elemNum;
+    }
+
+    std::vector<int> GetAllOffset() const
+    {
+        return offset;
+    }
+
 private:
     std::vector<int> elemNum{};
     std::vector<int> offset{};

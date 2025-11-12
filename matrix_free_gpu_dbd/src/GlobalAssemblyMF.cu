@@ -16,6 +16,10 @@ void GlobalAssemblyMF::AssemLoad(QuadraturePoint * const &quad1,
     const std::vector<int> &IEN,
     const std::vector<int> &ID,
     const std::vector<int> &Dir,
+    const std::vector<int> &invlm_elemNum,
+    const std::vector<int> &invlm_offset,
+    const std::vector<int> &invlm_elemIdx,
+    const std::vector<int> &invlm_baseIdx,
     const std::vector<double> &CP,
     const std::vector<double> &NURBSExtraction1,
     const std::vector<double> &NURBSExtraction2,
@@ -92,6 +96,17 @@ void GlobalAssemblyMF::AssemLoad(QuadraturePoint * const &quad1,
     CopyToDevice(qw1, w1.data(), nqp1);
     CopyToDevice(qw2, w2.data(), nqp2);
 
+    double * d_invlm_elemNum, * d_invlm_offset;
+    double * d_invlm_elemIdx, * d_invlm_baseIdx;
+    MallocDeviceMemory(&d_invlm_elemNum, invlm_elemNum.size());
+    MallocDeviceMemory(&d_invlm_offset, invlm_offset.size());
+    MallocDeviceMemory(&d_invlm_elemIdx, invlm_elemIdx.size());
+    MallocDeviceMemory(&d_invlm_baseIdx, invlm_baseIdx.size());
+    CopyToDevice(d_invlm_elemNum, invlm_elemNum.data(), invlm_elemNum.size());
+    CopyToDevice(d_invlm_offset, invlm_offset.data(), invlm_offset.size());
+    CopyToDevice(d_invlm_elemIdx, invlm_elemIdx.data(), invlm_elemIdx.size());
+    CopyToDevice(d_invlm_baseIdx, invlm_baseIdx.data(), invlm_baseIdx.size());
+
     VecSet(F, 0.0);
     double *d_F_array;
     VecCUDAGetArray(F, &d_F_array);
@@ -102,7 +117,10 @@ void GlobalAssemblyMF::AssemLoad(QuadraturePoint * const &quad1,
         d_NURBSExtraction1, d_NURBSExtraction2,
         d_elem_size1, d_elem_size2,
         d_IEN, d_ID, d_CP,
-        qw1, qw2, d_F_array);
+        qw1, qw2,
+        d_invlm_elemNum, d_invlm_offset,
+        d_invlm_elemIdx, d_invlm_baseIdx, 
+        d_F_array);
     
     DirichletBCCUDA(Dir.data(), static_cast<int>(Dir.size()), d_F_array, 0.0);
 
@@ -121,6 +139,10 @@ void GlobalAssemblyMF::AssemLoad(QuadraturePoint * const &quad1,
     FreeDeviceMemory(d_elem_size2);
     FreeDeviceMemory(qw1);
     FreeDeviceMemory(qw2);
+    FreeDeviceMemory(d_invlm_elemNum);
+    FreeDeviceMemory(d_invlm_offset);
+    FreeDeviceMemory(d_invlm_elemIdx);
+    FreeDeviceMemory(d_invlm_baseIdx);
 }
 
 void GlobalAssemblyMF::MatMulMF(QuadraturePoint * const &quad1,
@@ -128,6 +150,10 @@ void GlobalAssemblyMF::MatMulMF(QuadraturePoint * const &quad1,
     const std::vector<int> &IEN,
     const std::vector<int> &ID,
     const std::vector<int> &Dir,
+    const std::vector<int> &invlm_elemNum,
+    const std::vector<int> &invlm_offset,
+    const std::vector<int> &invlm_elemIdx,
+    const std::vector<int> &invlm_baseIdx,
     const std::vector<double> &CP,
     const std::vector<double> &NURBSExtraction1,
     const std::vector<double> &NURBSExtraction2,
@@ -207,6 +233,17 @@ void GlobalAssemblyMF::MatMulMF(QuadraturePoint * const &quad1,
     CopyToDevice(qw1, w1.data(), nqp1);
     CopyToDevice(qw2, w2.data(), nqp2);
 
+    double * d_invlm_elemNum, * d_invlm_offset;
+    double * d_invlm_elemIdx, * d_invlm_baseIdx;
+    MallocDeviceMemory(&d_invlm_elemNum, invlm_elemNum.size());
+    MallocDeviceMemory(&d_invlm_offset, invlm_offset.size());
+    MallocDeviceMemory(&d_invlm_elemIdx, invlm_elemIdx.size());
+    MallocDeviceMemory(&d_invlm_baseIdx, invlm_baseIdx.size());
+    CopyToDevice(d_invlm_elemNum, invlm_elemNum.data(), invlm_elemNum.size());
+    CopyToDevice(d_invlm_offset, invlm_offset.data(), invlm_offset.size());
+    CopyToDevice(d_invlm_elemIdx, invlm_elemIdx.data(), invlm_elemIdx.size());
+    CopyToDevice(d_invlm_baseIdx, invlm_baseIdx.data(), invlm_baseIdx.size());
+
     VecSet(y, 0.0);
     const double *d_x_array;
     double *d_y_array;
@@ -219,7 +256,10 @@ void GlobalAssemblyMF::MatMulMF(QuadraturePoint * const &quad1,
         d_NURBSExtraction1, d_NURBSExtraction2,
         d_elem_size1, d_elem_size2,
         d_IEN, d_ID, d_CP,
-        qw1, qw2, d_x_array, d_y_array);
+        qw1, qw2,
+        d_invlm_elemNum, d_invlm_offset,
+        d_invlm_elemIdx, d_invlm_baseIdx, 
+        d_x_array, d_y_array);
 
     DirichletBCCUDA(Dir.data(), static_cast<int>(Dir.size()), d_y_array, 0.0);
     
@@ -239,4 +279,8 @@ void GlobalAssemblyMF::MatMulMF(QuadraturePoint * const &quad1,
     FreeDeviceMemory(d_elem_size2);
     FreeDeviceMemory(qw1);
     FreeDeviceMemory(qw2);
+    FreeDeviceMemory(d_invlm_elemNum);
+    FreeDeviceMemory(d_invlm_offset);
+    FreeDeviceMemory(d_invlm_elemIdx);
+    FreeDeviceMemory(d_invlm_baseIdx);
 }

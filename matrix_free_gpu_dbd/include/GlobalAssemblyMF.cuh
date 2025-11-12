@@ -6,7 +6,6 @@
 #include "ElementMF.hpp"
 #include "memory.cuh"
 #include "mult.cuh"
-#include "InvLM.hpp"
 
 class GlobalAssemblyMF
 {
@@ -26,6 +25,10 @@ class GlobalAssemblyMF
             const std::vector<int> &IEN,
             const std::vector<int> &ID,
             const std::vector<int> &Dir,
+            const std::vector<int> &invlm_elemNum,
+            const std::vector<int> &invlm_offset,
+            const std::vector<int> &invlm_elemIdx,
+            const std::vector<int> &invlm_baseIdx,
             const std::vector<double> &CP,
             const std::vector<double> &NURBSExtraction1,
             const std::vector<double> &NURBSExtraction2,
@@ -40,12 +43,15 @@ class GlobalAssemblyMF
             const std::vector<int> &IEN,
             const std::vector<int> &ID,
             const std::vector<int> &Dir,
+            const std::vector<int> &invlm_elemNum,
+            const std::vector<int> &invlm_offset,
+            const std::vector<int> &invlm_elemIdx,
+            const std::vector<int> &invlm_baseIdx,
             const std::vector<double> &CP,
             const std::vector<double> &NURBSExtraction1,
             const std::vector<double> &NURBSExtraction2,
             const std::vector<double> &elem_size1,
             const std::vector<double> &elem_size2,
-            InvLM * const &invlm,
             ElementMF * const &elemmf,
             BernsteinBasis * const &bernstein,
             Vec x, Vec y);

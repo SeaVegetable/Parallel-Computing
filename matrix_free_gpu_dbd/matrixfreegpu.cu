@@ -10,6 +10,7 @@
 #include "AbscissaeGenerator.hpp"
 #include "IENGenerator.hpp"
 #include "IDGenerator.hpp"
+#include "InvLM.hpp"
 
 typedef struct {
     KSP innerksp;
@@ -38,11 +39,14 @@ typedef struct {
     std::vector<int> ID;
     std::vector<int> Dir;
     std::vector<int> IEN;
+    std::vector<int> invlm_elemNum;
+    std::vector<int> invlm_offset;
+    std::vector<int> invlm_elemIdx;
+    std::vector<int> invlm_baseIdx;
     std::vector<double> elem_size1;
     std::vector<double> elem_size2;
     std::vector<double> NURBSExtraction1;
     std::vector<double> NURBSExtraction2;
-    InvLM * invlm;
     GlobalAssemblyMF * globalassem;
     QuadraturePoint * quad1;
     QuadraturePoint * quad2;
@@ -58,10 +62,13 @@ PetscErrorCode MyMatMult(Mat A, Vec x, Vec y)
     VecSet(y, 0.0);
     
     data->globalassem->MatMulMF(data->quad1, data->quad2,
-        data->IEN, data->ID, data->Dir, data->CP,
+        data->IEN, data->ID, data->Dir,
+        data->invlm_elemNum, data->invlm_offset,
+        data->invlm_elemIdx, data->invlm_baseIdx, 
+        data->CP,
         data->NURBSExtraction1, data->NURBSExtraction2,
         data->elem_size1, data->elem_size2,
-        data->invlm, data->elem, data->bernstein, x, y);
+        data->elem, data->bernstein, x, y);
 
     return 0;
 }
@@ -238,8 +245,13 @@ int main(int argc, char **argv)
 
     data->nlocalfunc = nlocalfunc;
 
-    data->invlm = new InvLM((p+1)*(q+1), nlocalelemx*nlocalelemy,
+    InvLM invlm = new InvLM((p+1)*(q+1), nlocalelemx*nlocalelemy,
         nlocalfunc, data->ID, data->IEN);
+
+    data->invlm_elemNum = invlm->GetAllElemNum();
+    data->invlm_offset = invlm->GetAllOffset();
+    data->invlm_elemIdx = invlm->GetAllElemIdx();
+    data->invlm_baseIdx = invlm->GetAllBaseIdx();
 
     ElementMF * elemmf = new ElementMF(p, q);
     int nLocBas = elemmf->GetNumLocalBasis();
@@ -252,10 +264,13 @@ int main(int argc, char **argv)
     data->elem = elemmf;
     
     data->globalassem->AssemLoad(data->quad1, data->quad2,
-        data->IEN, data->ID, data->Dir, data->CP,
+        data->IEN, data->ID, data->Dir, 
+        data->invlm_elemNum, data->invlm_offset,
+        data->invlm_elemIdx, data->invlm_baseIdx,
+        data->CP,
         data->NURBSExtraction1, data->NURBSExtraction2,
         data->elem_size1, data->elem_size2,
-        data->invlm, data->elem, data->bernstein);
+        data->elem, data->bernstein);
     
     MPI_Barrier(PETSC_COMM_WORLD);
 
@@ -322,6 +337,7 @@ int main(int argc, char **argv)
     delete data->quad2; data->quad2 = nullptr;
     delete data->bernstein; data->bernstein = nullptr;
     delete data->globalassem; data->globalassem = nullptr;
+    delete invlm; invlm = nullptr;
 
     VecDestroy(&u);
     MatDestroy(&K);
