@@ -6,6 +6,7 @@
 #include "ElementMF.hpp"
 #include "memory.cuh"
 #include "mult.cuh"
+#include "InvLM.hpp"
 
 class GlobalAssemblyMF
 {
@@ -30,6 +31,7 @@ class GlobalAssemblyMF
             const std::vector<double> &NURBSExtraction2,
             const std::vector<double> &elem_size1,
             const std::vector<double> &elem_size2,
+            InvLM * const &invlm,
             ElementMF * const &elemmf,
             BernsteinBasis * const &bernstein);
         
@@ -43,6 +45,7 @@ class GlobalAssemblyMF
             const std::vector<double> &NURBSExtraction2,
             const std::vector<double> &elem_size1,
             const std::vector<double> &elem_size2,
+            InvLM * const &invlm,
             ElementMF * const &elemmf,
             BernsteinBasis * const &bernstein,
             Vec x, Vec y);

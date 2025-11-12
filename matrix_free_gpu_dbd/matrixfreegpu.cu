@@ -10,7 +10,6 @@
 #include "AbscissaeGenerator.hpp"
 #include "IENGenerator.hpp"
 #include "IDGenerator.hpp"
-#include "InvLM.hpp"
 
 typedef struct {
     KSP innerksp;
@@ -62,7 +61,7 @@ PetscErrorCode MyMatMult(Mat A, Vec x, Vec y)
         data->IEN, data->ID, data->Dir, data->CP,
         data->NURBSExtraction1, data->NURBSExtraction2,
         data->elem_size1, data->elem_size2,
-        data->elem, data->bernstein, x, y);
+        data->invlm, data->elem, data->bernstein, x, y);
 
     return 0;
 }
@@ -255,7 +254,8 @@ int main(int argc, char **argv)
     data->globalassem->AssemLoad(data->quad1, data->quad2,
         data->IEN, data->ID, data->Dir, data->CP,
         data->NURBSExtraction1, data->NURBSExtraction2,
-        data->elem_size1, data->elem_size2, data->elem, data->bernstein);
+        data->elem_size1, data->elem_size2,
+        data->invlm, data->elem, data->bernstein);
     
     MPI_Barrier(PETSC_COMM_WORLD);
 
