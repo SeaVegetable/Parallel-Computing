@@ -7,7 +7,7 @@ InvLM::InvLM(const int &nLocBas,
     const std::vector<int> IEN)
 {
     elemNum.resize(nlocfunc, 0);
-    std::vector<int> offset(nlocalfunc, 0);
+    offset.resize(nlocfunc, 0);
     std::vector<int> size_count(nlocfunc, 0);
 
     for (int i = 0; i < nLocElem; ++i)

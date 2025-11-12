@@ -14,6 +14,7 @@ public:
 
 private:
     std::vector<int> elemNum{};
+    std::vector<int> offset{};
     std::vector<int> elemIdx{};
     std::vector<int> baseIdx{};
 };
