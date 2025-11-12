@@ -11,7 +11,11 @@ void AssembleLoadCUDA(const int p, const int q,
     double * d_nurbs_extraction1, double * d_nurbs_extraction2,
     double * d_elem_size1, double * d_elem_size2,
     int * d_IEN, int * d_ID, double * d_CP,
-    double * qw1, double * qw2, double * d_x_array);
+    double * qw1, double * qw2,
+    int * d_invlm_elemNum, int * d_invlm_offset,
+    int * d_invlm_elemIdx, int * d_invlm_baseIdx,
+    int * d_xelemIdx, int * d_yelemIdx,
+    double * d_x_array);
 
 void MatrixFreeMatMultCUDA(const int p, const int q,
     const int nlocalelemx, const int nlocalelemy,
@@ -21,6 +25,9 @@ void MatrixFreeMatMultCUDA(const int p, const int q,
     double * d_elem_size1, double * d_elem_size2,
     int * d_IEN, int * d_ID, double * d_CP,
     double * qw1, double * qw2,
+    int * d_invlm_elemNum, int * d_invlm_offset,
+    int * d_invlm_elemIdx, int * d_invlm_baseIdx,
+    int * d_xelemIdx, int * d_yelemIdx,
     const double * d_F_array_in, double * d_F_array_out);
 
 void DirichletBCCUDA(const int * d_Dir,

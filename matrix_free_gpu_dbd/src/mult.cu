@@ -238,6 +238,9 @@ __global__ void AssembleKernel(
     int *d_IEN, int *d_ID,
     double *d_CP,
     double *qw1, double *qw2,
+    int *d_invlm_elemNum, int *d_invlm_offset,
+    int *d_invlm_elemIdx, int *d_invlm_baseIdx,
+    int *d_xelemIdx, int *d_yelemIdx,
     double *d_x_array
     )
 {
@@ -256,16 +259,6 @@ __global__ void AssembleKernel(
     offset += ny * ny * sizeof(double);
     double *s_qw = (double*)(shared_data + offset);
 
-    int elemIndex = blockIdx.y * gridDim.x + blockIdx.x;
-    const int nLocBas = nx * ny;
-
-    for (int j = 0; j < nLocBas; ++j)
-    {
-        s_eID[j] = d_ID[d_IEN[elemIndex * nLocBas + j]];
-        s_eCP[2 * j] = d_CP[2 * d_IEN[elemIndex * nLocBas + j]];
-        s_eCP[2 * j + 1] = d_CP[2 * d_IEN[elemIndex * nLocBas + j] + 1];
-    }
-
     for (int j = 0; j < ny; ++j)
     {
         for (int i = 0; i < nx; ++i)
@@ -274,15 +267,11 @@ __global__ void AssembleKernel(
         }
     }
 
-    for (int i = 0; i < nx * nx; ++i)
-        s_eNURBSExtraction1[i] = d_nurbs_extraction1[blockIdx.x * nx * nx + i];
-    for (int i = 0; i < ny * ny; ++i)
-        s_eNURBSExtraction2[i] = d_nurbs_extraction2[blockIdx.y * ny * ny + i];
+    int nodeIndex = blockIdx.y * gridDim.x + blockIdx.x;
+    const int nLocBas = nx * ny;
 
-    double h1 = d_elem_size1[blockIdx.x];
-    double h2 = d_elem_size2[blockIdx.y];
-
-    __syncthreads();
+    int invlm_elemNum = d_invlm_elemNum[nodeIndex];
+    int invlm_offset = d_invlm_offset[nodeIndex];
 
     int qpx = threadIdx.x;
     int qpy = threadIdx.y;
@@ -306,31 +295,50 @@ __global__ void AssembleKernel(
             dB2[j] = d_dB2[qpy * ny + j];
         }
 
-        double jacobian;
-        double R[nLocBas];
-
-        compute_jacobian_basis(h1, h2, B1, B2, dB1, dB2,
-            s_eNURBSExtraction1, s_eNURBSExtraction2, s_eCP, jacobian, R);
-        
-        double x = 0.0;
-        double y = 0.0;
-
-        for (int ii = 0; ii < nLocBas; ++ii)
+        for (int ee = 0; ee < invlm_elemNum; ++ee)
         {
-            x += s_eCP[2 * ii] * R[ii];
-            y += s_eCP[2 * ii + 1] * R[ii];
-        }
+            int elemIndex = d_invlm_elemIdx[invlm_offset + ee];
+            int baseIndex = d_invlm_baseIdx[invlm_offset + ee];
 
-        double force = get_force(x, y);
-
-        for (int ii = 0; ii < nLocBas; ++ii)
-        {
-            double val = R[ii] * force * jacobian * s_qw[qp];
-            int coo_index = s_eID[ii];
-            if (coo_index >= 0)
+            for (int j = 0; j < nLocBas; ++j)
             {
-                atomicAdd(&d_x_array[coo_index], val);
+                s_eID[j] = d_ID[d_IEN[elemIndex * nLocBas + j]];
+                s_eCP[2 * j] = d_CP[2 * d_IEN[elemIndex * nLocBas + j]];
+                s_eCP[2 * j + 1] = d_CP[2 * d_IEN[elemIndex * nLocBas + j] + 1];
             }
+
+            int elemx = d_xelemIdx[elemIndex];
+            int elemy = d_yelemIdx[elemIndex];
+            for (int i = 0; i < nx * nx; ++i)
+                s_eNURBSExtraction1[i] = d_nurbs_extraction1[elemx * nx * nx + i];
+            for (int i = 0; i < ny * ny; ++i)
+                s_eNURBSExtraction2[i] = d_nurbs_extraction2[elemy * ny * ny + i];
+
+            double h1 = d_elem_size1[elemx];
+            double h2 = d_elem_size2[elemy];
+
+            __syncthreads();
+
+            double jacobian;
+            double R[nLocBas];
+
+            compute_jacobian_basis(h1, h2, B1, B2, dB1, dB2,
+                s_eNURBSExtraction1, s_eNURBSExtraction2, s_eCP, jacobian, R);
+
+            double x = 0.0;
+            double y = 0.0;
+
+            for (int ii = 0; ii < nLocBas; ++ii)
+            {
+                x += s_eCP[2 * ii] * R[ii];
+                y += s_eCP[2 * ii + 1] * R[ii];
+            }
+
+            double force = get_force(x, y);
+
+            double val = R[baseIndex] * force * jacobian * s_qw[qp];
+            int coo_index = s_eID[baseIndex];
+            atomicAdd(&d_x_array[coo_index], val);
         }
     }
 }
@@ -343,6 +351,9 @@ __global__ void MatrixFreeMatMultKernel(
     int *d_IEN, int *d_ID,
     double *d_CP,
     double *qw1, double *qw2,
+    int *d_invlm_elemNum, int *d_invlm_offset,
+    int *d_invlm_elemIdx, int *d_invlm_baseIdx,
+    int *d_xelemIdx, int *d_yelemIdx,
     const double *d_F_array_in,
     double *d_F_array_out
     )
@@ -365,15 +376,6 @@ __global__ void MatrixFreeMatMultKernel(
     double *s_qw = (double*)(shared_data + offset);
     offset += nLocBas * sizeof(double);
     double *Floc_in = (double*)(shared_data + offset);
-    
-    int elemIndex = blockIdx.y * gridDim.x + blockIdx.x;
-
-    for (int j = 0; j < nLocBas; ++j)
-    {
-        s_eID[j] = d_ID[d_IEN[elemIndex * nLocBas + j]];
-        s_eCP[2 * j] = d_CP[2 * d_IEN[elemIndex * nLocBas + j]];
-        s_eCP[2 * j + 1] = d_CP[2 * d_IEN[elemIndex * nLocBas + j] + 1];
-    }
 
     for (int j = 0; j < ny; ++j)
     {
@@ -382,28 +384,12 @@ __global__ void MatrixFreeMatMultKernel(
             s_qw[j * nx + i] = qw1[i] * qw2[j];
         }
     }
+    
+    int nodeIndex = blockIdx.y * gridDim.x + blockIdx.x;
+    const int nLocBas = nx * ny;
 
-    for (int i = 0; i < nx * nx; ++i)
-        s_eNURBSExtraction1[i] = d_nurbs_extraction1[blockIdx.x * nx * nx + i];
-    for (int i = 0; i < ny * ny; ++i)
-        s_eNURBSExtraction2[i] = d_nurbs_extraction2[blockIdx.y * ny * ny + i];
-
-    for (int i = 0; i < nLocBas; ++i)
-    {
-        int coo_index = d_IEN[elemIndex * nLocBas + i];
-        Floc_in[i] = d_F_array_in[coo_index];
-    }
-
-    double h1 = d_elem_size1[blockIdx.x];
-    double h2 = d_elem_size2[blockIdx.y];
-
-    __syncthreads();
-
-    double Floc_out[nLocBas];
-    for (int i = 0; i < nLocBas; ++i)
-    {
-        Floc_out[i] = 0.0;
-    }
+    int invlm_elemNum = d_invlm_elemNum[nodeIndex];
+    int invlm_offset = d_invlm_offset[nodeIndex];
 
     int qpx = threadIdx.x;
     int qpy = threadIdx.y;
@@ -426,38 +412,65 @@ __global__ void MatrixFreeMatMultKernel(
             B2[j] = d_B2[qpy * ny + j];
             dB2[j] = d_dB2[qpy * ny + j];
         }
-
-        double jacobian;
-        double dR_dx[nLocBas];
-        double dR_dy[nLocBas];
-
-        compute_jacobian_derivative(h1, h2, B1, B2, dB1, dB2,
-            s_eNURBSExtraction1, s_eNURBSExtraction2, s_eCP, jacobian, dR_dx, dR_dy);
         
-        double temp_x = 0.0;
-        double temp_y = 0.0;
-
-        for (int jj = 0; jj < nLocBas; ++jj)
+        for (int ee = 0; ee < invlm_elemNum; ++ee)
         {
-            temp_x += dR_dx[jj] * Floc_in[jj];
-            temp_y += dR_dy[jj] * Floc_in[jj];
-        }
+            int elemIndex = d_invlm_elemIdx[invlm_offset + ee];
+            int baseIndex = d_invlm_baseIdx[invlm_offset + ee];
 
-        temp_x *= -s_qw[qp]*jacobian;
-        temp_y *= -s_qw[qp]*jacobian;
-
-        for (int ii = 0; ii < nLocBas; ++ii)
-        {
-            Floc_out[ii] += (dR_dx[ii] * temp_x + dR_dy[ii] * temp_y);
-        }
-
-        for (int ii = 0; ii < nLocBas; ++ii)
-        {
-            int coo_index = s_eID[ii];
-            if (coo_index >= 0)
+            for (int j = 0; j < nLocBas; ++j)
             {
-                atomicAdd(&d_F_array_out[coo_index], Floc_out[ii]);
+                s_eID[j] = d_ID[d_IEN[elemIndex * nLocBas + j]];
+                s_eCP[2 * j] = d_CP[2 * d_IEN[elemIndex * nLocBas + j]];
+                s_eCP[2 * j + 1] = d_CP[2 * d_IEN[elemIndex * nLocBas + j] + 1];
             }
+
+            int elemx = d_xelemIdx[elemIndex];
+            int elemy = d_yelemIdx[elemIndex];
+            for (int i = 0; i < nx * nx; ++i)
+                s_eNURBSExtraction1[i] = d_nurbs_extraction1[elemx * nx * nx + i];
+            for (int i = 0; i < ny * ny; ++i)
+                s_eNURBSExtraction2[i] = d_nurbs_extraction2[elemy * ny * ny + i];
+            double h1 = d_elem_size1[elemx];
+            double h2 = d_elem_size2[elemy];
+
+            for (int i = 0; i < nLocBas; ++i)
+            {
+                int coo_index = d_IEN[elemIndex * nLocBas + i];
+                Floc_in[i] = d_F_array_in[coo_index];
+            }
+
+            __syncthreads();
+
+            double Floc_out[nLocBas];
+            for (int i = 0; i < nLocBas; ++i)
+            {
+                Floc_out[i] = 0.0;
+            }
+
+            double jacobian;
+            double dR_dx[nLocBas];
+            double dR_dy[nLocBas];
+
+            compute_jacobian_derivative(h1, h2, B1, B2, dB1, dB2,
+                s_eNURBSExtraction1, s_eNURBSExtraction2, s_eCP, jacobian, dR_dx, dR_dy);
+            
+            double temp_x = 0.0;
+            double temp_y = 0.0;
+
+            for (int jj = 0; jj < nLocBas; ++jj)
+            {
+                temp_x += dR_dx[jj] * Floc_in[jj];
+                temp_y += dR_dy[jj] * Floc_in[jj];
+            }
+
+            temp_x *= -s_qw[qp]*jacobian;
+            temp_y *= -s_qw[qp]*jacobian;
+
+            Floc_out[baseIndex] += (dR_dx[baseIndex] * temp_x + dR_dy[baseIndex] * temp_y);
+
+            int coo_index = s_eID[baseIndex];
+            atomicAdd(&d_F_array_out[coo_index], Floc_out[baseIndex]);
         }
     }
 }
@@ -483,7 +496,11 @@ void AssembleLoadCUDA(const int p, const int q,
     double * d_nurbs_extraction1, double * d_nurbs_extraction2,
     double * d_elem_size1, double * d_elem_size2,
     int * d_IEN, int * d_ID, double * d_CP,
-    double * qw1, double * qw2, double * d_F_array)
+    double * qw1, double * qw2,
+    int * d_invlm_elemNum, int * d_invlm_offset,
+    int * d_invlm_elemIdx, int * d_invlm_baseIdx,
+    int * d_xelemIdx, int * d_yelemIdx,
+    double * d_F_array)
 {
     if (p != P_ORDER || q != Q_ORDER)
     {
@@ -503,7 +520,11 @@ void AssembleLoadCUDA(const int p, const int q,
         d_nurbs_extraction1, d_nurbs_extraction2,
         d_elem_size1, d_elem_size2,
         d_IEN, d_ID, d_CP,
-        qw1, qw2, d_F_array);
+        qw1, qw2,
+        d_invlm_elemNum, d_invlm_offset,
+        d_invlm_elemIdx, d_invlm_baseIdx,
+        d_xelemIdx, d_yelemIdx,
+        d_F_array);
 
     cudaDeviceSynchronize();
 
@@ -523,6 +544,9 @@ void MatrixFreeMatMultCUDA(const int p, const int q,
     double * d_elem_size1, double * d_elem_size2,
     int * d_IEN, int * d_ID, double * d_CP,
     double * qw1, double * qw2,
+    int * d_invlm_elemNum, int * d_invlm_offset,
+    int * d_invlm_elemIdx, int * d_invlm_baseIdx,
+    int * d_xelemIdx, int * d_yelemIdx,
     const double * d_F_array_in, double * d_F_array_out)
 {
     if (p != P_ORDER || q != Q_ORDER)
@@ -545,6 +569,9 @@ void MatrixFreeMatMultCUDA(const int p, const int q,
         d_elem_size1, d_elem_size2,
         d_IEN, d_ID, d_CP,
         qw1, qw2,
+        d_invlm_elemNum, d_invlm_offset,
+        d_invlm_elemIdx, d_invlm_baseIdx,
+        d_xelemIdx, d_yelemIdx,
         d_F_array_in, d_F_array_out);
 
     cudaDeviceSynchronize();

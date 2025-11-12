@@ -20,6 +20,8 @@ void GlobalAssemblyMF::AssemLoad(QuadraturePoint * const &quad1,
     const std::vector<int> &invlm_offset,
     const std::vector<int> &invlm_elemIdx,
     const std::vector<int> &invlm_baseIdx,
+    const std::vector<int> &xelemIdx,
+    const std::vector<int> &yelemIdx,
     const std::vector<double> &CP,
     const std::vector<double> &NURBSExtraction1,
     const std::vector<double> &NURBSExtraction2,
@@ -96,8 +98,8 @@ void GlobalAssemblyMF::AssemLoad(QuadraturePoint * const &quad1,
     CopyToDevice(qw1, w1.data(), nqp1);
     CopyToDevice(qw2, w2.data(), nqp2);
 
-    double * d_invlm_elemNum, * d_invlm_offset;
-    double * d_invlm_elemIdx, * d_invlm_baseIdx;
+    int * d_invlm_elemNum, * d_invlm_offset;
+    int * d_invlm_elemIdx, * d_invlm_baseIdx;
     MallocDeviceMemory(&d_invlm_elemNum, invlm_elemNum.size());
     MallocDeviceMemory(&d_invlm_offset, invlm_offset.size());
     MallocDeviceMemory(&d_invlm_elemIdx, invlm_elemIdx.size());
@@ -106,6 +108,12 @@ void GlobalAssemblyMF::AssemLoad(QuadraturePoint * const &quad1,
     CopyToDevice(d_invlm_offset, invlm_offset.data(), invlm_offset.size());
     CopyToDevice(d_invlm_elemIdx, invlm_elemIdx.data(), invlm_elemIdx.size());
     CopyToDevice(d_invlm_baseIdx, invlm_baseIdx.data(), invlm_baseIdx.size());
+
+    int * d_xelemIdx, * d_yelemIdx;
+    MallocDeviceMemory(&d_xelemIdx, xelemIdx.size());
+    MallocDeviceMemory(&d_yelemIdx, yelemIdx.size());
+    CopyToDevice(d_xelemIdx, xelemIdx.data(), xelemIdx.size());
+    CopyToDevice(d_yelemIdx, yelemIdx.data(), yelemIdx.size());
 
     VecSet(F, 0.0);
     double *d_F_array;
@@ -119,7 +127,8 @@ void GlobalAssemblyMF::AssemLoad(QuadraturePoint * const &quad1,
         d_IEN, d_ID, d_CP,
         qw1, qw2,
         d_invlm_elemNum, d_invlm_offset,
-        d_invlm_elemIdx, d_invlm_baseIdx, 
+        d_invlm_elemIdx, d_invlm_baseIdx,
+        d_xelemIdx, d_yelemIdx, 
         d_F_array);
     
     DirichletBCCUDA(Dir.data(), static_cast<int>(Dir.size()), d_F_array, 0.0);
@@ -143,6 +152,8 @@ void GlobalAssemblyMF::AssemLoad(QuadraturePoint * const &quad1,
     FreeDeviceMemory(d_invlm_offset);
     FreeDeviceMemory(d_invlm_elemIdx);
     FreeDeviceMemory(d_invlm_baseIdx);
+    FreeDeviceMemory(d_xelemIdx);
+    FreeDeviceMemory(d_yelemIdx);
 }
 
 void GlobalAssemblyMF::MatMulMF(QuadraturePoint * const &quad1,
@@ -154,6 +165,8 @@ void GlobalAssemblyMF::MatMulMF(QuadraturePoint * const &quad1,
     const std::vector<int> &invlm_offset,
     const std::vector<int> &invlm_elemIdx,
     const std::vector<int> &invlm_baseIdx,
+    const std::vector<int> &xelemIdx,
+    const std::vector<int> &yelemIdx,
     const std::vector<double> &CP,
     const std::vector<double> &NURBSExtraction1,
     const std::vector<double> &NURBSExtraction2,
@@ -233,8 +246,8 @@ void GlobalAssemblyMF::MatMulMF(QuadraturePoint * const &quad1,
     CopyToDevice(qw1, w1.data(), nqp1);
     CopyToDevice(qw2, w2.data(), nqp2);
 
-    double * d_invlm_elemNum, * d_invlm_offset;
-    double * d_invlm_elemIdx, * d_invlm_baseIdx;
+    int * d_invlm_elemNum, * d_invlm_offset;
+    int * d_invlm_elemIdx, * d_invlm_baseIdx;
     MallocDeviceMemory(&d_invlm_elemNum, invlm_elemNum.size());
     MallocDeviceMemory(&d_invlm_offset, invlm_offset.size());
     MallocDeviceMemory(&d_invlm_elemIdx, invlm_elemIdx.size());
@@ -243,6 +256,12 @@ void GlobalAssemblyMF::MatMulMF(QuadraturePoint * const &quad1,
     CopyToDevice(d_invlm_offset, invlm_offset.data(), invlm_offset.size());
     CopyToDevice(d_invlm_elemIdx, invlm_elemIdx.data(), invlm_elemIdx.size());
     CopyToDevice(d_invlm_baseIdx, invlm_baseIdx.data(), invlm_baseIdx.size());
+
+    int * d_xelemIdx, * d_yelemIdx;
+    MallocDeviceMemory(&d_xelemIdx, xelemIdx.size());
+    MallocDeviceMemory(&d_yelemIdx, yelemIdx.size());
+    CopyToDevice(d_xelemIdx, xelemIdx.data(), xelemIdx.size());
+    CopyToDevice(d_yelemIdx, yelemIdx.data(), yelemIdx.size());
 
     VecSet(y, 0.0);
     const double *d_x_array;
@@ -259,6 +278,7 @@ void GlobalAssemblyMF::MatMulMF(QuadraturePoint * const &quad1,
         qw1, qw2,
         d_invlm_elemNum, d_invlm_offset,
         d_invlm_elemIdx, d_invlm_baseIdx, 
+        d_xelemIdx, d_yelemIdx,
         d_x_array, d_y_array);
 
     DirichletBCCUDA(Dir.data(), static_cast<int>(Dir.size()), d_y_array, 0.0);

@@ -43,6 +43,8 @@ typedef struct {
     std::vector<int> invlm_offset;
     std::vector<int> invlm_elemIdx;
     std::vector<int> invlm_baseIdx;
+    std::vector<int> xelemIdx;
+    std::vector<int> yelemIdx;
     std::vector<double> elem_size1;
     std::vector<double> elem_size2;
     std::vector<double> NURBSExtraction1;
@@ -64,7 +66,8 @@ PetscErrorCode MyMatMult(Mat A, Vec x, Vec y)
     data->globalassem->MatMulMF(data->quad1, data->quad2,
         data->IEN, data->ID, data->Dir,
         data->invlm_elemNum, data->invlm_offset,
-        data->invlm_elemIdx, data->invlm_baseIdx, 
+        data->invlm_elemIdx, data->invlm_baseIdx,
+        data->xelemIdx, data->yelemIdx,
         data->CP,
         data->NURBSExtraction1, data->NURBSExtraction2,
         data->elem_size1, data->elem_size2,
@@ -253,6 +256,19 @@ int main(int argc, char **argv)
     data->invlm_elemIdx = invlm->GetAllElemIdx();
     data->invlm_baseIdx = invlm->GetAllBaseIdx();
 
+    std::vector<int> xelemIdx{};
+    std::vector<int> yelemIdx{};
+    for (int ey = 0; ey < nlocalelemy; ++ey)
+    {
+        for (int ex = 0; ex < nlocalelemx; ++ex)
+        {
+            xelemIdx.push_back(ex);
+            yelemIdx.push_back(ey);
+        }
+    }
+    data->xelemIdx = xelemIdx;
+    data->yelemIdx = yelemIdx;
+
     ElementMF * elemmf = new ElementMF(p, q);
     int nLocBas = elemmf->GetNumLocalBasis();
 
@@ -267,6 +283,7 @@ int main(int argc, char **argv)
         data->IEN, data->ID, data->Dir, 
         data->invlm_elemNum, data->invlm_offset,
         data->invlm_elemIdx, data->invlm_baseIdx,
+        data->xelemIdx, data->yelemIdx,
         data->CP,
         data->NURBSExtraction1, data->NURBSExtraction2,
         data->elem_size1, data->elem_size2,
