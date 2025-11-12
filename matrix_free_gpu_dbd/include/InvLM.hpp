@@ -12,6 +12,36 @@ public:
     const std::vector<int> ID,
     const std::vector<int> IEN);
 
+    int GetElemNum(const int &i) const
+    {
+        return elemNum[i];
+    }
+
+    int GetOffset(const int &i) const
+    {
+        return offset[i];
+    }
+
+    std::vector<int> GetElemIdx(const int &i) const
+    {
+        std::vector<int> result(elemNum[i], -1);
+        for (int j = 0; j < elemNum[i]; ++j)
+        {
+            result[j] = elemIdx[offset[i] + j];
+        }
+        return result;
+    }
+
+    std::vector<int> GetBaseIdx(const int &i) const
+    {
+        std::vector<int> result(elemNum[i], -1);
+        for (int j = 0; j < elemNum[i]; ++j)
+        {
+            result[j] = baseIdx[offset[i] + j];
+        }
+        return result;
+    }
+
 private:
     std::vector<int> elemNum{};
     std::vector<int> offset{};
