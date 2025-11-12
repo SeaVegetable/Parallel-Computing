@@ -2,13 +2,12 @@
 
 InvLM::InvLM(const int &nLocBas,
     const int &nLocElem,
-    const std::vector<int> local_to_global_wo_dir,
+    const int &nlocfunc,
     const std::vector<int> ID,
     const std::vector<int> IEN)
 {
-    const int nlocfunc = local_to_global_wo_dir.size();
-
     elemNum.resize(nlocfunc, 0);
+    std::vector<int> offset(nlocalfunc, 0);
     std::vector<int> size_count(nlocfunc, 0);
 
     for (int i = 0; i < nLocElem; ++i)
@@ -18,7 +17,7 @@ InvLM::InvLM(const int &nLocBas,
             const int global_func = ID[IEN[i*nLocBas + j]];
             for (int k = 0; k < nlocfunc; ++k)
             {
-                if (local_to_global_wo_dir[k] == global_func)
+                if ( k == global_func )
                 {
                     elemNum[k] += 1;
                 }
@@ -28,8 +27,11 @@ InvLM::InvLM(const int &nLocBas,
 
     int size = 0;
     for (int i = 0; i < nlocfunc; ++i)
-         size += elemNum[i];
-    
+    {
+        offset[i] = size;
+        size += elemNum[i];
+    }
+
     elemIdx.resize(size, -1);
     baseIdx.resize(size, -1);
 
@@ -40,11 +42,16 @@ InvLM::InvLM(const int &nLocBas,
             const int global_func = ID[IEN[i*nLocBas + j]];
             for (int k = 0; k < nlocfunc; ++k)
             {
-                if (local_to_global_wo_dir[k] == global_func)
+                if ( k == global_func )
                 {
-                    elemIdx[size_count[k] + (k == 0 ? 0 : std::accumulate(elemNum.begin(), elemNum.begin() + k, 0))] = i;
-                    baseIdx[size_count[k] + (k == 0 ? 0 : std::accumulate(elemNum.begin(), elemNum.begin() + k, 0))] = j;
+                    elemIdx[size_count[k] + offset[k]] = i;
+                    baseIdx[size_count[k] + offset[k]] = j;
                     size_count[k] += 1;
+                }
+
+                if ( size_count[k] == elemNum[k] )
+                {
+                    break;
                 }
             }
         }

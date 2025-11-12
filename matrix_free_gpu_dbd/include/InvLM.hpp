@@ -8,7 +8,7 @@ class InvLM
 public:
     InvLM(const int &nLocBas,
     const int &nLocElem,
-    const std::vector<int> local_to_global_wo_dir,
+    const int &nlocfunc,
     const std::vector<int> ID,
     const std::vector<int> IEN);
 
