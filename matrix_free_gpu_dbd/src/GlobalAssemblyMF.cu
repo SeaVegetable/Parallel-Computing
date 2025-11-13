@@ -27,6 +27,7 @@ void GlobalAssemblyMF::AssemLoad(QuadraturePoint * const &quad1,
     const std::vector<double> &NURBSExtraction2,
     const std::vector<double> &elem_size1,
     const std::vector<double> &elem_size2,
+    InvLM * const &invlm,
     ElementMF * const &elemmf,
     BernsteinBasis * const &bernstein)
 {
