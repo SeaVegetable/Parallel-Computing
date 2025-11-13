@@ -71,6 +71,7 @@ PetscErrorCode MyMatMult(Mat A, Vec x, Vec y)
         data->CP,
         data->NURBSExtraction1, data->NURBSExtraction2,
         data->elem_size1, data->elem_size2,
+        data->invlm,
         data->elem, data->bernstein, x, y);
 
     return 0;
@@ -288,6 +289,7 @@ int main(int argc, char **argv)
         data->CP,
         data->NURBSExtraction1, data->NURBSExtraction2,
         data->elem_size1, data->elem_size2,
+        data->invlm,
         data->elem, data->bernstein);
     
     MPI_Barrier(PETSC_COMM_WORLD);
