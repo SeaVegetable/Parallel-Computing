@@ -9,7 +9,6 @@ public:
     InvLM(const int &nLocBas,
     const int &nLocElem,
     const int &nlocfunc,
-    const std::vector<int> ID,
     const std::vector<int> IEN);
 
     int GetElemNum(const int &i) const

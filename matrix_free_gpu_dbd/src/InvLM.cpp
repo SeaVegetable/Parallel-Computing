@@ -3,7 +3,6 @@
 InvLM::InvLM(const int &nLocBas,
     const int &nLocElem,
     const int &nlocfunc,
-    const std::vector<int> ID,
     const std::vector<int> IEN)
 {
     elemNum.resize(nlocfunc, 0);
@@ -14,7 +13,7 @@ InvLM::InvLM(const int &nLocBas,
     {
         for (int j = 0; j < nLocBas; ++j)
         {
-            const int global_func = ID[IEN[i*nLocBas + j]];
+            const int global_func = IEN[i*nLocBas + j];
             for (int k = 0; k < nlocfunc; ++k)
             {
                 if ( k == global_func )
@@ -39,7 +38,7 @@ InvLM::InvLM(const int &nLocBas,
     {
         for (int j = 0; j < nLocBas; ++j)
         {
-            const int global_func = ID[IEN[i*nLocBas + j]];
+            const int global_func = IEN[i*nLocBas + j];
             for (int k = 0; k < nlocfunc; ++k)
             {
                 if ( k == global_func )

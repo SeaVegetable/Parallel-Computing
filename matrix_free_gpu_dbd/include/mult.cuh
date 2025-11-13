@@ -4,7 +4,8 @@
 #include <stdio.h>
 #include <memory.cuh>
 
-void AssembleLoadCUDA(const int p, const int q,
+void AssembleLoadCUDA(const int nfunc,
+    const int p, const int q,
     const int nlocalelemx, const int nlocalelemy,
     double * d_B1, double * d_B2,
     double * d_dB1, double * d_dB2,
@@ -17,7 +18,8 @@ void AssembleLoadCUDA(const int p, const int q,
     int * d_xelemIdx, int * d_yelemIdx,
     double * d_x_array);
 
-void MatrixFreeMatMultCUDA(const int p, const int q,
+void MatrixFreeMatMultCUDA(const int nfunc,
+    const int p, const int q,
     const int nlocalelemx, const int nlocalelemy,
     double * d_B1, double * d_B2,
     double * d_dB1, double * d_dB2,

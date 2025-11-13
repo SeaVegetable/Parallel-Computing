@@ -231,6 +231,7 @@ __device__ double get_force(double x, double y)
 }
 
 __global__ void AssembleKernel(
+    int nfunc,
     double *d_B1, double *d_B2,
     double *d_dB1, double *d_dB2,
     double *d_nurbs_extraction1, double *d_nurbs_extraction2,
@@ -246,18 +247,9 @@ __global__ void AssembleKernel(
 {
     const int nx = P_ORDER + 1;
     const int ny = Q_ORDER + 1;
-    extern __shared__ char shared_data[];
+    const int nLocBas = nx * ny;
 
-    int offset = 0;
-    int *s_eID = (int*)(shared_data + offset);
-    offset += nx * ny * sizeof(int) + MYOFFSET;
-    double *s_eCP = (double*)(shared_data + offset);
-    offset += 2 * nx * ny * sizeof(double);
-    double *s_eNURBSExtraction1 = (double*)(shared_data + offset);
-    offset += nx * nx * sizeof(double);
-    double *s_eNURBSExtraction2 = (double*)(shared_data + offset);
-    offset += ny * ny * sizeof(double);
-    double *s_qw = (double*)(shared_data + offset);
+    double s_qw[nLocBas];
 
     for (int j = 0; j < ny; ++j)
     {
@@ -267,83 +259,87 @@ __global__ void AssembleKernel(
         }
     }
 
-    int nodeIndex = blockIdx.y * gridDim.x + blockIdx.x;
-    const int nLocBas = nx * ny;
+    int nodeIndex = blockIdx.x * blockDim.x + threadIdx.x;
 
-    int invlm_elemNum = d_invlm_elemNum[nodeIndex];
-    int invlm_offset = d_invlm_offset[nodeIndex];
-
-    int qpx = threadIdx.x;
-    int qpy = threadIdx.y;
-    int qp = threadIdx.y * blockDim.x + threadIdx.x;
-
-    double B1[nx];
-    double dB1[nx];
-    double B2[ny];
-    double dB2[ny];
-
-    if (qp < nx*ny)
+    if (nodeIndex < nfunc)
     {
-        for (int i = 0; i < nx; ++i)
-        {
-            B1[i] = d_B1[qpx * nx + i];
-            dB1[i] = d_dB1[qpx * nx + i];
-        }
-        for (int j = 0; j < ny; ++j)
-        {
-            B2[j] = d_B2[qpy * ny + j];
-            dB2[j] = d_dB2[qpy * ny + j];
-        }
+        int invlm_elemNum = d_invlm_elemNum[nodeIndex];
+        int invlm_offset = d_invlm_offset[nodeIndex];
 
         for (int ee = 0; ee < invlm_elemNum; ++ee)
         {
             int elemIndex = d_invlm_elemIdx[invlm_offset + ee];
             int baseIndex = d_invlm_baseIdx[invlm_offset + ee];
 
+            int eID[nLocBas];
+            double eCP[2 * nLocBas];
             for (int j = 0; j < nLocBas; ++j)
             {
-                s_eID[j] = d_ID[d_IEN[elemIndex * nLocBas + j]];
-                s_eCP[2 * j] = d_CP[2 * d_IEN[elemIndex * nLocBas + j]];
-                s_eCP[2 * j + 1] = d_CP[2 * d_IEN[elemIndex * nLocBas + j] + 1];
+                eID[j] = d_ID[d_IEN[elemIndex * nLocBas + j]];
+                eCP[2 * j] = d_CP[2 * d_IEN[elemIndex * nLocBas + j]];
+                eCP[2 * j + 1] = d_CP[2 * d_IEN[elemIndex * nLocBas + j] + 1];
             }
 
-            int elemx = d_xelemIdx[elemIndex];
-            int elemy = d_yelemIdx[elemIndex];
+            double eNURBSExtraction1[nx * nx];
+            double eNURBSExtraction2[ny * ny];
             for (int i = 0; i < nx * nx; ++i)
-                s_eNURBSExtraction1[i] = d_nurbs_extraction1[elemx * nx * nx + i];
+                eNURBSExtraction1[i] = d_nurbs_extraction1[d_xelemIdx[elemIndex] * nx * nx + i];
             for (int i = 0; i < ny * ny; ++i)
-                s_eNURBSExtraction2[i] = d_nurbs_extraction2[elemy * ny * ny + i];
+                eNURBSExtraction2[i] = d_nurbs_extraction2[d_yelemIdx[elemIndex] * ny * ny + i];
 
-            double h1 = d_elem_size1[elemx];
-            double h2 = d_elem_size2[elemy];
+            double h1 = d_elem_size1[d_xelemIdx[elemIndex]];
+            double h2 = d_elem_size2[d_yelemIdx[elemIndex]];
 
-            __syncthreads();
+            int coo_index = eID[baseIndex];
 
-            double jacobian;
-            double R[nLocBas];
-
-            compute_jacobian_basis(h1, h2, B1, B2, dB1, dB2,
-                s_eNURBSExtraction1, s_eNURBSExtraction2, s_eCP, jacobian, R);
-
-            double x = 0.0;
-            double y = 0.0;
-
-            for (int ii = 0; ii < nLocBas; ++ii)
+            for (int qpy = 0; qpy < ny; ++qpy)
             {
-                x += s_eCP[2 * ii] * R[ii];
-                y += s_eCP[2 * ii + 1] * R[ii];
+                for (int qpx = 0; qpx < nx; ++qpx)
+                {
+                    double B1[nx];
+                    double dB1[nx];
+                    double B2[ny];
+                    double dB2[ny];
+
+                    for (int i = 0; i < nx; ++i)
+                    {
+                        B1[i] = d_B1[qpx * nx + i];
+                        dB1[i] = d_dB1[qpx * nx + i];
+                    }
+                    for (int j = 0; j < ny; ++j)
+                    {
+                        B2[j] = d_B2[qpy * ny + j];
+                        dB2[j] = d_dB2[qpy * ny + j];
+                    }
+
+                    double jacobian;
+                    double R[nLocBas];
+
+                    compute_jacobian_basis(h1, h2, B1, B2, dB1, dB2,
+                        eNURBSExtraction1, eNURBSExtraction2, eCP, jacobian, R);
+                    
+                    double x = 0.0;
+                    double y = 0.0;
+
+                    for (int ii = 0; ii < nLocBas; ++ii)
+                    {
+                        x += eCP[2 * ii] * R[ii];
+                        y += eCP[2 * ii + 1] * R[ii];
+                    }
+
+                    double force = get_force(x, y);
+
+                    double val = R[baseIndex] * force * jacobian * s_qw[qpy * nx + qpx];
+
+                    d_x_array[coo_index] += val;
+                }
             }
-
-            double force = get_force(x, y);
-
-            double val = R[baseIndex] * force * jacobian * s_qw[qp];
-            int coo_index = s_eID[baseIndex];
-            atomicAdd(&d_x_array[coo_index], val);
         }
     }
 }
 
 __global__ void MatrixFreeMatMultKernel(
+    int nfunc,
     double *d_B1, double *d_B2,
     double *d_dB1, double *d_dB2,
     double *d_nurbs_extraction1, double *d_nurbs_extraction2,
@@ -358,24 +354,11 @@ __global__ void MatrixFreeMatMultKernel(
     double *d_F_array_out
     )
 {
-    extern __shared__ char shared_data[];
-
     const int nx = P_ORDER + 1;
     const int ny = Q_ORDER + 1;
     const int nLocBas = nx * ny;
 
-    int offset = 0;
-    int *s_eID = (int*)(shared_data + offset);
-    offset += nLocBas * sizeof(int) + MYOFFSET;
-    double *s_eCP = (double*)(shared_data + offset);
-    offset += 2 * nLocBas * sizeof(double);
-    double *s_eNURBSExtraction1 = (double*)(shared_data + offset);
-    offset += nx * nx * sizeof(double);
-    double *s_eNURBSExtraction2 = (double*)(shared_data + offset);
-    offset += ny * ny * sizeof(double);
-    double *s_qw = (double*)(shared_data + offset);
-    offset += nLocBas * sizeof(double);
-    double *Floc_in = (double*)(shared_data + offset);
+    double s_qw[nx * ny];
 
     for (int j = 0; j < ny; ++j)
     {
@@ -385,92 +368,84 @@ __global__ void MatrixFreeMatMultKernel(
         }
     }
     
-    int nodeIndex = blockIdx.y * gridDim.x + blockIdx.x;
-    const int nLocBas = nx * ny;
+    int nodeIndex = blockIdx.x * blockDim.x + threadIdx.x;
 
-    int invlm_elemNum = d_invlm_elemNum[nodeIndex];
-    int invlm_offset = d_invlm_offset[nodeIndex];
-
-    int qpx = threadIdx.x;
-    int qpy = threadIdx.y;
-    int qp = threadIdx.y * blockDim.x + threadIdx.x;
-
-    double B1[nx];
-    double dB1[nx];
-    double B2[ny];
-    double dB2[ny];
-
-    if (qp < nx * ny)
+    if (nodeIndex < nfunc)
     {
-        for (int i = 0; i < nx; ++i)
-        {
-            B1[i] = d_B1[qpx * nx + i];
-            dB1[i] = d_dB1[qpx * nx + i];
-        }
-        for (int j = 0; j < ny; ++j)
-        {
-            B2[j] = d_B2[qpy * ny + j];
-            dB2[j] = d_dB2[qpy * ny + j];
-        }
-        
+        int invlm_elemNum = d_invlm_elemNum[nodeIndex];
+        int invlm_offset = d_invlm_offset[nodeIndex];
+
         for (int ee = 0; ee < invlm_elemNum; ++ee)
         {
             int elemIndex = d_invlm_elemIdx[invlm_offset + ee];
             int baseIndex = d_invlm_baseIdx[invlm_offset + ee];
 
+            int eID[nLocBas];
+            double eCP[2 * nLocBas];
             for (int j = 0; j < nLocBas; ++j)
             {
-                s_eID[j] = d_ID[d_IEN[elemIndex * nLocBas + j]];
-                s_eCP[2 * j] = d_CP[2 * d_IEN[elemIndex * nLocBas + j]];
-                s_eCP[2 * j + 1] = d_CP[2 * d_IEN[elemIndex * nLocBas + j] + 1];
+                eID[j] = d_ID[d_IEN[elemIndex * nLocBas + j]];
+                eCP[2 * j] = d_CP[2 * d_IEN[elemIndex * nLocBas + j]];
+                eCP[2 * j + 1] = d_CP[2 * d_IEN[elemIndex * nLocBas + j] + 1];
             }
 
-            int elemx = d_xelemIdx[elemIndex];
-            int elemy = d_yelemIdx[elemIndex];
+            double eNURBSExtraction1[nx * nx];
+            double eNURBSExtraction2[ny * ny];
             for (int i = 0; i < nx * nx; ++i)
-                s_eNURBSExtraction1[i] = d_nurbs_extraction1[elemx * nx * nx + i];
+                eNURBSExtraction1[i] = d_nurbs_extraction1[d_xelemIdx[elemIndex] * nx * nx + i];
             for (int i = 0; i < ny * ny; ++i)
-                s_eNURBSExtraction2[i] = d_nurbs_extraction2[elemy * ny * ny + i];
-            double h1 = d_elem_size1[elemx];
-            double h2 = d_elem_size2[elemy];
+                eNURBSExtraction2[i] = d_nurbs_extraction2[d_yelemIdx[elemIndex] * ny * ny + i];
 
-            for (int i = 0; i < nLocBas; ++i)
+            double h1 = d_elem_size1[d_xelemIdx[elemIndex]];
+            double h2 = d_elem_size2[d_yelemIdx[elemIndex]];
+
+            int coo_index = eID[baseIndex];
+
+            for (int qpy = 0; qpy < ny; ++qpy)
             {
-                int coo_index = d_IEN[elemIndex * nLocBas + i];
-                Floc_in[i] = d_F_array_in[coo_index];
+                for (int qpx = 0; qpx < nx; ++qpx)
+                {
+                    double B1[nx];
+                    double dB1[nx];
+                    double B2[ny];
+                    double dB2[ny];
+
+                    for (int i = 0; i < nx; ++i)
+                    {
+                        B1[i] = d_B1[qpx * nx + i];
+                        dB1[i] = d_dB1[qpx * nx + i];
+                    }
+                    for (int j = 0; j < ny; ++j)
+                    {
+                        B2[j] = d_B2[qpy * ny + j];
+                        dB2[j] = d_dB2[qpy * ny + j];
+                    }
+
+                    double jacobian;
+                    double R[nLocBas];
+                    double dR_dx[nLocBas];
+                    double dR_dy[nLocBas];
+
+                    compute_jacobian_derivative(h1, h2, B1, B2, dB1, dB2,
+                        eNURBSExtraction1, eNURBSExtraction2, eCP, jacobian, dR_dx, dR_dy);
+
+                    double temp_x = 0.0;
+                    double temp_y = 0.0;
+
+                    for (int jj = 0; jj < nLocBas; ++jj)
+                    {
+                        temp_x += dR_dx[jj] * d_F_array_in[eID[jj]];
+                        temp_y += dR_dy[jj] * d_F_array_in[eID[jj]];
+                    }
+
+                    temp_x *= -s_qw[qpy * nx + qpx] * jacobian;
+                    temp_y *= -s_qw[qpy * nx + qpx] * jacobian;
+
+                    double val = (dR_dx[baseIndex] * temp_x + dR_dy[baseIndex] * temp_y);
+
+                    d_F_array_out[coo_index] += val;
+                }
             }
-
-            __syncthreads();
-
-            double Floc_out[nLocBas];
-            for (int i = 0; i < nLocBas; ++i)
-            {
-                Floc_out[i] = 0.0;
-            }
-
-            double jacobian;
-            double dR_dx[nLocBas];
-            double dR_dy[nLocBas];
-
-            compute_jacobian_derivative(h1, h2, B1, B2, dB1, dB2,
-                s_eNURBSExtraction1, s_eNURBSExtraction2, s_eCP, jacobian, dR_dx, dR_dy);
-            
-            double temp_x = 0.0;
-            double temp_y = 0.0;
-
-            for (int jj = 0; jj < nLocBas; ++jj)
-            {
-                temp_x += dR_dx[jj] * Floc_in[jj];
-                temp_y += dR_dy[jj] * Floc_in[jj];
-            }
-
-            temp_x *= -s_qw[qp]*jacobian;
-            temp_y *= -s_qw[qp]*jacobian;
-
-            Floc_out[baseIndex] += (dR_dx[baseIndex] * temp_x + dR_dy[baseIndex] * temp_y);
-
-            int coo_index = s_eID[baseIndex];
-            atomicAdd(&d_F_array_out[coo_index], Floc_out[baseIndex]);
         }
     }
 }
@@ -489,7 +464,9 @@ __global__ void DirichletBCKernel(const int * d_Dir, const int dirsize, double *
     }
 }
 
-void AssembleLoadCUDA(const int p, const int q,
+void AssembleLoadCUDA(
+    const int nfunc,
+    const int p, const int q,
     const int nlocalelemx, const int nlocalelemy,
     double * d_B1, double * d_B2,
     double * d_dB1, double * d_dB2,
@@ -508,14 +485,11 @@ void AssembleLoadCUDA(const int p, const int q,
         exit(EXIT_FAILURE);
     }
 
-    size_t shared_size = (p + 1) * (q + 1) * sizeof(int)
-                + 2 * (p + 1) * (q + 1) * sizeof(double)
-                + (p + 1) * (p + 1) * sizeof(double)
-                + (q + 1) * (q + 1) * sizeof(double)
-                + (p + 1) * (q + 1) * sizeof(double)
-                + MYOFFSET;
+    int blocksize = 256;
+    int nblocks = (nfunc + blocksize - 1) / blocksize;
 
-    AssembleKernel<<<dim3(nlocalelemx, nlocalelemy), dim3(p+1, q+1), shared_size>>>(
+    AssembleKernel<<<nblocks, blocksize>>>(
+        nfunc,
         d_B1, d_B2, d_dB1, d_dB2,
         d_nurbs_extraction1, d_nurbs_extraction2,
         d_elem_size1, d_elem_size2,
@@ -536,7 +510,9 @@ void AssembleLoadCUDA(const int p, const int q,
     }
 }
 
-void MatrixFreeMatMultCUDA(const int p, const int q,
+void MatrixFreeMatMultCUDA(
+    const int nfunc,
+    const int p, const int q,
     const int nlocalelemx, const int nlocalelemy,
     double * d_B1, double * d_B2,
     double * d_dB1, double * d_dB2,
@@ -555,15 +531,11 @@ void MatrixFreeMatMultCUDA(const int p, const int q,
         exit(EXIT_FAILURE);
     }
 
-    size_t shared_size = (p + 1) * (q + 1) * sizeof(int)
-                + 2 * (p + 1) * (q + 1) * sizeof(double)
-                + (p + 1) * (p + 1) * sizeof(double)
-                + (q + 1) * (q + 1) * sizeof(double)
-                + (p + 1) * (q + 1) * sizeof(double)
-                + (p + 1) * (q + 1) * sizeof(double)
-                + MYOFFSET;
+    int blocksize = 256;
+    int nblocks = (nfunc + blocksize - 1) / blocksize;
 
-    MatrixFreeMatMultKernel<<<dim3(nlocalelemx, nlocalelemy), dim3(p+1, q+1), shared_size>>>(
+    MatrixFreeMatMultKernel<<<nblocks, blocksize>>>(
+        nfunc,
         d_B1, d_B2, d_dB1, d_dB2,
         d_nurbs_extraction1, d_nurbs_extraction2,
         d_elem_size1, d_elem_size2,

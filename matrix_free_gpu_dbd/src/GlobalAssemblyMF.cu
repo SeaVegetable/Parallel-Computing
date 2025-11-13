@@ -109,6 +109,8 @@ void GlobalAssemblyMF::AssemLoad(QuadraturePoint * const &quad1,
     CopyToDevice(d_invlm_elemIdx, invlm_elemIdx.data(), invlm_elemIdx.size());
     CopyToDevice(d_invlm_baseIdx, invlm_baseIdx.data(), invlm_baseIdx.size());
 
+    int nfunc = static_cast<int>(invlm_elemNum.size());
+
     int * d_xelemIdx, * d_yelemIdx;
     MallocDeviceMemory(&d_xelemIdx, xelemIdx.size());
     MallocDeviceMemory(&d_yelemIdx, yelemIdx.size());
@@ -119,7 +121,7 @@ void GlobalAssemblyMF::AssemLoad(QuadraturePoint * const &quad1,
     double *d_F_array;
     VecCUDAGetArray(F, &d_F_array);
 
-    AssembleLoadCUDA(pp, qq,
+    AssembleLoadCUDA(nfunc, pp, qq,
         nlocalelemx, nlocalelemy,
         d_B1, d_B2, d_dB1, d_dB2,
         d_NURBSExtraction1, d_NURBSExtraction2,
@@ -257,6 +259,8 @@ void GlobalAssemblyMF::MatMulMF(QuadraturePoint * const &quad1,
     CopyToDevice(d_invlm_elemIdx, invlm_elemIdx.data(), invlm_elemIdx.size());
     CopyToDevice(d_invlm_baseIdx, invlm_baseIdx.data(), invlm_baseIdx.size());
 
+    int nfunc = static_cast<int>(invlm_elemNum.size());
+
     int * d_xelemIdx, * d_yelemIdx;
     MallocDeviceMemory(&d_xelemIdx, xelemIdx.size());
     MallocDeviceMemory(&d_yelemIdx, yelemIdx.size());
@@ -269,7 +273,7 @@ void GlobalAssemblyMF::MatMulMF(QuadraturePoint * const &quad1,
     VecCUDAGetArrayRead(x, &d_x_array);
     VecCUDAGetArray(y, &d_y_array);
 
-    MatrixFreeMatMultCUDA(pp, qq,
+    MatrixFreeMatMultCUDA(nfunc, pp, qq,
         nlocalelemx, nlocalelemy,
         d_B1, d_B2, d_dB1, d_dB2,
         d_NURBSExtraction1, d_NURBSExtraction2,
