@@ -10,7 +10,6 @@
 #include "AbscissaeGenerator.hpp"
 #include "IENGenerator.hpp"
 #include "IDGenerator.hpp"
-#include "InvLM.hpp"
 
 typedef struct {
     KSP innerksp;

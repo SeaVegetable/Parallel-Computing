@@ -6,6 +6,7 @@
 #include "ElementMF.hpp"
 #include "memory.cuh"
 #include "mult.cuh"
+#include "InvLM.hpp"
 
 class GlobalAssemblyMF
 {
