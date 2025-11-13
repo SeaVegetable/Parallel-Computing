@@ -62,7 +62,7 @@ PetscErrorCode MyMatMult(Mat A, Vec x, Vec y)
 
     VecSet(y, 0.0);
     
-    data->globalassem->MatMulMF(data->nlocalfunc,
+    data->globalassem->MatMulMF(
         data->quad1, data->quad2,
         data->IEN, data->ID, data->Dir,
         data->invlm_elemNum, data->invlm_offset,
@@ -279,7 +279,7 @@ int main(int argc, char **argv)
     data->bernstein = new BernsteinBasis(p);
     data->elem = elemmf;
     
-    data->globalassem->AssemLoad(data->nlocalfunc,
+    data->globalassem->AssemLoad(
         data->quad1, data->quad2,
         data->IEN, data->ID, data->Dir, 
         data->invlm_elemNum, data->invlm_offset,
