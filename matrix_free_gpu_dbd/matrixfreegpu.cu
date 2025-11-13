@@ -248,7 +248,7 @@ int main(int argc, char **argv)
 
     data->nlocalfunc = nlocalfunc;
 
-    InvLM invlm = new InvLM((p+1)*(q+1), nlocalelemx*nlocalelemy,
+    InvLM * invlm = new InvLM((p+1)*(q+1), nlocalelemx*nlocalelemy,
         nlocalfunc, data->IEN);
 
     data->invlm_elemNum = invlm->GetAllElemNum();
