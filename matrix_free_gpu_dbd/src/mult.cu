@@ -433,8 +433,8 @@ __global__ void MatrixFreeMatMultKernel(
 
                     for (int jj = 0; jj < nLocBas; ++jj)
                     {
-                        temp_x += dR_dx[jj] * d_F_array_in[eID[jj]];
-                        temp_y += dR_dy[jj] * d_F_array_in[eID[jj]];
+                        temp_x += dR_dx[jj] * d_F_array_in[eIEN[jj]];
+                        temp_y += dR_dy[jj] * d_F_array_in[eIEN[jj]];
                     }
 
                     temp_x *= -s_qw[qpy * nx + qpx] * jacobian;
