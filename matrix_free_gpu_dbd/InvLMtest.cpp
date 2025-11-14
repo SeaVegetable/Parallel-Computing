@@ -37,7 +37,7 @@ int main(int argc, char **argv)
     std::vector<double> NURBSExtraction1{};
     std::vector<double> NURBSExtraction2{};
 
-    std::string filename = fm->GeneratePartitionFileName(base_name, 0);
+    std::string filename = fm->GetPartitionFileName(base_name, 0);
     fm->ReadPartition(filename,
         nlocalfunc,
         nlocalelemx,
