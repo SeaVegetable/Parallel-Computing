@@ -14,13 +14,7 @@ InvLM::InvLM(const int &nLocBas,
         for (int j = 0; j < nLocBas; ++j)
         {
             const int global_func = IEN[i*nLocBas + j];
-            for (int k = 0; k < nlocfunc; ++k)
-            {
-                if ( k == global_func )
-                {
-                    elemNum[k] += 1;
-                }
-            }
+            elemNum[global_func] += 1;
         }
     }
 
@@ -39,20 +33,13 @@ InvLM::InvLM(const int &nLocBas,
         for (int j = 0; j < nLocBas; ++j)
         {
             const int global_func = IEN[i*nLocBas + j];
-            for (int k = 0; k < nlocfunc; ++k)
+            if ( size_count[global_func] == elemNum[global_func] )
             {
-                if ( k == global_func )
-                {
-                    elemIdx[size_count[k] + offset[k]] = i;
-                    baseIdx[size_count[k] + offset[k]] = j;
-                    size_count[k] += 1;
-                }
-
-                if ( size_count[k] == elemNum[k] )
-                {
-                    break;
-                }
+                break;
             }
+            elemIdx[size_count[global_func] + offset[global_func]] = i;
+            baseIdx[size_count[global_func] + offset[global_func]] = j;
+            size_count[global_func] += 1;
         }
     }
 }
