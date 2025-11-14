@@ -93,26 +93,29 @@ target_link_libraries(preprocess_fem eigenvalue_problem_lib)
 add_executable(dry_run dry_run.cpp)
 target_link_libraries(dry_run eigenvalue_problem_lib ${PETSC_LIB})
 
-add_executable(coo2aij coo2aij.cu)
-target_link_libraries(coo2aij eigenvalue_problem_lib ${PETSC_LIB})
-target_include_directories(coo2aij PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C_INCLUDE_PATH})
+add_executable(invlmtest InvLMtest.cpp)
+target_link_libraries(invlmtest eigenvalue_problem_lib ${PETSC_LIB})
 
-add_executable(memorytest memorytest.cu)
-target_link_libraries(memorytest eigenvalue_problem_lib ${PETSC_LIB})
-target_include_directories(memorytest PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C_INCLUDE_PATH})
+# add_executable(coo2aij coo2aij.cu)
+# target_link_libraries(coo2aij eigenvalue_problem_lib ${PETSC_LIB})
+# target_include_directories(coo2aij PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C_INCLUDE_PATH})
 
-add_executable(assemblytest assemblytest.cu)
-target_link_libraries(assemblytest eigenvalue_problem_lib eigenvalue_problem_cuda_lib ${PETSC_LIB})
-target_include_directories(assemblytest PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C_INCLUDE_PATH})
+# add_executable(memorytest memorytest.cu)
+# target_link_libraries(memorytest eigenvalue_problem_lib ${PETSC_LIB})
+# target_include_directories(memorytest PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C_INCLUDE_PATH})
 
-add_executable(testelem2coo testelem2coo.cu)
-target_link_libraries(testelem2coo eigenvalue_problem_lib eigenvalue_problem_cuda_lib ${PETSC_LIB})
-target_include_directories(testelem2coo PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C_INCLUDE_PATH})
+# add_executable(assemblytest assemblytest.cu)
+# target_link_libraries(assemblytest eigenvalue_problem_lib eigenvalue_problem_cuda_lib ${PETSC_LIB})
+# target_include_directories(assemblytest PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C_INCLUDE_PATH})
 
-add_executable(multtest multtest.cu)
-target_link_libraries(multtest eigenvalue_problem_lib eigenvalue_problem_cuda_lib ${PETSC_LIB})
-target_include_directories(multtest PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C_INCLUDE_PATH})
-target_compile_definitions(multtest PRIVATE P_ORDER=${P_ORDER} Q_ORDER=${Q_ORDER})
+# add_executable(testelem2coo testelem2coo.cu)
+# target_link_libraries(testelem2coo eigenvalue_problem_lib eigenvalue_problem_cuda_lib ${PETSC_LIB})
+# target_include_directories(testelem2coo PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C_INCLUDE_PATH})
+
+# add_executable(multtest multtest.cu)
+# target_link_libraries(multtest eigenvalue_problem_lib eigenvalue_problem_cuda_lib ${PETSC_LIB})
+# target_include_directories(multtest PRIVATE ${PETSC_INC} ${CUDA_INC} ${MPI_C_INCLUDE_PATH})
+# target_compile_definitions(multtest PRIVATE P_ORDER=${P_ORDER} Q_ORDER=${Q_ORDER})
 
 add_executable(matrixfreegpu matrixfreegpu.cu)
 target_link_libraries(matrixfreegpu eigenvalue_problem_lib eigenvalue_problem_cuda_lib ${PETSC_LIB})
@@ -131,40 +134,40 @@ if(OPENMP_CXX_FOUND)
   target_link_libraries( preprocess_fem ${OpenMP_CXX_LIBRARIES} )
 endif()
 
-set_target_properties(coo2aij PROPERTIES
-  CUDA_STANDARD 11
-  CUDA_STANDARD_REQUIRED YES
-  CUDA_SEPARABLE_COMPILATION ON
-  CUDA_ARCHITECTURES 75
-)
+# set_target_properties(coo2aij PROPERTIES
+#   CUDA_STANDARD 11
+#   CUDA_STANDARD_REQUIRED YES
+#   CUDA_SEPARABLE_COMPILATION ON
+#   CUDA_ARCHITECTURES 75
+# )
 
-set_target_properties(memorytest PROPERTIES
-  CUDA_STANDARD 11
-  CUDA_STANDARD_REQUIRED YES
-  CUDA_SEPARABLE_COMPILATION ON
-  CUDA_ARCHITECTURES 75
-)
+# set_target_properties(memorytest PROPERTIES
+#   CUDA_STANDARD 11
+#   CUDA_STANDARD_REQUIRED YES
+#   CUDA_SEPARABLE_COMPILATION ON
+#   CUDA_ARCHITECTURES 75
+# )
 
-set_target_properties(assemblytest PROPERTIES
-  CUDA_STANDARD 11
-  CUDA_STANDARD_REQUIRED YES
-  CUDA_SEPARABLE_COMPILATION ON
-  CUDA_ARCHITECTURES 75
-)
+# set_target_properties(assemblytest PROPERTIES
+#   CUDA_STANDARD 11
+#   CUDA_STANDARD_REQUIRED YES
+#   CUDA_SEPARABLE_COMPILATION ON
+#   CUDA_ARCHITECTURES 75
+# )
 
-set_target_properties(testelem2coo PROPERTIES
-  CUDA_STANDARD 11
-  CUDA_STANDARD_REQUIRED YES
-  CUDA_SEPARABLE_COMPILATION ON
-  CUDA_ARCHITECTURES 75
-)
+# set_target_properties(testelem2coo PROPERTIES
+#   CUDA_STANDARD 11
+#   CUDA_STANDARD_REQUIRED YES
+#   CUDA_SEPARABLE_COMPILATION ON
+#   CUDA_ARCHITECTURES 75
+# )
 
-set_target_properties(multtest PROPERTIES
-  CUDA_STANDARD 11
-  CUDA_STANDARD_REQUIRED YES
-  CUDA_SEPARABLE_COMPILATION ON
-  CUDA_ARCHITECTURES 75
-)
+# set_target_properties(multtest PROPERTIES
+#   CUDA_STANDARD 11
+#   CUDA_STANDARD_REQUIRED YES
+#   CUDA_SEPARABLE_COMPILATION ON
+#   CUDA_ARCHITECTURES 75
+# )
 
 set_target_properties(matrixfreegpu PROPERTIES
   CUDA_STANDARD 11
