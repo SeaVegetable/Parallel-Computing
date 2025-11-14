@@ -292,8 +292,6 @@ __global__ void AssembleKernel(
 
             int coo_index = eIEN[baseIndex];
 
-            if (coo_index >= 0 && coo_index < nfunc)
-            {
             for (int qpy = 0; qpy < ny; ++qpy)
             {
                 for (int qpx = 0; qpx < nx; ++qpx)
@@ -335,7 +333,6 @@ __global__ void AssembleKernel(
 
                     d_x_array[coo_index] += val;
                 }
-            }
             }
         }
     }
@@ -383,11 +380,11 @@ __global__ void MatrixFreeMatMultKernel(
             int elemIndex = d_invlm_elemIdx[invlm_offset + ee];
             int baseIndex = d_invlm_baseIdx[invlm_offset + ee];
 
-            int eID[nLocBas];
+            int eIEN[nLocBas];
             double eCP[2 * nLocBas];
             for (int j = 0; j < nLocBas; ++j)
             {
-                eID[j] = d_ID[d_IEN[elemIndex * nLocBas + j]];
+                eIEN[j] = d_IEN[elemIndex * nLocBas + j];
                 eCP[2 * j] = d_CP[2 * d_IEN[elemIndex * nLocBas + j]];
                 eCP[2 * j + 1] = d_CP[2 * d_IEN[elemIndex * nLocBas + j] + 1];
             }
@@ -402,7 +399,7 @@ __global__ void MatrixFreeMatMultKernel(
             double h1 = d_elem_size1[d_xelemIdx[elemIndex]];
             double h2 = d_elem_size2[d_yelemIdx[elemIndex]];
 
-            int coo_index = eID[baseIndex];
+            int coo_index = eIEN[baseIndex];
 
             for (int qpy = 0; qpy < ny; ++qpy)
             {
