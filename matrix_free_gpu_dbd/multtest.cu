@@ -43,12 +43,32 @@ int main (int argc, char *argv[])
     fm->ReadPartition(filename, nlocalfunc,
         nlocalelemx, nlocalelemy,
         elem_size1, elem_size2,
-        CP, ID, ghostID, Dir, IEN, NURBSExtraction1, NURBSExtraction2);
+        CP, ID, Dir, IEN, NURBSExtraction1, NURBSExtraction2);
 
     ElementMF * elemmf = new ElementMF(p, q);
     int nLocBas = elemmf->GetNumLocalBasis();
     GlobalAssemblyMF * globalAssembly = new GlobalAssemblyMF(
         nLocBas, nlocalfunc, nlocalelemx, nlocalelemy);
+
+    InvLM * invlm = new InvLM((p+1)*(q+1), nlocalelemx*nlocalelemy, nlocalfunc, IEN);
+
+    std::vector<int> invlm_elemNum = invlm->GetAllElemNum();
+    std::vector<int> invlm_offset = invlm->GetAllOffset();
+    std::vector<int> invlm_elemIdx = invlm->GetAllElemIdx();
+    std::vector<int> invlm_baseIdx = invlm->GetAllBaseIdx();
+
+     std::vector<int> xelemIdx{};
+    std::vector<int> yelemIdx{};
+    for (int ey = 0; ey < nlocalelemy; ++ey)
+    {
+        for (int ex = 0; ex < nlocalelemx; ++ex)
+        {
+            xelemIdx.push_back(ex);
+            yelemIdx.push_back(ey);
+        }
+    }
+    data->xelemIdx = xelemIdx;
+    data->yelemIdx = yelemIdx;
 
     QuadraturePoint * quad1 = new QuadraturePoint(p+1, 0, 1);
     QuadraturePoint * quad2 = new QuadraturePoint(q+1, 0, 1);
@@ -56,36 +76,26 @@ int main (int argc, char *argv[])
     BernsteinBasis * bernstein = new BernsteinBasis(p);
 
     globalAssembly->AssemLoad(quad1, quad2,
-        IEN, ID, Dir, CP,
+        IEN, ID, Dir, 
+        invlm_elemNum, invlm_offset, invlm_elemIdx, invlm_baseIdx,
+        xelemIdx, yelemIdx,
+        CP,
         NURBSExtraction1, NURBSExtraction2,
         elem_size1, elem_size2, elemmf, bernstein);
     VecView(globalAssembly->F, PETSC_VIEWER_STDOUT_WORLD);
     
     Vec x;
     VecDuplicate(globalAssembly->F, &x);
-    VecCopy(globalAssembly->F, x);
-
-    Vec y;
-    VecDuplicate(globalAssembly->F, &y);
 
     globalAssembly->MatMulMF(quad1, quad2,
-        IEN, ID, Dir, CP,
+        IEN, ID, Dir,
+        invlm_elemNum, invlm_offset, invlm_elemIdx, invlm_baseIdx,
+        xelemIdx, yelemIdx,
+        CP,
         NURBSExtraction1, NURBSExtraction2,
         elem_size1, elem_size2, elemmf, bernstein,
-        x, y);
-    
-    VecView(y, PETSC_VIEWER_STDOUT_WORLD);
+        globalAssembly->F, x);
 
-    VecCopy(y,x);
-    globalAssembly->MatMulMF(quad1, quad2,
-        IEN, ID, Dir, CP,
-        NURBSExtraction1, NURBSExtraction2,
-        elem_size1, elem_size2, elemmf, bernstein,
-        x, y);
-    VecView(y, PETSC_VIEWER_STDOUT_WORLD);
-
-    VecDestroy(&x);
-    VecDestroy(&y);
     delete globalAssembly;
     delete elemmf;
     delete quad1;
