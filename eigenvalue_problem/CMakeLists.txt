@@ -81,6 +81,9 @@ target_link_libraries(iter_num eigenvalue_problem_lib ${PETSC_LIB})
 add_executable(iter_num_fem iteration_number_fempc.cpp)
 target_link_libraries(iter_num_fem eigenvalue_problem_lib ${PETSC_LIB})
 
+add_executable(mult mult.cpp)
+target_link_libraries(mult eigenvalue_problem_lib ${PETSC_LIB})
+
 if(OPENMP_CXX_FOUND)
   set_target_properties( eigenvalue_problem_lib PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )
   set_target_properties( preprocess PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )
