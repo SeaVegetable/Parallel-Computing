@@ -25,6 +25,7 @@ class GlobalAssemblyMF
             const std::vector<int> &IEN,
             const std::vector<int> &ID,
             const std::vector<int> &Dir,
+            const std::vector<int> 
             const std::vector<double> &CP,
             const std::vector<double> &NURBSExtraction1,
             const std::vector<double> &NURBSExtraction2,

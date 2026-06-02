@@ -1,3 +1,4 @@
+#include <iostream>
 #include <petscvec.h>
 #include <cuda_runtime.h>
 
@@ -7,7 +8,7 @@ int main(int argc, char **argv)
 
     int ndevices;
     cudaGetDeviceCount(&ndevices);
-    PetscPrintf(PETSC_COMM_WORLD, "Number of CUDA devices: %d\n", ndevices);
+    std::cout << "Number of CUDA devices: " << ndevices << std::endl;
 
     int rank, size;
     MPI_Comm_rank(PETSC_COMM_WORLD, &rank);
@@ -19,9 +20,7 @@ int main(int argc, char **argv)
     cudaDeviceProp prop;
     cudaGetDeviceProperties(&prop, device_id);
 
-    PetscPrintf(PETSC_COMM_WORLD,
-                "MPI rank %d assigned to GPU %d: %s\n",
-                rank, device_id, prop.name);
+    std::cout << "MPI rank " << rank << " assigned to GPU " << device_id << ": " << prop.name << std::endl;
 
     PetscFinalize();
     return 0;

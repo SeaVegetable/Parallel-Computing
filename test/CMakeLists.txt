@@ -14,6 +14,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 
+find_package(MPI REQUIRED)
+
 # Add your source files here
 set(CUDA_INC "/public/software/compiler/nvidia/cuda/12.1.0/include")
 
@@ -34,7 +36,7 @@ set(CMAKE_CXX_COMPILER /public/software/mpi/openmpi/4.1.5/bin/mpicxx)
 include_directories(${PETSC_INC})
 
 add_executable(test ghost_with_cuda.cpp)
-target_link_libraries(test ${PETSC_LIB})
+target_link_libraries(test ${PETSC_LIB} MPI::MPI_CXX)
 target_include_directories(test PRIVATE ${PETSC_INC} ${CUDA_INC})
 set_target_properties(test PROPERTIES
   CUDA_STANDARD 14
@@ -44,7 +46,7 @@ set_target_properties(test PROPERTIES
 )
 
 add_executable(test_func cuda_function_test.cu)
-target_link_libraries(test_func ${PETSC_LIB})
+target_link_libraries(test_func ${PETSC_LIB} MPI::MPI_CXX)
 target_include_directories(test_func PRIVATE ${PETSC_INC} ${CUDA_INC})
 set_target_properties(test_func PROPERTIES
   CUDA_STANDARD 14
