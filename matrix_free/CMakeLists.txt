@@ -62,6 +62,9 @@ message(STATUS "PETSC_LIB: ${PETSC_LIB}")
 set(SLEPC_DIR $ENV{HOME}/lib/slepc-3.18.3-opt)
 find_package(SLEPc REQUIRED)
 
+find_library(PETSC_HDF5_LIB NAMES hdf5 PATHS ${PETSC_DIR}/lib NO_DEFAULT_PATH REQUIRED)
+message(STATUS "PETSC_HDF5_LIB: ${PETSC_HDF5_LIB}")
+
 set(CMAKE_C_COMPILER  /opt/homebrew/opt/mpich/bin/mpicc)
 set(CMAKE_CXX_COMPILER /opt/homebrew/opt/mpich/bin/mpicxx)
 
@@ -77,6 +80,13 @@ target_link_libraries(preprocess eigenvalue_problem_lib)
 
 add_executable(preprocess_fem preprocess_fem.cpp)
 target_link_libraries(preprocess_fem eigenvalue_problem_lib)
+
+add_executable(precompute_jacobian
+  precompute_jacobian.cpp
+  jacobian_precompute/JacobianH5Writer.cpp)
+target_include_directories(precompute_jacobian PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/jacobian_precompute)
+target_link_libraries(precompute_jacobian eigenvalue_problem_lib ${PETSC_HDF5_LIB})
 
 add_executable(iter_num_fem iteration_number_fempc.cpp)
 target_link_libraries(iter_num_fem eigenvalue_problem_lib ${PETSC_LIB} ${SLEPC_LIB})
@@ -97,9 +107,12 @@ if(OPENMP_CXX_FOUND)
   set_target_properties( eigenvalue_problem_lib PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )
   set_target_properties( preprocess PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )
   set_target_properties( preprocess_fem PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )
+  set_target_properties( precompute_jacobian PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP" )
   target_include_directories( eigenvalue_problem_lib PRIVATE ${OpenMP_CXX_INCLUDE_DIR} )
   target_include_directories( preprocess PRIVATE ${OpenMP_CXX_INCLUDE_DIR} )
   target_include_directories( preprocess_fem PRIVATE ${OpenMP_CXX_INCLUDE_DIR} )
+  target_include_directories( precompute_jacobian PRIVATE ${OpenMP_CXX_INCLUDE_DIR} )
   target_link_libraries( preprocess ${OpenMP_CXX_LIBRARIES} )
   target_link_libraries( preprocess_fem ${OpenMP_CXX_LIBRARIES} )
+  target_link_libraries( precompute_jacobian ${OpenMP_CXX_LIBRARIES} )
 endif()

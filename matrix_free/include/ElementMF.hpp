@@ -2,6 +2,7 @@
 #define ELEMENTMF_HPP
 
 #include <algorithm>
+#include <array>
 #include "RefElement.hpp"
 #include "QuadraturePoint.hpp"
 
@@ -40,6 +41,15 @@ class ElementMF
             const std::vector<double> &eCP,
             std::vector<double> &R, std::vector<double> &dR_dx, std::vector<double> &dR_dy,
             double &jacobian) const;
+
+        void ComputeJacobianDataSingleQP(const std::vector<double> &B1,
+            const std::vector<double> &B2,
+            const std::vector<double> &dB1,
+            const std::vector<double> &dB2,
+            const std::vector<double> &eCP,
+            std::array<double, 4> &jacobian_matrix,
+            std::array<double, 4> &inv_jacobian_matrix,
+            double &det_jacobian) const;
         
         void GenerateElement(const QuadraturePoint * const &quad1,
             const QuadraturePoint * const &quad2,
@@ -72,6 +82,24 @@ class ElementMF
         }
     
     private:
+        void BuildRationalBasis(const std::vector<double> &N1,
+            const std::vector<double> &N2,
+            const std::vector<double> &dN1,
+            const std::vector<double> &dN2,
+            std::vector<double> &R,
+            std::vector<double> &dR_dxi,
+            std::vector<double> &dR_deta) const;
+
+        void EvaluateGeometryMapping(const std::vector<double> &eCP,
+            const std::vector<double> &R,
+            const std::vector<double> &dR_dxi,
+            const std::vector<double> &dR_deta,
+            std::array<double, 4> &jacobian_matrix,
+            std::array<double, 4> &inv_jacobian_matrix,
+            double &det_jacobian,
+            std::vector<double> *dR_dx,
+            std::vector<double> *dR_dy) const;
+
         const int p;
         const int q;
         const int nLocBas;
