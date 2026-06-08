@@ -70,6 +70,13 @@ public:
         int &part_num_1d, int &dim,
         std::string &base_name) const;
 
+    void ReadPreprocessInfo(const std::string &filename,
+        int &p, int &q, int &r,
+        double &Lx, double &Ly, double &Lz,
+        int &nElemX, int &nElemY, int &nElemZ,
+        int &part_num_1d, int &dim,
+        std::string &base_name) const;
+
     std::string GetPartitionFilename(const std::string &base_name, const int &rank) const;
 };
 

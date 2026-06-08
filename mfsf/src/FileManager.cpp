@@ -447,6 +447,73 @@ void FileManager::ReadPreprocessInfo(const std::string &filename, int &p, int &q
     }
 }
 
+void FileManager::ReadPreprocessInfo(const std::string &filename,
+    int &p, int &q, int &r,
+    double &Lx, double &Ly, double &Lz,
+    int &nElemX, int &nElemY, int &nElemZ,
+    int &part_num_1d, int &dim, std::string &base_name) const
+{
+    std::ifstream file(filename.c_str());
+    if (!file.is_open())
+    {
+        std::cerr << "Error: Could not open file " << filename << std::endl;
+        exit(1);
+    }
+
+    std::string line;
+    while (std::getline(file, line))
+    {
+        if (line.find("p: ") != std::string::npos)
+        {
+            p = std::stoi(line.substr(3));
+        }
+        else if (line.find("q: ") != std::string::npos)
+        {
+            q = std::stoi(line.substr(3));
+        }
+        else if (line.find("r: ") != std::string::npos)
+        {
+            r = std::stoi(line.substr(3));
+        }
+        else if (line.find("Lx: ") != std::string::npos)
+        {
+            Lx = std::stod(line.substr(4));
+        }
+        else if (line.find("Ly: ") != std::string::npos)
+        {
+            Ly = std::stod(line.substr(4));
+        }
+        else if (line.find("Lz: ") != std::string::npos)
+        {
+            Lz = std::stod(line.substr(4));
+        }
+        else if (line.find("nElemX: ") != std::string::npos)
+        {
+            nElemX = std::stoi(line.substr(8));
+        }
+        else if (line.find("nElemY: ") != std::string::npos)
+        {
+            nElemY = std::stoi(line.substr(8));
+        }
+        else if (line.find("nElemZ: ") != std::string::npos)
+        {
+            nElemZ = std::stoi(line.substr(8));
+        }
+        else if (line.find("part_num_1d: ") != std::string::npos)
+        {
+            part_num_1d = std::stoi(line.substr(13));
+        }
+        else if (line.find("dim: ") != std::string::npos)
+        {
+            dim = std::stoi(line.substr(5));
+        }
+        else if (line.find("base_name: ") != std::string::npos)
+        {
+            base_name = line.substr(11);
+        }
+    }
+}
+
 std::string FileManager::GetPartitionFilename(const std::string &base_name, const int &rank) const
 {
     return base_name + "_" + std::to_string(rank) + ".txt";
