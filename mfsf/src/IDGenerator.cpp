@@ -77,10 +77,8 @@ std::vector<int> IDGenerator::GenerateID3D(const int &nFuncX, const int &nFuncY,
         {
             for (int i = 1; i < nFuncX-1; ++i)
             {
-                ID[k*nFuncX*nFuncY+j*nFuncX+i] = A;
-                A++;
+                ID[k*nFuncX*nFuncY+j*nFuncX+i] = k*nFuncX*nFuncY+j*nFuncX+i;
             }
-        A++;
         }
     }
 
@@ -111,10 +109,8 @@ std::vector<int> IDGenerator::GenerateID3D(
         {
             for (int i = 1; i < m-1; ++i)
             {
-                ID[k*m*n + j*m + i] = A;
-                A++;
+                ID[k*m*n + j*m + i] = k*m*n + j*m + i;
             }
-            A++;
         }
     }
 
